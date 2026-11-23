@@ -30,7 +30,7 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
    - Show a `.src` source tag while the core claim is on screen.
    - Use a new composition every 3-5 s.
    - Make character faces 160-200 px wide, with `idle()`.
-   - **Daki appears in every episode** (see `mascot/DAKI.md`): load `/mascot/daki.js` in `index.html`, then `dakiMount(A, W, {...})`. He is the host, not the hero: on frame 0 he reacts beside the hero object, he switches expression on key words (`surprised` on the surprising fact, `aha` on the payoff, `wink` on the last line), and he never covers the hero or the captions. Never redraw or restyle him.
+   - **Daki appears in every episode** (see `mascot/DAKI.md`): load `/mascot/daki.js` in `index.html`, then `dakiMount(A, W, {...})`. He is the host, not the hero: on frame 0 he reacts beside the hero object, he switches expression on key words (`surprised` on the surprising fact, `aha` on the payoff, `rush` in the last seconds, `wink` on the last line), his rim sweep (arc + red marker) runs one lap over the video by itself so keep it visible, and he never covers the hero or the captions. Never redraw or restyle him.
 3. Check stills: `node engine/render.js <proj> --still t1,t2,...`, then `python engine/sheet.py <proj>/stills N`. Fix overlaps, clipped text and stray lines, then repeat.
 4. Full render: `node engine/render.js <proj> --workers 4`.
 5. Mix: `python engine/mix.py <proj> --key X --bpm 92-100 --music-gain 0.18`.

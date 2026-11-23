@@ -19,8 +19,9 @@ Pipeline + commands: see `engine/README.md`. Best reference scene: `examples/v3`
 - Flat shapes, 8–12 px ink outlines, offset ink drop-shadow (8,10 px), small gloss highlights.
 
 ### Mascot: Daki (`mascot/`)
-- Stopwatch + mortarboard. Yellow body `#F2B705`, cream dial `#FBF6EC`, red button at 10 o'clock and red tassel on image-right `#E0452B`, ink `#1C1A17`. Profile picture: `mascot/profile-blue.png` (Daki on blue `#2B6CB0`).
-- Code: `<script src="/mascot/daki.js"></script>` in `index.html`, then `const d = dakiMount(A, W, {x, y, scale:.45, expr})`. Animate only `d.wrap`; `d.body`/eyes belong to `A.idle`. Switch faces with `tl.call(() => d.setExpr('aha'), null, t)`. Expressions: smirk, surprised, thinking, aha, wink.
+- Stopwatch + mortarboard. Yellow body `#F2B705`, cream dial `#FBF6EC`, red button at 10 o'clock, small yellow button at 2 o'clock, red tassel on image-right `#E0452B`, ink `#1C1A17`, blue pencil behind the body, motion arcs and sparkles (v3). Profile picture: `mascot/profile-blue.png` (Daki on blue `#2B6CB0`).
+- Code: `<script src="/mascot/daki.js"></script>` in `index.html`, then `const d = dakiMount(A, W, {x, y, scale:.45, expr})`. Animate only `d.wrap`; `d.body`/eyes belong to `A.idle`. Switch faces with `tl.call(() => d.setExpr('aha'), null, t)`. Expressions: smirk, surprised, thinking, aha, wink, rush (each adds its own FX: sparkle rays, !, ?, sweat).
+- Time sweep: `dakiMount` runs a red arc + rim marker one full lap over `A.T.duration` (override with `{duration}`), via `A.frame`, resetting to 12 at the end for a seamless loop. Drive by hand with `d.setProgress(0..1)`; in stills use `daki({progress})`, and `sweep:false` for avatars.
 - Local coords: centred on (0,0), body radius 200, cap reaches about y -265, feet (if `legs:true`) y 300. `scale:.45` gives a ~180 px face; keep it in the safe zone and clear of the caption band (y≈1300).
 
 ## 3. Composition and grounding
