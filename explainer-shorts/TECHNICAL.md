@@ -18,6 +18,11 @@ Pipeline + commands: see `engine/README.md`. Best reference scene: `examples/v3`
 - Fonts: Bricolage Grotesque 800 (display/captions), JetBrains Mono 500/700 (labels, numbers). Never Inter / Space Grotesk / Geist.
 - Flat shapes, 8–12 px ink outlines, offset ink drop-shadow (8,10 px), small gloss highlights.
 
+### Mascot: Daki (`mascot/`)
+- Stopwatch + mortarboard. Yellow body `#F2B705`, cream dial `#FBF6EC`, red button at 10 o'clock and red tassel on image-right `#E0452B`, ink `#1C1A17`. Profile picture: `mascot/profile-blue.png` (Daki on blue `#2B6CB0`).
+- Code: `<script src="/mascot/daki.js"></script>` in `index.html`, then `const d = dakiMount(A, W, {x, y, scale:.45, expr})`. Animate only `d.wrap`; `d.body`/eyes belong to `A.idle`. Switch faces with `tl.call(() => d.setExpr('aha'), null, t)`. Expressions: smirk, surprised, thinking, aha, wink.
+- Local coords: centred on (0,0), body radius 200, cap reaches about y -265, feet (if `legs:true`) y 300. `scale:.45` gives a ~180 px face; keep it in the safe zone and clear of the caption band (y≈1300).
+
 ## 3. Composition and grounding
 - **Concrete anchor**: one real object (a microwave or headphones) is the hero. Every abstract zoom (field, molecule, wave) must exit from it and return to it. Abstract-only beats last at most ~3 s.
 - Hero fills 70–90% of the width at frame 0, already mid-motion (scale 1.12→1, 0.8 s, power3.out). Headline 108–150 px, max 2 lines, top ~200–250 px.
