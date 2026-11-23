@@ -1,0 +1,13 @@
+{"voice":"af_heart","speed":1.05,"lead":0.05,"tail":0.7,
+"lines":[
+{"id":"hook","text":"Your headphones fight noise, with more noise.","pause":0.35},
+{"id":"wave","text":"Sound is just air being pushed and pulled. A wave.","pause":0.25},
+{"id":"mic","text":"A tiny mic on the outside hears it coming.","pause":0.2},
+{"id":"flip","text":"A chip flips it upside down. Every push becomes a pull.","pause":0.25},
+{"id":"play","text":"Then the speaker plays that flipped wave, at the exact same moment.","pause":0.3},
+{"id":"cancel","text":"Push meets pull, and they cancel out.","pause":0.6},
+{"id":"payoff","text":"Silence, made of noise.","pause":0.45},
+{"id":"catch","text":"But it has to be perfectly timed. Arrive late, and the waves stack up instead.","pause":0.3},
+{"id":"why","text":"That's why it kills a steady engine hum, but barely touches voices.","pause":0.3},
+{"id":"end","text":"So the next time the world goes quiet, that's noise, fighting noise.","pause":0.1}
+]}

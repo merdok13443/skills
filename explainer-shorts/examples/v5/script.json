@@ -1,0 +1,51 @@
+{
+ "voice_mix": {
+  "af_heart": 0.6,
+  "af_bella": 0.4
+ },
+ "speed": 1.0,
+ "lead": 0.05,
+ "tail": 0.6,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Your phone races to eighty percent... then crawls. That's on purpose.",
+   "pause": 0.3
+  },
+  {
+   "id": "hotel",
+   "text": "Charging pushes lithium into tiny layers in the battery. Picture a hotel.",
+   "pause": 0.25
+  },
+  {
+   "id": "empty",
+   "text": "Empty hotel? Guests rush right in. Full power.",
+   "pause": 0.25
+  },
+  {
+   "id": "full",
+   "text": "But near full, the last guests have to squeeze into the last few rooms.",
+   "pause": 0.25
+  },
+  {
+   "id": "cv",
+   "text": "So the charger stops pushing. It holds the voltage steady, and the current drops.",
+   "pause": 0.3
+  },
+  {
+   "id": "why",
+   "text": "Forcing it at the top... adds heat and stress. That's what ages batteries.",
+   "pause": 0.3
+  },
+  {
+   "id": "iphone",
+   "text": "It's also why an iPhone may wait at eighty overnight, and finish before you wake.",
+   "pause": 0.25
+  },
+  {
+   "id": "end",
+   "text": "So that slow last twenty percent? Your battery's buying itself a longer life.",
+   "pause": 0.1
+  }
+ ]
+}

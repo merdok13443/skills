@@ -1,0 +1,14 @@
+{"voice":"am_michael","speed":1.08,"lead":0.1,"tail":0.8,
+"lines":[
+{"id":"hook","text":"Two strangers can agree on a secret, while everyone is listening.","pause":0.3},
+{"id":"stakes","text":"Your phone does this every time you open a website.","pause":0.35},
+{"id":"public","text":"Start with a public color. Yellow. Anyone can see it.","pause":0.25},
+{"id":"secret","text":"Alice and Bob each mix in a private color. They never share it.","pause":0.25},
+{"id":"swap","text":"Then they swap the mixtures, right out in the open.","pause":0.3},
+{"id":"eve","text":"Eve saw everything. But she's stuck.","pause":0.2},
+{"id":"unmix","text":"Mixing paint is easy. Un-mixing it is practically impossible.","pause":0.4},
+{"id":"finish","text":"Now each adds their own secret to the mix they received.","pause":0.25},
+{"id":"same","text":"And they land on the exact same color.","pause":0.45},
+{"id":"payoff","text":"A shared secret that was never sent.","pause":0.35},
+{"id":"real","text":"Swap paint for giant numbers, and that's Diffie-Hellman. It's protecting this video right now.","pause":0.1}
+]}

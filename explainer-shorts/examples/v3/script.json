@@ -1,0 +1,61 @@
+{
+ "speed": 1.0,
+ "lead": 0.05,
+ "tail": 0.7,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Your microwave doesn't heat your food. It shakes it.",
+   "pause": 0.35
+  },
+  {
+   "id": "field",
+   "text": "Inside, an invisible field flips direction billions of times a second.",
+   "pause": 0.3
+  },
+  {
+   "id": "water",
+   "text": "And water molecules are lopsided. One end's a little positive, the other a little negative.",
+   "pause": 0.25
+  },
+  {
+   "id": "yank",
+   "text": "So every flip yanks them around.",
+   "pause": 0.2
+  },
+  {
+   "id": "heat",
+   "text": "They spin, they slam into their neighbors, and that jostling... That's heat.",
+   "pause": 0.45
+  },
+  {
+   "id": "depth",
+   "text": "But the waves only reach about an inch in.",
+   "pause": 0.2
+  },
+  {
+   "id": "middle",
+   "text": "The middle has to wait for heat to creep inward. That's your frozen center.",
+   "pause": 0.35
+  },
+  {
+   "id": "ice",
+   "text": "And ice is even worse. Its molecules are locked in place, so they can't spin.",
+   "pause": 0.3
+  },
+  {
+   "id": "defrost",
+   "text": "That's why defrost pulses on and off, giving the heat time to spread.",
+   "pause": 0.35
+  },
+  {
+   "id": "end",
+   "text": "So no, it's not heating your food. It's shaking it.",
+   "pause": 0.1
+  }
+ ],
+ "voice_mix": {
+  "af_heart": 0.6,
+  "af_bella": 0.4
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "voice_mix": {
+  "af_heart": 0.6,
+  "af_bella": 0.4
+ },
+ "speed": 0.94,
+ "lead": 0.05,
+ "tail": 0.6,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "See that tiny hole in your airplane window? It's the reason the window holds.",
+   "pause": 0.35
+  },
+  {
+   "id": "push",
+   "text": "Up at cruising height, the air inside the cabin is pushing outward, hard.",
+   "pause": 0.25
+  },
+  {
+   "id": "ton",
+   "text": "On one window, that's about half a ton.",
+   "pause": 0.35
+  },
+  {
+   "id": "three",
+   "text": "So the window isn't one pane. It's three.",
+   "pause": 0.25
+  },
+  {
+   "id": "inner",
+   "text": "The inner one is just a scratch shield.",
+   "pause": 0.2
+  },
+  {
+   "id": "outer",
+   "text": "The outer pane takes the whole load. The middle pane has the hole.",
+   "pause": 0.25
+  },
+  {
+   "id": "leak",
+   "text": "Air leaks through it, so the middle pane feels nothing... it's resting.",
+   "pause": 0.4
+  },
+  {
+   "id": "crack",
+   "text": "But if the outer pane ever cracks... the middle one takes over.",
+   "pause": 0.4
+  },
+  {
+   "id": "fog",
+   "text": "Bonus: the hole lets moisture out, which helps keep your view clear.",
+   "pause": 0.3
+  },
+  {
+   "id": "end",
+   "text": "So that tiny hole? It's the backup plan you're sitting next to.",
+   "pause": 0.1
+  }
+ ]
+}

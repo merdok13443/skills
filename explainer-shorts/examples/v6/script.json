@@ -1,0 +1,56 @@
+{
+ "voice_mix": {
+  "af_heart": 0.6,
+  "af_bella": 0.4
+ },
+ "speed": 0.95,
+ "lead": 0.05,
+ "tail": 0.6,
+ "lines": [
+  {
+   "id": "hook",
+   "text": "Yank your seatbelt, and it locks. Pull it slowly, and it doesn't. So how does it know?",
+   "pause": 0.3
+  },
+  {
+   "id": "spool",
+   "text": "Inside, the belt winds around a spool, with a ring of teeth on the side.",
+   "pause": 0.25
+  },
+  {
+   "id": "car",
+   "text": "Lock one watches the car. A little pendulum hangs inside.",
+   "pause": 0.2
+  },
+  {
+   "id": "brake",
+   "text": "Brake hard, and it swings forward, and pushes a hook into the teeth.",
+   "pause": 0.3
+  },
+  {
+   "id": "belt",
+   "text": "Lock two watches the belt. Yank it, and the spool spins fast...",
+   "pause": 0.1
+  },
+  {
+   "id": "fling",
+   "text": "so a weighted lever swings outward, and locks the spool too.",
+   "pause": 0.3
+  },
+  {
+   "id": "twin",
+   "text": "That's the trick... two locks. Either one can hold you.",
+   "pause": 0.35
+  },
+  {
+   "id": "stat",
+   "text": "In the front seat, a belt cuts your risk of dying in a crash by forty-five percent.",
+   "pause": 0.3
+  },
+  {
+   "id": "end",
+   "text": "So when it locks on you? It's doing its job.",
+   "pause": 0.1
+  }
+ ]
+}
