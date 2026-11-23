@@ -15,6 +15,7 @@ On macOS/Linux the folder is `~/.claude/skills/explainer-shorts`.
 - `TECHNICAL.md`: exact values plus code-level lessons
 - `engine/`: tts, align, render, mix, sheet (setup in `engine/README.md`)
 - `audio/`: procedural music + SFX
+- `mascot/`: Daki (דקי), the channel mascot and profile picture, as reusable SVG code plus spec
 - `examples/`: v3-v6 reference scenes
 - `critiques/`, `research/`: review notes and research rounds
 

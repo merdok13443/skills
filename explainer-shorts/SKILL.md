@@ -12,6 +12,7 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
 - `TECHNICAL.md`: concrete values (colours, fonts, sizes, timings, mix settings) and code-level lessons.
 - `engine/README.md`: setup and commands.
 - The newest critique in `critiques/` and the newest `research/roundN.md`, so you don't repeat open issues.
+- `mascot/DAKI.md`: the channel mascot Daki (דקי), the fixed host character of every episode.
 - Reference scenes: `examples/v3` to `examples/v6`. Reuse the helpers from the newest `scene.js` (kin, slam, rise, whip, zoomOut, ratchet, eyesAt, battery).
 
 ## 2. Plan
@@ -29,6 +30,7 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
    - Show a `.src` source tag while the core claim is on screen.
    - Use a new composition every 3-5 s.
    - Make character faces 160-200 px wide, with `idle()`.
+   - **Daki appears in every episode** (see `mascot/DAKI.md`): load `/mascot/daki.js` in `index.html`, then `dakiMount(A, W, {...})`. He is the host, not the hero: on frame 0 he reacts beside the hero object, he switches expression on key words (`surprised` on the surprising fact, `aha` on the payoff, `wink` on the last line), and he never covers the hero or the captions. Never redraw or restyle him.
 3. Check stills: `node engine/render.js <proj> --still t1,t2,...`, then `python engine/sheet.py <proj>/stills N`. Fix overlaps, clipped text and stray lines, then repeat.
 4. Full render: `node engine/render.js <proj> --workers 4`.
 5. Mix: `python engine/mix.py <proj> --key X --bpm 92-100 --music-gain 0.18`.
