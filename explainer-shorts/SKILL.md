@@ -1,6 +1,6 @@
 ---
 name: explainer-shorts
-description: Make a 32-38 s vertical English explainer Short or Reel (EVERYDAY MYSTERIES series) with the free local pipeline and the saved guidelines, lessons, engine and example scenes.
+description: Make a 32-38 s vertical explainer Short or Reel (EVERYDAY MYSTERIES series), narrated in English (Kokoro) or Hebrew (edge-tts Hila), with the free local pipeline and the saved guidelines, lessons, engine and example scenes.
 ---
 
 # Explainer Shorts
@@ -33,6 +33,8 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
 4. Full render: `node engine/render.js <proj> --workers 4`.
 5. Mix: `python engine/mix.py <proj> --key X --bpm 92-100 --music-gain 0.18`.
 6. Loudness: `ffmpeg -af ebur128`, aiming for about -14 to -15 LUFS.
+
+**Hebrew narration:** step 1 changes. Use `python engine/tts_he.py <proj>` (edge-tts, default voice he-IL-HilaNeural, male alternative he-IL-AvriNeural, with exact word timings), then `bash engine/mktiming.sh <proj>`. Skip `align.py`. Aim for about 60-70 Hebrew words at about 100 wpm. Copy `index.html` from `examples/he1` for RTL captions (Heebo font). See `HEBREW_NARRATION.md`.
 
 The engine needs Python (kokoro-onnx, soundfile, scipy, pillow, pocketsphinx), Node with playwright and gsap, and ffmpeg. See `engine/README.md`.
 

@@ -1,0 +1,32 @@
+Hebrew TTS test - Windows 11, Python 3.11 venv, 2026-11-23
+Packages: edge-tts 7.3.1, piper-tts 1.8.0, faster-whisper 1.2.1, ffmpeg via imageio-ffmpeg (v9.0.2)
+(The mp3 samples stayed on the test PC; they are not in this repo.)
+
+edge-tts --list-voices (he-IL):
+  he-IL-AvriNeural   Male    General  Friendly, Positive
+  he-IL-HilaNeural   Female  General  Friendly, Positive
+
+Short test sentence: "שלום, זה מבחן של קריינות בעברית. הטלפון נטען מהר עד שמונים אחוז."
+  hila.srt, avri.srt - OK (SRT is sentence-level, 2 cues)
+
+Pipeline engine/tts_he.py on examples/he1 (7 lines, 32 words):
+  edge Hila : duration 18.1 s,   106 wpm, exact word marks 7/7
+  edge Avri : duration 19.414 s,  99 wpm, exact word marks 7/7
+  piper noa : duration 16.805 s, 114 wpm, exact word marks 0/7
+  piper noa + align_he.py (ivrit-ai/whisper-large-v3-turbo-ct2): aligned 24/32 words (672 s on CPU incl. 1.5 GB download)
+  piper noa with "say" respellings (numbers spelled out + nikud): 18.298 s, 105 wpm
+
+First 12 words of timing.json (edge Hila):
+  למה 0.150-0.355 | הטלפון 0.355-0.928 | נטען 0.928-1.267 | מהר 1.267-1.684 | עד 1.684-1.814 | 80%, 1.814-2.764
+  ואז 2.943-3.213 | פתאום 3.213-3.565 | זוחל? 3.565-4.118 | זה 4.518-4.672 | לא 4.672-4.815 | באג. 4.815-5.310
+
+Intelligibility check (ivrit-ai Whisper transcription of each sample vs script):
+  hila / avri short test : exact
+  edge_avri_demo         : exact, word for word
+  edge_hila_demo         : correct (Whisper spelled זוחל as זוכל and סוללה as סולה)
+  piper_noa_demo         : "80%" skipped; נטען->ניתן, באג->בא, לסוף->לאסוף, שנים->שאנים
+  piper_noa_fixed        : 80% fixed ("שמונים אחוז"); nikud lines worse (הטלפון->טלפון, חיה יותר->חיי אותו)
+
+Verdict: edge-tts is the default for Hebrew: free, natural, exact word timings.
+Default voice: he-IL-HilaNeural (female). Male alternative: he-IL-AvriNeural.
+Piper noa is the offline fallback only (CC-BY-4.0); spell numbers out, don't rely on nikud.

@@ -29,6 +29,10 @@ python -m venv venv && venv/bin/pip install kokoro-onnx soundfile scipy pillow p
 # ffmpeg must be on PATH
 ```
 
+### Hebrew narration
+
+Kokoro has no Hebrew voice. For Hebrew, steps 2-3 become `python engine/tts_he.py myvideo`. That uses edge-tts by default (`pip install edge-tts`, free, no key) with the default voice `he-IL-HilaNeural` (male alternative: `he-IL-AvriNeural`), which returns exact word timings, so you can skip align. For offline use, run `--backend piper` with the `thewh1teagle/piper-he-noa` model, then `python engine/align_he.py myvideo` (`pip install faster-whisper`). For RTL captions add `npm i @fontsource/heebo` and copy `examples/he1/index.html`. Full notes and test results are in `../HEBREW_NARRATION.md`.
+
 ## Scene API (window.SCENE = function(A){...})
 
 - `A.tl` is the paused GSAP timeline. Always place tweens at absolute times. Never use CSS animations or `Date.now()`.
