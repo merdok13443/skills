@@ -1,0 +1,17 @@
+{
+ "lang": "he",
+ "backend": "edge",
+ "voice": "he-IL-HilaNeural",
+ "rate": "-4%",
+ "piper_model": "tts/he/he_IL-noa-medium.onnx",
+ "length_scale": 1.15,
+ "lines": [
+  {"id": "hook", "text": "למה הטלפון נטען מהר עד 80%,", "pause": 0.15},
+  {"id": "crawl", "text": "ואז פתאום זוחל?", "pause": 0.4},
+  {"id": "why", "text": "זה לא באג. זה מכוון.", "pause": 0.35},
+  {"id": "push", "text": "בהתחלה המטען דוחף זרם חזק.", "pause": 0.25},
+  {"id": "hold", "text": "קרוב לסוף, הוא מחזיק מתח קבוע, והזרם יורד.", "pause": 0.3},
+  {"id": "pay", "text": "ככה הסוללה...", "pause": 0.7},
+  {"id": "end", "text": "חיה יותר שנים.", "pause": 0.3}
+ ]
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<style>
+/* Hebrew template: Heebo carries Hebrew + Latin glyphs. Load both subsets. */
+@font-face{font-family:Heb;font-weight:800;src:url(/engine/node_modules/@fontsource/heebo/files/heebo-hebrew-800-normal.woff2);unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:Heb;font-weight:800;src:url(/engine/node_modules/@fontsource/heebo/files/heebo-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2212}
+@font-face{font-family:Heb;font-weight:500;src:url(/engine/node_modules/@fontsource/heebo/files/heebo-hebrew-500-normal.woff2);unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:Heb;font-weight:500;src:url(/engine/node_modules/@fontsource/heebo/files/heebo-latin-500-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2212}
+:root{--paper:#EEE6D8;--ink:#1C1A17;--mute:#8C8273;--y:#F2B705;--r:#E0452B;--b:#2B6CB0;--g:#5E9B3A}
+html,body{margin:0;background:var(--paper)}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--paper);font-family:Heb,sans-serif;color:var(--ink);direction:rtl}
+#cam{position:absolute;inset:0;transform-origin:540px 760px}
+svg.world{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible;direction:ltr}
+/* RTL: anchor to the RIGHT edge; no uppercase/letter-spacing on Hebrew */
+.kicker{position:absolute;right:96px;top:300px;font:500 34px Heb;color:var(--mute)}
+.head{position:absolute;right:96px;left:120px;top:350px;font:800 100px/1.05 Heb}
+.head em{font-style:normal;color:var(--r)}
+.captions{position:absolute;left:40px;right:0;top:1300px;height:240px}
+.cap{position:absolute;left:90px;right:90px;top:0;text-align:center;font:800 70px/1.42 Heb;visibility:hidden;opacity:0;direction:rtl;unicode-bidi:isolate}
+.pill{background:rgba(28,26,23,.93);padding:6px 22px 10px;border-radius:22px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cw{display:inline;padding:0 2px;color:var(--paper);unicode-bidi:isolate}
+.cw.on{color:var(--y)}
+.cw.said{color:var(--paper)}
+.src{position:absolute;right:90px;top:1258px;font:500 26px Heb;color:var(--mute);visibility:hidden}
+.big{position:absolute;left:0;right:0;text-align:center;font:800 260px/0.95 Heb;direction:ltr}
+</style>
+<script src="/engine/node_modules/gsap/dist/gsap.min.js"></script>
+<script src="timing.js"></script>
+<script src="/engine/runtime.js"></script>
+<script src="scene.js"></script>
+</head><body>
+<div id="stage">
+  <div id="cam"><svg class="world" id="world" viewBox="0 0 1080 1920"></svg></div>
+</div>
+</body></html>
