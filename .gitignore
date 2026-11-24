@@ -4,4 +4,3 @@ node_modules/
 __pycache__/
 stills/
 review/
-!daki-dakademia/videos/**/*.mp4
