@@ -1,18 +1,19 @@
 ---
 name: explainer-shorts
-description: Make a 32-38 s vertical explainer Short or Reel (EVERYDAY MYSTERIES series), narrated in English (Kokoro) or Hebrew (edge-tts Hila), with the free local pipeline and the saved guidelines, lessons, engine and example scenes.
+description: Make a 32-38 s vertical explainer Short or Reel for any series, narrated in English (Kokoro) or Hebrew (edge-tts Hila), with the free local pipeline and the saved guidelines (hook, viewer engagement, structure, pacing, text, sound, fact-checking), lessons, engine and example scenes. General skill; series-specific skills (mascot, project rules) layer on top.
 ---
 
 # Explainer Shorts
 
 Use this skill whenever the user asks for a short teaching video (Short, Reel, TikTok, explainer), or to improve one. All files sit next to this SKILL.md.
 
+**Series layer:** this is the general skill and it stands on its own. If a series-specific skill is installed next to it in `~/.claude/skills/` (for example one that adds a fixed mascot and project rules), read its SKILL.md after this one and follow its additions. Where the two differ, the series skill wins for that series.
+
 ## 1. Read first (every time)
 - `GUIDELINES.md`: the general rules and lessons, in Hebrew. These are the quality bar, so follow all of it.
 - `TECHNICAL.md`: concrete values (colours, fonts, sizes, timings, mix settings) and code-level lessons.
 - `engine/README.md`: setup and commands.
 - The newest critique in `critiques/` and the newest `research/roundN.md`, so you don't repeat open issues.
-- `mascot/DAKI.md`: the channel mascot Daki (דקי), the fixed host character of every episode.
 - Reference scenes: `examples/v3` to `examples/v6`. Reuse the helpers from the newest `scene.js` (kin, slam, rise, whip, zoomOut, ratchet, eyesAt, battery).
 
 ## 2. Plan
@@ -26,11 +27,11 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
 ## 3. Build
 1. Voice and timing: `python engine/tts.py <proj>`, then `python engine/align.py <proj>`, then `bash engine/mktiming.sh <proj>`. Check that the duration and wpm hit the targets.
 2. Write `<proj>/scene.js`, and copy `index.html` from the newest example.
-   - Series kicker: "Everyday mysteries · #N".
+   - Series kicker (default series: "Everyday mysteries · #N"; per GUIDELINES the kicker shows the topic name, so adapt it to your series).
    - Show a `.src` source tag while the core claim is on screen.
    - Use a new composition every 3-5 s.
    - Make character faces 160-200 px wide, with `idle()`.
-   - **Daki appears in every episode** (see `mascot/DAKI.md`): load `/mascot/daki.js` in `index.html`, then `dakiMount(A, W, {...})`. He is the host, not the hero: on frame 0 he reacts beside the hero object, he switches expression on key words (`surprised` on the surprising fact, `aha` on the payoff, `rush` in the last seconds, `wink` on the last line), his rim sweep (arc + red marker) runs one lap over the video by itself so keep it visible, and he never covers the hero or the captions. Never redraw or restyle him.
+   - **Optional recurring host/mascot:** if the series has one (from its series skill), load it from its `mascot/` folder (see `TECHNICAL.md`, "Optional recurring host / mascot"). The host is a host, not the hero: it reacts beside the hero object, switches expression on key moments, never covers the hero or the captions, and is never redrawn or restyled.
 3. Check stills: `node engine/render.js <proj> --still t1,t2,...`, then `python engine/sheet.py <proj>/stills N`. Fix overlaps, clipped text and stray lines, then repeat.
 4. Full render: `node engine/render.js <proj> --workers 4`.
 5. Mix: `python engine/mix.py <proj> --key X --bpm 92-100 --music-gain 0.18`.

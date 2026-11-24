@@ -43,6 +43,8 @@ Kokoro has no Hebrew voice. For Hebrew, steps 2-3 become `python engine/tts_he.p
 
 See `examples/v3` for the most refined scene (microwave). Use it as the template.
 
+**Optional mascot/host:** `render.js` serves the skill folder as the web root, so `/mascot/<name>.js` normally resolves inside it. When the mascot lives in a sibling series skill (e.g. `~/.claude/skills/<series-skill>/mascot/`), `render.js` automatically also serves any sibling skill folder that has a `mascot/` directory. Extra folders can be added with the `EXPLAINER_EXTRA_ROOTS` environment variable (path-delimited).
+
 ## Alternative
 
 [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0) is the same idea, packaged with Claude Code skills: `npx skills add heygen-com/hyperframes`, then `npx hyperframes tts|transcribe|render`. On a normal network it is the fastest way to start.

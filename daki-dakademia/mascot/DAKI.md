@@ -22,13 +22,14 @@
 - `character-sheet.png`: דף הדמות (הבעות, שלבי הסיבוב, בדיקת קריאות).
 - `sweep-demo.mp4`: הדגמה של 9 שניות, סיבוב מלא עם החלפות הבעה.
 - `daki.js`: הדמות כקוד. כל ציור של דקי עובר דרכו, לא מציירים אותו מחדש.
-- `render.js`: מייצר מחדש את תמונות הפרופיל, דף הדמות וההדגמה (`node mascot/render.js`, דורש playwright ו-ffmpeg).
+- `render.js`: מייצר מחדש את תמונות הפרופיל, דף הדמות וההדגמה (`node mascot/render.js`, דורש playwright ו-ffmpeg; playwright מותקן במנוע של הסקיל הכללי, אז מריצים עם `NODE_PATH=<נתיב ל-explainer-shorts>/engine/node_modules`).
 
 ## שימוש בסצנה (scene.js)
 ב-`index.html` מוסיפים לפני `scene.js`:
 ```html
 <script src="/mascot/daki.js"></script>
 ```
+מנוע הרינדור של הסקיל הכללי (`explainer-shorts/engine/render.js`) מגיש את `/mascot/daki.js` אוטומטית מהסקיל הזה כששני הסקילים יושבים זה לצד זה ב-`~/.claude/skills/`.
 ובסצנה:
 ```js
 const d = dakiMount(A, W, { x: 860, y: 330, scale: .45, expr: 'smirk' }); // פנים ~180px רוחב
