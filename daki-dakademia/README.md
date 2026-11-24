@@ -16,4 +16,5 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 - `SKILL.md`: what Claude does for a Dakademia video (reads the general skill first, then this layer)
 - `GUIDELINES-DAKI.md`: project conventions, the Daki section, extra checklist (Hebrew)
 - `TECHNICAL-DAKI.md`: Daki code API, time sweep, acceptance checks
+- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish via Buffer to YouTube, Instagram and TikTok (Hebrew)
 - `mascot/`: Daki as reusable SVG code (`daki.js`), spec (`DAKI.md`), profile pictures, character sheet, and `render.js` to regenerate them
