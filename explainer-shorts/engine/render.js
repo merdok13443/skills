@@ -1,15 +1,28 @@
 // node render.js <projectDir> [--fps 30] [--workers 3] [--still t1,t2,...]
-// Serves /home/user/vid over http, seeks the GSAP timeline frame by frame, pipes JPEGs to ffmpeg.
+// Serves the skill folder (and optional sibling mascot folders, see EXTRA) over http, seeks the GSAP timeline frame by frame, pipes JPEGs to ffmpeg.
 const http = require('http'), fs = require('fs'), path = require('path'), { spawn } = require('child_process');
 const { chromium } = require('playwright');
 const ROOT = path.resolve(__dirname, '..');
+// Optional extra roots, so `/mascot/...` (or any shared asset folder) can live in a sibling skill folder.
+// Auto-detected: every sibling skill folder that has a `mascot/` directory (e.g. ~/.claude/skills/<series-skill>/mascot).
+// Add more with EXPLAINER_EXTRA_ROOTS (path-delimited list of folders).
+const SKILLS_DIR = path.resolve(ROOT, '..');
+const EXTRA = [
+  ...(process.env.EXPLAINER_EXTRA_ROOTS || '').split(path.delimiter).filter(Boolean).map(d => path.resolve(d)),
+  ...(fs.existsSync(SKILLS_DIR) ? fs.readdirSync(SKILLS_DIR).map(d => path.join(SKILLS_DIR, d)).filter(d => d !== ROOT && fs.existsSync(path.join(d, 'mascot'))) : []),
+];
 const proj = path.resolve(process.argv[2]);
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
 const FPS = +arg('--fps', 30), WORKERS = +arg('--workers', 3), STILL = arg('--still', null);
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.woff2': 'font/woff2', '.woff': 'font/woff', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };
 const server = http.createServer((q, r) => {
-  const p = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]));
-  if (!p.startsWith(ROOT) || !fs.existsSync(p)) { r.writeHead(404); return r.end(); }
+  const rel = decodeURIComponent(q.url.split('?')[0]);
+  let p = null;
+  for (const base of [ROOT, ...EXTRA]) {
+    const c = path.join(base, rel);
+    if (c.startsWith(base) && fs.existsSync(c) && fs.statSync(c).isFile()) { p = c; break; }
+  }
+  if (!p) { r.writeHead(404); return r.end(); }
   r.writeHead(200, { 'Content-Type': types[path.extname(p)] || 'application/octet-stream' });
   fs.createReadStream(p).pipe(r);
 }).listen(0);
