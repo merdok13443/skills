@@ -17,6 +17,5 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 - `GUIDELINES-DAKI.md`: project conventions, the Daki section, extra checklist (Hebrew)
 - `TECHNICAL-DAKI.md`: Daki code API, time sweep, acceptance checks
 - `METADATA-DAKI.md`: titles, captions and hashtags per platform, with an example and a feedback loop (Hebrew)
-- `PUBLISHING-DAKI.md`: put the finished video in `videos/` of this repo and publish via Buffer to YouTube, Instagram and TikTok (Hebrew)
-- `videos/`: the finished final mp4 files, `videos/<course>/<unit>/<N.M name>.mp4` (finished videos only, no sources or trial versions)
+- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish via Buffer to YouTube, Instagram and TikTok (Hebrew)
 - `mascot/`: Daki as reusable SVG code (`daki.js`), spec (`DAKI.md`), profile pictures, character sheet, and `render.js` to regenerate them

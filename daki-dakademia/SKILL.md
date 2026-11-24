@@ -42,7 +42,7 @@ If a rule here differs from the general skill, this skill wins for Dakademia vid
 - The pipeline runs autonomously, with no human review between steps and no extra video outside the schedule (see RUNBOOK.md).
 
 ## 4. Publish (right after the render passes)
-Follow `PUBLISHING-DAKI.md`: put the finished `final.mp4` in this repo (`merdok13443/skills`) at `daki-dakademia/videos/<course>/<unit>/<N.M name>.mp4` (finished videos only, no sources or trial versions) through a branch and a PR that is merged into main, confirm its raw.githubusercontent.com URL returns the file, write the Hebrew title, captions and hashtags per platform by `METADATA-DAKI.md`, and publish at once through Buffer (`shareNow`) to YouTube (Short, category Education), Instagram (Reel, shared to feed) and TikTok. Respect Buffer's free-plan limit of 2 YouTube Shorts a day. Record the post ids in `<N.M name>.json` next to the video.
+Follow `PUBLISHING-DAKI.md`: push `final.mp4` to the public repo `merdok13443/dakademia-videos` as `<course-slug>/uNN-eNN.mp4`, confirm its raw.githubusercontent.com URL returns the file, write the Hebrew title, captions and hashtags per platform by `METADATA-DAKI.md`, and publish at once through Buffer (`shareNow`) to YouTube (Short, category Education), Instagram (Reel, shared to feed) and TikTok. Respect Buffer's free-plan limit of 2 YouTube Shorts a day. Record the post ids in `uNN-eNN.json` next to the video.
 
 ## 5. Review and learn
 After a video, write the critique in Hebrew as the general skill says, add general lessons to `../explainer-shorts/GUIDELINES.md` and Daki/Dakademia-specific ones to `GUIDELINES-DAKI.md`.
