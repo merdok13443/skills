@@ -28,17 +28,16 @@ cd /tmp/dv && git add -A && git commit -m "<course-slug> u01-e03" && git push or
 
 ## 2. בדיקת הכתובת הישירה
 
-כתובת ברירת מחדל (GitHub Pages, נשלח כ-`video/mp4`):
-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`
-
-גיבוי, זמין מיד אחרי ה-push:
+הכתובת הישירה (זמינה מיד אחרי ה-push):
 `https://raw.githubusercontent.com/merdok13443/dakademia-videos/main/<course-slug>/u01-e03.mp4`
 
 ```bash
-curl -sIL "<url>" | grep -iE "^HTTP|content-length|content-type"
+curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 ```
 
-ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ המקומי. Pages מתעדכן בדרך כלל תוך דקה או שתיים; בודקים כל 30 שניות עד 5 דקות, ואם עדיין לא, משתמשים בכתובת הגיבוי.
+ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ המקומי. אם לא, מחכים 30 שניות ובודקים שוב, עד 3 פעמים.
+
+הכתובת מוגשת כ-`application/octet-stream`. אם Buffer דוחה את הסרטון בגלל סוג הקובץ, מפעילים GitHub Pages במאגר (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save) ומשתמשים ב-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`, שמוגש כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
 
 ## 3. טקסטים לפרסום (כותבים לבד, בעברית)
 
