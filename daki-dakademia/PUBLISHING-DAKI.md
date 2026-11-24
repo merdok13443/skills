@@ -65,7 +65,7 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 {
   "course": "<course-slug>", "unit": 1, "episode": 3,
   "file": "u01-e03.mp4", "url": "<הכתובת ששימשה>",
-  "keyword": "<מונח ראשי>", "title_type": "topic|question", "question_source": "<קישור, אם יש>",
+  "keyword": "<מונח ראשי>", "question": "<שאלה אמיתית או null>", "question_source": "<קישור או null>",
   "youtube": { "title": "...", "description": "..." },
   "instagram": { "caption": "..." },
   "tiktok": { "title": "...", "caption": "..." },
