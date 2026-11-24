@@ -2,37 +2,34 @@
 
 השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את הבדיקות של הסקיל (render, mix, loudness, critique). אין עצירה לאישור אנושי בין השלבים, בהתאם ל-RUNBOOK.
 
-## 1. העלאה לתיקיית הסרטונים בריפו
+## 1. העלאה למאגר הסרטונים
 
-הסרטונים המוכנים נשמרים בריפו `merdok13443/skills` (ציבורי), בתוך תיקיית הסקיל:
+מאגר: `merdok13443/dakademia-videos` (ציבורי). מבנה ושמות קבצים לפי ה-README שלו:
 
 ```
-daki-dakademia/videos/<course>/<unit>/<N.M name>.mp4
-daki-dakademia/videos/<course>/<unit>/<N.M name>.json
+<course-slug>/u<NN>-e<NN>.mp4
+<course-slug>/u<NN>-e<NN>.json
 ```
 
-- `<course>` ו-`<unit>` הם שמות התיקיות של הקורס והפרק כפי שהם ב-`videos/` של פרויקט העבודה (למשל `בדידה/1 לוגיקה פסוקית`), ו-`<N.M name>` הוא מספר הסרטון ושמו (למשל `1.1 פסוק וערך אמת`). אותו שם כמו ב-`out` ב-progress.json.
-- רק הקובץ הסופי (mp4) וקובץ התיעוד (json). בלי מקורות, תסריטים, קבצי ביניים או גרסאות ניסוי. אלה נשארים בתיקיית הפרויקט.
-- קובץ שכבר פורסם לא מוחלף. גרסה מתוקנת: `<N.M name> v2.mp4`.
-- קובץ עד 100MB. `.gitignore` בריפו מתעלם מ-mp4 חוץ מ-`daki-dakademia/videos/`, לכן אין צורך ב-`git add -f`.
+- `course-slug` באנגלית, אותיות קטנות ומקפים (למשל `discrete-math`). מספרים בשתי ספרות.
+- קובץ שכבר פורסם לא מוחלף. גרסה מתוקנת: `u01-e03-v2.mp4`.
+- קובץ עד 100MB.
 
-**בסשן ענן (claude.ai):** מושכים את main האחרון, פותחים ענף, מעתיקים את הקובץ, דוחפים ופותחים PR, וממזגים ל-main (לפי הכלל של הסשן לגבי ענף הפיתוח ו-PR):
+**בסשן ענן (claude.ai):** אם המאגר לא מחובר לסשן, מחברים אותו (`add_repo` עם `access: push`). ואז:
 
 ```bash
-git -C ~/skills fetch origin main && git -C ~/skills checkout -B <ענף-הסשן> origin/main
-D=~/skills/daki-dakademia/videos/<course>/<unit>
-mkdir -p "$D" && cp "<proj>/<N.M name>.mp4" "$D/"
-git -C ~/skills add daki-dakademia/videos && git -C ~/skills commit -m "Add video <N.M>" && git -C ~/skills push -u origin <ענף-הסשן>
+git clone --depth 1 https://github.com/merdok13443/dakademia-videos /tmp/dv
+mkdir -p /tmp/dv/<course-slug>
+cp <proj>/final.mp4 /tmp/dv/<course-slug>/u01-e03.mp4
+cd /tmp/dv && git add -A && git commit -m "<course-slug> u01-e03" && git push origin main
 ```
-
-ואז PR למיזוג ל-main. מיזוג ל-main נחוץ כי הכתובת הישירה למטה היא של main.
 
 **ב-Claude Code מקומי:** אותן פקודות, עם הרשאות ה-git של המחשב.
 
 ## 2. בדיקת הכתובת הישירה
 
-הכתובת הישירה (זמינה מיד אחרי המיזוג ל-main), עם קידוד URL לשמות בעברית וריווחים:
-`https://raw.githubusercontent.com/merdok13443/skills/main/daki-dakademia/videos/<course>/<unit>/<N.M name>.mp4`
+הכתובת הישירה (זמינה מיד אחרי ה-push):
+`https://raw.githubusercontent.com/merdok13443/dakademia-videos/main/<course-slug>/u01-e03.mp4`
 
 ```bash
 curl -sIL "<url>" | grep -iE "^HTTP|content-length"
@@ -40,7 +37,7 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ המקומי. אם לא, מחכים 30 שניות ובודקים שוב, עד 3 פעמים.
 
-הכתובת מוגשת כ-`application/octet-stream`. אם Buffer דוחה את הסרטון בגלל סוג הקובץ, מפעילים GitHub Pages בריפו (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save) ומשתמשים בכתובת `https://merdok13443.github.io/skills/daki-dakademia/videos/...`, שמוגשת כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
+הכתובת מוגשת כ-`application/octet-stream`. אם Buffer דוחה את הסרטון בגלל סוג הקובץ, מפעילים GitHub Pages במאגר (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save) ומשתמשים ב-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`, שמוגש כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
 
 ## 3. טקסטים לפרסום
 
@@ -62,12 +59,12 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 ## 5. תיעוד
 
-שומרים ליד הסרטון, באותה תיקייה בריפו, את `<N.M name>.json` ודוחפים (באותו ענף וקומיט או בקומיט נוסף עם PR):
+שומרים ליד הסרטון במאגר `<course-slug>/u01-e03.json` ודוחפים:
 
 ```json
 {
-  "course": "<course>", "unit": "<unit>", "video": "<N.M>",
-  "file": "<N.M name>.mp4", "url": "<הכתובת ששימשה>",
+  "course": "<course-slug>", "unit": 1, "episode": 3,
+  "file": "u01-e03.mp4", "url": "<הכתובת ששימשה>",
   "keyword": "<מונח ראשי>", "question": "<שאלה אמיתית או null>", "question_source": "<קישור או null>",
   "youtube": { "title": "...", "description": "..." },
   "instagram": { "caption": "..." },
