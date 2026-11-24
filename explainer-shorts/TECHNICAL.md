@@ -28,7 +28,7 @@ Pipeline + commands: see `engine/README.md`. Best reference scene: `examples/v3`
 - Hero fills 70–90% of the width at frame 0, already mid-motion (scale 1.12→1, 0.8 s, power3.out). Headline 108–150 px, max 2 lines, top ~200–250 px.
 - 6–9 distinct compositions per video: wide, inside-the-object, macro, crowd, cross-section, back to wide. Never use the same layout twice in a row.
 - A character with eyes (blink every ~2.5 s, pupils lead the look, squash and stretch on hits) beats any icon.
-- Safe zone: key content y 200–1300, x 60–1020. The bottom ~420 px is covered by app UI.
+- Safe zone: everything that must be read or seen (text, kicker, cards, stamps, character, captions) inside x 150–930, y 270–1500 (margins L150 R150 T270 B420). Only background and grain may bleed. Details and rationale in GUIDELINES.md, "אזור בטוח ושוליים".
 
 ## 4. Motion
 - Never linear. Entrances use ease-out or back.out/elastic.out; exits use ease-in, 0.15–0.25 s. Stagger 40–100 ms.
@@ -38,7 +38,7 @@ Pipeline + commands: see `engine/README.md`. Best reference scene: `examples/v3`
 
 ## 5. Text
 - ONE text layer at a time. When a big kinetic word is up, hide the captions for that range (`hide`).
-- Captions are phrases: at most 6 words / ~23 chars per chunk, at least 1.0 s on screen, 66 px Bricolage 800, paper text in a dark pill (`rgba(28,26,23,.93)`), one active word in yellow, at y≈1300.
+- Captions are phrases: at most 6 words / ~23 chars per chunk, at least 1.0 s on screen, 66 px Bricolage 800, paper text in a dark pill (`rgba(28,26,23,.93)`), one active word in yellow, in the band y 1250–1450, at most 780 px wide and centred (`left:150px; width:780px`).
 - Kinetic words: 1–3 words, 120–210 px, slammed in (scale 1.6→1, 0.28 s, power4.out).
 
 ## 6. Audio
@@ -49,13 +49,15 @@ Pipeline + commands: see `engine/README.md`. Best reference scene: `examples/v3`
 
 ## 7. QA loop (every video)
 1. Render 15–25 stills with `--still`, build a contact sheet (`engine/sheet.py`), and look for overlaps, clipped text, empty frames and tiny elements.
-2. Fix, then do the full render and mix. Pull 24 frames from `final.mp4` for a second contact sheet.
+   Also run `python engine/safezone_check.py <proj>/stills` (margin check, fails if anything but background enters the margins).
+2. Fix, then do the full render and mix. Pull 24 frames from `final.mp4` for a second contact sheet and run `python engine/safezone_check.py final.mp4` (every second plus frame 0 and the last frame).
 3. Check loudness (`ffmpeg -af ebur128`). Watch it on a phone.
 4. Write an honest critique (what works, what doesn't, by severity) and feed it into the next round.
 
 ## Anti-slop checklist
 - [ ] Frame 0 = hook claim + hero object in motion
 - [ ] Works with sound off
+- [ ] Everything inside the safe rectangle (L150 R150 T270 B420), frame 0 and last frame included; `safezone_check.py` passes
 - [ ] Visual change every ~2 s, big pattern interrupt every 6–8 s
 - [ ] Concrete anchor object visible or one zoom away at all times
 - [ ] One text layer at a time; captions ≥1 s per chunk

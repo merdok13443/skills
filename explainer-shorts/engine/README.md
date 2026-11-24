@@ -12,6 +12,7 @@ A free, local pipeline for 9:16 explainer shorts that Claude Code can drive. You
 | 4. Timing to JS | `sh engine/mktiming.sh myvideo` | Writes `timing.js` for the page. |
 | 5. Scene | write `myvideo/scene.js` (+ `index.html`) | GSAP timeline keyed to `word(lineId, 'word')` / `line(id)` times. |
 | 6. Preview stills | `node engine/render.js myvideo --still 0,3.5,10` | PNGs in `myvideo/stills/`. Then run `python engine/sheet.py myvideo/stills 8` for a contact sheet. |
+| 6b. Margins | `python engine/safezone_check.py myvideo/stills` | Fails when text, cards, stamps or the host enter the margins L150 R150 T270 B420. Run it on `final.mp4` too (every second, plus frame 0 and the last frame). |
 | 7. Render | `node engine/render.js myvideo --workers 4` | Headless Chromium seeks frame by frame and ffmpeg writes `video.mp4`. |
 | 8. Mix | `python engine/mix.py myvideo --key A --bpm 92 --music-gain 0.45` | Procedural music, SFX at the scene's cues, ducking and loudnorm at -14 LUFS, giving `final.mp4`. |
 
