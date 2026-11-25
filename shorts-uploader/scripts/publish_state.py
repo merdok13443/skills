@@ -38,7 +38,8 @@ def render(p, d):
             if s.get("url"):
                 c = f"[{c}]({s['url']})"
             cells.append(c)
-        lines.append(f"| `{vid}` | {v.get('title', '').replace('|', chr(92) + '|')} | " + " | ".join(cells) + f" | {v.get('note', '').replace('|', chr(92) + '|')} |")
+        pn = "; ".join(f"{pl}: {v['platforms'][pl]['note']}" for pl in PLATFORMS if v.get("platforms", {}).get(pl, {}).get("note"))
+        lines.append(f"| `{vid}` | {v.get('title', '').replace('|', chr(92) + '|')} | " + " | ".join(cells) + f" | {'; '.join(x for x in (v.get('note', ''), pn) if x).replace('|', chr(92) + '|')} |")
     pathlib.Path(p).with_name("PUBLISH-STATE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -61,7 +62,9 @@ def main():
         save(n.state, d)
     elif n.cmd == "set":
         v = d["videos"].setdefault(n.video, {"platforms": {}})
-        e = {"status": n.status, "date": n.date or datetime.date.today().isoformat()}
+        e = dict(v.get("platforms", {}).get(n.platform, {}))   # keep url/note from earlier updates
+        e["status"] = n.status
+        e["date"] = n.date or datetime.date.today().isoformat()
         if n.url: e["url"] = n.url
         if n.note: e["note"] = n.note
         v.setdefault("platforms", {})[n.platform] = e

@@ -52,8 +52,8 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 |---|---|
 | Orchestrator (the thread) | this file, `pipeline/README.md`, the course's `progress.json` |
 | 1 content (Haiku) | the curriculum entry, the source PDFs, the course notation notes, section 1 "Content" above |
-| 1b example + message (Opus) | `pipeline/prompts/example_researcher.md` |
-| 2 script (Opus) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
+| 1b example + message (Opus, high) | `pipeline/prompts/example_researcher.md` |
+| 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
 | 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
 | 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
 | 6 visuals (Sonnet) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
