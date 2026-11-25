@@ -22,8 +22,9 @@ or a phonetic respelling to fix a mispronounced word. Keep the same number of wo
 "say" as in "text" so the word timings map 1:1.
 
 Gemini backend ("backend": "gemini"):
-  Uses ONLY the model gemini-3.8-flash-tts and ONLY to generate narration audio. This is a
-  standing rule from the project owner: no other model and no other use of the API key.
+  Uses ONLY these TTS models (default gemini-3.8-flash-tts; "model" in script.json may pick
+  gemini-3.8-flash-lite-tts or gemini-3.1-flash-tts) and ONLY to generate narration audio.
+  Standing rule from the project owner: no other model and no other use of the API key.
   The key is read from the GEMINI_API_KEY environment variable (never stored in files).
   "voice": a Gemini prebuilt voice (default "Puck"); "style": delivery instruction (default:
   Decky's style below). One request per line, spaced to stay under 10 requests/minute; the
@@ -108,6 +109,8 @@ def synth_edge(text):
 # ---------------- gemini ----------------
 # Standing rule: this key is used ONLY for this model and ONLY for narration audio.
 GEMINI_MODEL = 'gemini-3.8-flash-tts'
+GEMINI_ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts',
+                  'gemini-3.1-flash-tts', 'gemini-3.1-flash-tts-preview'}
 DECKY_STYLE = ('A young Israeli guy, quick, curious and a little cheeky, explaining to a friend '
                'who just started university. Upbeat and energetic, slightly faster than normal '
                'speech, smiling while speaking. Short punchy sentences. Never lecturing, never an '
@@ -116,8 +119,9 @@ _gc, _last = None, [0.0]
 def synth_gemini(text):
     import base64, io, time
     global _gc
-    if spec.get('model', GEMINI_MODEL) != GEMINI_MODEL:
-        sys.exit('Only ' + GEMINI_MODEL + ' may be used with the Gemini key (standing project rule).')
+    model = spec.get('model', GEMINI_MODEL)
+    if model not in GEMINI_ALLOWED:
+        sys.exit('Only ' + ', '.join(sorted(GEMINI_ALLOWED)) + ' may be used with the Gemini key (standing project rule).')
     key = os.environ.get('GEMINI_API_KEY')
     if not key:
         sys.exit('GEMINI_API_KEY is not set.')
@@ -129,7 +133,7 @@ def synth_gemini(text):
         time.sleep(wait)
     _last[0] = time.time()
     it = _gc.interactions.create(
-        model=GEMINI_MODEL,
+        model=model,
         input=[{'type': 'user_input', 'content': [{'type': 'text', 'text': text,
                 'annotations': [{'type': 'speech_metadata', 'style': spec.get('style', DECKY_STYLE)}]}]}],
         response_format={'type': 'audio'},

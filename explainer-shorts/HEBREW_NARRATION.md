@@ -27,7 +27,7 @@ python engine/tts_he.py <proj> --backend gemini
 python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
 ```
 
-**Standing rule (project owner, 2026-11-25):** the Gemini API key is used ONLY with the model `gemini-3.8-flash-tts` and ONLY to generate narration audio. No other model, no other use. `tts_he.py` hard-codes the model and exits if the script asks for another.
+**Standing rule (project owner, 2026-11-25):** the Gemini API key is used ONLY with these TTS models: `gemini-3.8-flash-tts` (default), `gemini-3.8-flash-lite-tts`, `gemini-3.1-flash-tts` (also accepted as `-preview`), and ONLY to generate narration audio. No other model, no other use. `tts_he.py` keeps this allowlist and exits if the script asks for anything else. Set `"model"` in script.json to switch.
 
 - **Limits:** one request per script line, spaced about 6.5 s apart (10 requests/minute). The Google Cloud project is capped at 50 requests per day for this model.
 - **Voice:** default `Puck` (Upbeat). A/B candidates: `Sadachbia` (Lively), `Achird` (Friendly), `Fenrir` (Excitable). Pick once and keep it for the series.
