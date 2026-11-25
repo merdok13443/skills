@@ -43,7 +43,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - `voice.wav` always comes from the same `script.json` that produced `timing.json`.
 
 **Git, delivery, publishing**
-- In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`. Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
+- In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`, and merge your finished PR into `dev` (owner wish, 2026-11-25). Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
 - The final mp4 goes only to `merdok13443/dakademia-videos` (never into `skills`).
 - Publish only with the `shorts-uploader` skill, per `PUBLISHING-DAKI.md`. Never Buffer and never any `mcp__Buffer__*` tool. YouTube: Short, category Education, NOT made for kids, at most 6 uploads per day (raised only by the owner). **Temporary override (owner, 2026-11-25, until the owner says otherwise): publish to YouTube only; Instagram and TikTok are skipped (record `skipped`).** Later: Instagram Reel, TikTok manual.
 - Never commit secrets (tokens, `client_secret.json`, `.env`, state files).
@@ -57,11 +57,11 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`. Each
 | 1 content (Haiku) | pack `content`: the video card (curriculum entry), section 1 "Content" above, the course notation notes; the source text through `pipeline/sources.py` |
 | 1b example + message (Opus, high) | pack `example`: `pipeline/prompts/example_researcher.md`, `GUIDELINES-DAKI.md` (trailer/intro videos: `INTRO-VIDEOS-DAKI.md` instead, Fable then Opus high) |
 | 2 script (Opus, high) | pack `script`: `pipeline/prompts/scriptwriter.md`, `GUIDELINES-DAKI.md`; plus `example.md` |
-| 3 review (Sonnet + Haiku) | pack `review`: section 1 "Content" above, `GUIDELINES-DAKI.md` (owner feedback patterns, checklist, teaching quality rules); plus `script.md` and the "קטעי מקור" of `draft-haiku.md` for the facts |
+| 3 review (Sonnet + Haiku) | pack `review`: section 1 "Content" above, `GUIDELINES-DAKI.md` (owner feedback patterns, the pre-delivery discipline section, checklist, teaching quality rules); plus `script.md` and the "קטעי מקור" of `draft-haiku.md` for the facts |
 | 4 voice (owner's PC) | none: `python pipeline/voice.py <src>` (rules: `HEBREW_NARRATION.md`, Gemini section) |
-| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | pack `visuals`: `pipeline/SCENE_SPEC.md`, the unit `--bg` (video card), `mascot/DAKI.md` (character, files, use in a scene), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | pack `visuals`: `pipeline/SCENE_SPEC.md`, the unit `--bg` (video card), `mascot/DAKI.md` (character, files, use in a scene), `GUIDELINES-DAKI.md` (the owner feedback patterns, the pre-delivery discipline section and the checklist: most visual lessons live there), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
 | 7-8 make + QA | `pipeline/README.md`, `qa_report.json`, the one contact sheet |
-| 9 deliver + publish | pack `deliver`: `METADATA-DAKI.md` (principle, keywords, YouTube, rules for all texts), `PUBLISHING-DAKI.md` section 4; the commands in `pipeline/README.md` stage 9; `../shorts-uploader/README.md` only for setup or errors |
+| 9 deliver + publish | pack `deliver`: `pipeline/VIDEO-PACKAGE.md` (the package), `METADATA-DAKI.md` (principle, keywords, YouTube, rules for all texts), `PUBLISHING-DAKI.md` section 4; the commands in `pipeline/README.md` stage 9; `../shorts-uploader/README.md` only for setup or errors |
 
 Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), old `work/<course>/video-sources/` templates.
 

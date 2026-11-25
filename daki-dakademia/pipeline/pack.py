@@ -47,14 +47,16 @@ PACKS = {
     ],
     'review': [
         ('daki-dakademia/SKILL.md', ('between', '**Content**', '**Look**')),
-        ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', "## צ'קליסט לסרטוני דקדמיה", '## Teaching quality rules']),
+        ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', '### משמעת עבודה לפני מסירה', "## צ'קליסט לסרטוני דקדמיה", '## Teaching quality rules']),
     ],
     'visuals': [
         ('daki-dakademia/pipeline/SCENE_SPEC.md', None),
         ('daki-dakademia/mascot/DAKI.md', ['## הדמות', '## קבצים', '## שימוש בסצנה']),
+        ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', '### משמעת עבודה לפני מסירה', "## צ'קליסט לסרטוני דקדמיה"]),
         ('explainer-shorts/GUIDELINES.md', ['## מעורבות', '## אזור בטוח', '## עיצוב', '## תנועה', '## טקסט']),
     ],
     'deliver': [
+        ('daki-dakademia/pipeline/VIDEO-PACKAGE.md', None),
         ('daki-dakademia/METADATA-DAKI.md', ['## העיקרון', '## 1.', '## 2.', '## 6.']),
         ('daki-dakademia/PUBLISHING-DAKI.md', ['## 4.']),
     ],
