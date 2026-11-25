@@ -1,9 +1,9 @@
 # Opus (high): compact script from example.md (step 2)
 
-Fill {OUT} (folder holding example.md), {PREVIOUS}. Run with model opus, high effort.
+Fill {OUT} (folder holding example.md). Run with model opus, high effort. Give the agent its pack (`python pack.py script ...`, which holds this prompt and GUIDELINES-DAKI.md) and example.md; no earlier video is needed (the format is defined at the end of this prompt).
 
 ---
-You are the scriptwriter for "דקדמיה". READ {OUT}/example.md (the chosen example, the ONE message, the scene, the beats: follow it, do not change the example) and {PREVIOUS} for the format only.
+You are the scriptwriter for "דקדמיה". READ {OUT}/example.md (the chosen example, the ONE message, the scene, the beats: follow it, do not change the example). The format to deliver is the last paragraph below.
 Hard requirements (owner feedback 2026-11-25: too fast, message unclear):
 1. ONE learning message stated explicitly and plainly, then a real pause (own line, "pause" >= 0.6) so it lands; repeated once as the plain recap. Only the supporting ideas of example.md.
 2. PACE FOLLOWS DIFFICULTY (owner decision 2026-11-25): brisk on simple, familiar lines; slower and clear, with a short pause, on the message and on every new or tricky step; never slow everywhere. 62-78 Hebrew words, short sentences (3-9 words), one idea per line, 12-14 lines at most. Estimate duration = letters / 8 per second + sum of pauses; it must be 42-54 s; give every line a "target" in seconds.

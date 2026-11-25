@@ -8,6 +8,7 @@ description: Bulk-upload original vertical shorts to YouTube Shorts and Instagra
 Use when the user wants to publish many finished shorts (from `explainer-shorts` or any other source) to YouTube Shorts and Instagram Reels without a paid scheduler.
 
 ## Read first
+Only for setup, errors or a new series. A routine upload of a series that has its own one-command wrapper uses that instead (Dakademia: `../daki-dakademia/pipeline/publish_video.py`, which reuses `scripts/youtube_upload.py` and `scripts/instagram_publish.py`).
 - `README.md` (Hebrew): full setup, usage, limits, kids setting, pacing, troubleshooting.
 - `queue.example.json`: format of the upload queue.
 - `ALTERNATIVES.md` (Hebrew): existing GitHub tools (Postiz, Upload-Post MCP, Mixpost) with setup pointers, when to prefer each, and what to avoid.

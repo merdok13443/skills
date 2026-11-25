@@ -14,7 +14,7 @@ Every finished video keeps its COMPLETE source in the project folder, so it can 
   README.md              human index (Hebrew): the message, the example, versions with the owner's verdict, publish links, gaps
   PACKAGE.json           machine index: name, type (lesson|intro|trailer), final file, declared gaps, versions
   <N.M name>.mp4         the current final, byte-identical to the file in dakademia-videos
-  01-content/            draft-haiku.md             stage 1: facts and draft from the sources
+  01-content/            draft-haiku.md             stage 1: facts and draft from the sources, ending with "קטעי מקור" (quotes + [book p.N])
   02-example/            example.md                 stage 1b: the approved example + the ONE message
   03-script/             script.md, review.md       stage 2-3: script (human table), Sonnet critique + Haiku accuracy check (one pass; every round's findings)
                          fable-notes.md, display.md trailer/intro videos only (Fable's notes and visual presentation)

@@ -3,7 +3,7 @@
 Checks: duration 30-60 s (20-60 s when scene.json has type trailer/intro), 1080x1920, 30 fps, audio stream, loudness (-14 +-1.5 LUFS, true peak <= -1), loop seam (first vs last
 frame), safe margins (explainer-shorts/engine/safezone_check.py), build report (stamp truth, ids, boxes), payoff 65-75 %, fresh
 Decky (daki.js identical to the skill copy), voice/timing length, forbidden words in captions.
-The model only needs to look at ONE small contact sheet afterwards (python qa.py ... --sheet)."""
+The model only needs to look at ONE contact sheet afterwards (stills/contact-sheet.jpg from make_video.py --sheet)."""
 import json, os, re, subprocess, sys, tempfile, filecmp
 import numpy as np
 from PIL import Image

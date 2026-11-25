@@ -16,17 +16,14 @@
 - קובץ עד 100MB.
 - מיפוי: סרטון `N.M` ביחידה N הוא `u<NN>-e<MM>` (למשל 1.3 בבדידה הוא `discrete-math/u01-e03.mp4`). הקובץ הוא רק ה-mp4 הסופי (והתיעוד json), בלי מקורות, תסריטים או גרסאות ניסוי.
 
-**בסשן ענן (claude.ai):** אם המאגר לא מחובר לסשן, מחברים אותו (`add_repo` עם `access: push`). ואז:
+**הפקודה (בענן או במחשב, אותה פקודה):** אם המאגר לא מחובר לסשן ענן, מחברים אותו קודם (`add_repo` עם `access: push`). ואז:
 
 ```bash
-git clone --depth 1 -b dev https://github.com/merdok13443/dakademia-videos /tmp/dv
-cd /tmp/dv && git checkout -b <thread-branch>
-mkdir -p <course-slug> && cp <proj>/final.mp4 <course-slug>/u01-e03.mp4
-git add -A && git commit -m "<course-slug> u01-e03" && git push -u origin <thread-branch>
-# PR to dev, merge it, then: git rev-parse HEAD  -> <sha> for the direct link
+python pipeline/deliver.py push <src>/final.mp4 <uNN-eNN.json מ-metadata.py> --branch <thread-branch>
+# then: PR <thread-branch> -> dev, merge it
 ```
 
-**ב-Claude Code מקומי:** אותן פקודות, עם הרשאות ה-git של המחשב.
+הסקריפט משכפל את `dev`, יוצר את הענף, מעתיק את הקובץ בשם הנכון (קובץ זהה שכבר קיים נשאר; קובץ אחר באותו שם מקבל `-v2`, `-v3`), כותב את קובץ הטקסטים ליד הסרטון, רושם את הסרטון ב-`publish-state.json` (`add`) ודוחף. נשארות רק פתיחת ה-PR והמיזוג.
 
 ## 2. בדיקת הכתובת הישירה
 
@@ -34,10 +31,10 @@ git add -A && git commit -m "<course-slug> u01-e03" && git push -u origin <threa
 `https://raw.githubusercontent.com/merdok13443/dakademia-videos/<sha>/<course-slug>/u01-e03.mp4`
 
 ```bash
-curl -sIL "<url>" | grep -iE "^HTTP|content-length"
+python pipeline/deliver.py verify --name <course-slug>/u01-e03
 ```
 
-ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ המקומי. אם לא, מחכים 30 שניות ובודקים שוב, עד 3 פעמים.
+הסקריפט לוקח את ה-sha של `dev` אחרי המיזוג, בונה את הכתובת ובודק אותה: ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ. אם לא, הוא מחכה 30 שניות ובודק שוב, עד 3 פעמים, ואז נכשל.
 
 הכתובת מוגשת כ-`application/octet-stream`. אם הפלטפורמה דוחה את הסרטון בגלל סוג הקובץ, מבקשים מהבעלים להפעיל GitHub Pages במאגר (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save; עובד רק לקבצים שכבר מוזגו ל-`main`) ומשתמשים ב-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`, שמוגש כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
 
@@ -51,6 +48,16 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 לא משתמשים ב-Buffer ולא באף כלי `mcp__Buffer__*`. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
+**פקודה אחת לסרטון, על המחשב של הבעלים** (מתוך תיקיית ה-uploader, עם ה-venv שלה; סשן Remote Control מריץ רק אותה):
+
+```bash
+python <skills>/daki-dakademia/pipeline/publish_video.py --url <הכתובת מבדיקה 2> --uploader-dir . [--platforms youtube]
+```
+
+הסקריפט מוריד את הסרטון ואת קובץ הטקסטים מהכתובת המוצמדת, בונה תור של פריט אחד ומעלה עם אותו קוד של `youtube_upload.py` (אותם `client_secret.json`, `token_youtube.json` ו-`state.json`): ציבורי, לא לילדים, קטגוריה 27, עברית. סרטון שכבר הועלה לא עולה שוב, ונשמרת המגבלה היומית. Instagram רק כש-`instagram` ברשימת הפלטפורמות (כרגע לא, לפי החריגה הזמנית). ל-TikTok אין API חינמי ובטוח, ולכן הסקריפט מדפיס את הכותרת והכיתוב להעלאה ידנית. השורה האחרונה היא `RESULT {...}` עם המזהים, והם עוברים לסעיף 5. `--dry-run` בודק הכול בלי להעלות.
+
+הסעיפים למטה מתארים את ההגדרות שהסקריפט מיישם.
+
 - בתור: `file` הוא קובץ ה-mp4 המקומי (יחסית לתיקייה שממנה מריצים), `title` ו-`description` ל-YouTube, `caption` ל-Instagram, ו-`instagram_video_url` הוא הכתובת הישירה מבדיקה 2.
 - `defaults.youtube`: `privacy: "public"`, `made_for_kids: false`, `category_id: "27"` (Education), `language: "he"`.
 - YouTube: `python scripts/youtube_upload.py queue.json --dry-run`, ואז בלי `--dry-run`. ההתחברות הראשונה פותחת דפדפן, ולכן רצה על מחשב עם דפדפן (לא בענן). ההרשאה `youtube.upload` מעלה אבל לא עורכת סרטון קיים.
@@ -62,7 +69,13 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 ## 5. תיעוד
 
-שומרים ליד הסרטון במאגר `<course-slug>/u01-e03.json` ודוחפים:
+הקובץ `<course-slug>/u01-e03.json` נכתב ב-`metadata.py` ונדחף עם הסרטון. אחרי ההעלאה ממלאים בו את הכתובת והמזהים ומעדכנים את `publish-state.json` בפקודה אחת, ואז PR ל-`dev` ומיזוג:
+
+```bash
+python pipeline/deliver.py record --name <course-slug>/u01-e03 --url <URL> --youtube <id> --instagram skipped --tiktok skipped --branch <b> --package "<video folder>"
+```
+
+המבנה:
 
 ```json
 {
