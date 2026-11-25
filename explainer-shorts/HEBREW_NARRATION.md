@@ -18,6 +18,39 @@ sh engine/mktiming.sh he1
 - **Quality check:** a Whisper Hebrew transcription (ivrit-ai large-v3-turbo) of the Avri demo matched the script word for word. "80%" was read correctly as שמונים אחוז. The Hila demo was also correct; Whisper only spelled זוחל and סוללה slightly differently.
 - **Caveats:** it uses Microsoft's Edge read-aloud endpoint, which is free but unofficial and can change. Keep the generated `voice.wav` with each project.
 
+## Gemini TTS: the fixed voice of Decky (דקי)
+
+This is the locked, stable voice of the mascot Decky for every Dakademia video. Heard and approved by the project owner on 2026-11-25 ("sounds great, energetic"); the sample was 10.49 s.
+
+**Standing rule (project owner, 2026-11-25):** the Gemini API key is used ONLY with these TTS models: `gemini-3.8-flash-tts` (default and the one that produced the approved voice), `gemini-3.8-flash-lite-tts`, `gemini-3.1-flash-tts` (also accepted as `-preview`), and ONLY to generate narration audio. No other model, no other use. `tts_he.py` keeps this allowlist and exits if the script asks for anything else.
+
+```
+pip install "google-genai>=2.25.0" soundfile scipy numpy
+# key once, on the PC (then open a new terminal):  setx GEMINI_API_KEY "<key>"
+python engine/tts_he.py <proj> --backend gemini
+python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
+```
+
+### How it was done (what made it work)
+1. **Model:** `gemini-3.8-flash-tts` through the Interactions API (`client.interactions.create`), WAV output, 24 kHz mono.
+2. **API version v1beta is mandatory.** `genai.Client(api_key=..., http_options={'api_version': 'v1beta'})`. With the SDK default every TTS model answered `404 Model ... not found` (we lost four requests to it on 2026-11-25). Same fix as in a Google forum report; env alternative `GOOGLE_GENAI_API_VERSION=v1beta`.
+3. **Billing:** the AI Studio project of the key must be on a paid tier with a prepay credit balance above zero, otherwise the call returns `402 RESOURCE_EXHAUSTED: Your prepayment credits are depleted`. The project has a monthly spend cap set in AI Studio, Spend page (5 ILS at the time of writing), and the Google Cloud project dakademia-515807 has a daily quota cap of 50 requests for this model.
+4. **Voice:** prebuilt voice `Puck` (Upbeat). Alternatives to A/B only if the owner asks: `Sadachbia`, `Achird`, `Fenrir`.
+5. **Style:** put delivery in the `style` annotation (`speech_metadata`), never in the text (the text is read verbatim). The fixed prompt is `DECKY_STYLE` in `engine/tts_he.py`; copy it here if it changes:
+
+> Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, slightly faster than normal speech, smiling while speaking. Short punchy sentences with expressive rises and falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. Never monotone, never robotic, never an announcer.
+
+   The approved sample used the earlier wording of this prompt (young Israeli guy plus classic newscaster qualities, no real person named). The version above pushes the Israeli accent harder, which is the owner's top priority, and keeps the energy. **Never name or imitate a real person in the prompt.** Describe qualities instead.
+6. **Pace:** one request per script line, spaced about 6.5 s apart (10 requests per minute). A script of about eight lines uses eight of the 50 daily requests.
+
+### Text rules for the voice (applied automatically by `prepare_voice_text` in `tts_he.py`)
+- **Numbers are always Hebrew words, never digits.** The script converts `80%` to `שמונים אחוז`, `3.14` to `שלוש נקודה אחת ארבע`, `ו-17` to `ושבע עשרה`, up to 9999. It uses the feminine/abstract counting forms, so for a counted noun of another gender, or a bigger number, write the words yourself in the line's `"say"` field. The script exits with an error if a digit or the Latin name reaches the voice.
+- **The name is spelled דקי in Hebrew letters, never "Daki" or "Decky" in Latin, and pronounced like "דקה" (DA-ka, stress on the first syllable).** The script replaces `דקי` with the niqqud form `דַּקִּי` before sending (override with `"name_say"` in script.json). The vowel pronunciation of the name still has to be confirmed by listening to a test line: if the voice stresses the wrong syllable, try `דַּקִּי` vs `דָּקִי` vs `דֶּקִי` and record the winner here.
+- Prefer short sentences, commas for breath. `<short pause>` inline tags are allowed in the text.
+
+### Timing and checks
+Gemini returns no word timestamps, so run `align_he.py` afterwards (estimates otherwise). After each render listen for: Israeli accent (not foreign or newsreader-flat), energy, correct numbers, the name דקי.
+
 ## Offline fallback: Piper + noa
 
 ```

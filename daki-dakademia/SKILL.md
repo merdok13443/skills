@@ -1,6 +1,6 @@
 ---
 name: daki-dakademia
-description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Daki / Decky (דקי הדקה). Use for any Dakademia video or whenever Daki is needed. Adds the mascot code and spec, unit background colours, loop, T/F stamp and no-sources rules, and automatic publishing via GitHub + Buffer, on top of the general explainer-shorts skill, which must be read first.
+description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Daki / Decky (דקי הדקה). Use for any Dakademia video or whenever Daki is needed. Adds the mascot code and spec, unit background colours, loop, T/F stamp and no-sources rules, and automatic publishing via GitHub + the shorts-uploader skill, on top of the general explainer-shorts skill, which must be read first.
 ---
 
 # Daki + Dakademia (דקי הדקה ודקדמיה)
@@ -46,7 +46,7 @@ If a rule here differs from the general skill, this skill wins for Dakademia vid
 ## 4. Publish (right after the render passes)
 Before publishing: `python ../explainer-shorts/engine/safezone_check.py final.mp4` must pass (margins).
 
-Follow `PUBLISHING-DAKI.md`: push `final.mp4` to the public repo `merdok13443/dakademia-videos` as `<course-slug>/uNN-eNN.mp4`, confirm its raw.githubusercontent.com URL returns the file, write the Hebrew title, captions and hashtags per platform by `METADATA-DAKI.md`, and publish at once through Buffer (`shareNow`) to YouTube (Short, category Education), Instagram (Reel, shared to feed) and TikTok. Respect Buffer's free-plan limit of 2 YouTube Shorts a day. Record the post ids in `uNN-eNN.json` next to the video.
+Follow `PUBLISHING-DAKI.md`: push `final.mp4` to the public repo `merdok13443/dakademia-videos` as `<course-slug>/uNN-eNN.mp4`, confirm its raw.githubusercontent.com URL returns the file, write the Hebrew title, captions and hashtags per platform by `METADATA-DAKI.md`, and publish with the `shorts-uploader` skill (official YouTube and Instagram APIs, not Buffer): YouTube Short (category Education, not made for kids), Instagram Reel (shared to feed); TikTok is manual. Record the video/media ids in `uNN-eNN.json` next to the video.
 
 ## 5. Review and learn
 After a video, write the critique in Hebrew as the general skill says, add general lessons to `../explainer-shorts/GUIDELINES.md` and Daki/Dakademia-specific ones to `GUIDELINES-DAKI.md`.
