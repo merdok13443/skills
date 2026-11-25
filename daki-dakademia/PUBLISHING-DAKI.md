@@ -1,6 +1,6 @@
 # פרסום סרטון של דקדמיה (אחרי הרינדור)
 
-השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube ול-Instagram רצה על המחשב של הבעלים; אם הוא לא זמין, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
+השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube רצה על המחשב של הבעלים (Instagram כשיחזור); אם הוא לא זמין, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
 
 ## 1. העלאה למאגר הסרטונים
 
@@ -43,9 +43,11 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 ## 3. טקסטים לפרסום
 
-כותבים לפי `METADATA-DAKI.md`: טקסט נפרד לכל פלטפורמה (כותרת ותיאור ל-YouTube, כיתוב לאינסטגרם, כיתוב ו-title לטיקטוק), סביב מונח ראשי אחד, בלי לחשוף את ה-payoff.
+כותבים לפי `METADATA-DAKI.md`: טקסט נפרד לכל פלטפורמה (כרגע נדרש רק של YouTube; של אינסטגרם וטיקטוק כותבים כשהם חוזרים לפעולה) (כותרת ותיאור ל-YouTube, כיתוב לאינסטגרם, כיתוב ו-title לטיקטוק), סביב מונח ראשי אחד, בלי לחשוף את ה-payoff.
 
 ## 4. פרסום עם הסקיל shorts-uploader
+
+**חריגה זמנית (הבעלים, 2026-11-25, עד שיבטל): מפרסמים רק ב-YouTube. Instagram ו-TikTok מדלגים, ורושמים `skipped` ב-`published` וב-`publish-state.json`.** הסעיפים על Instagram ו-TikTok למטה נשארים לשימוש כשהבעלים יחזיר אותם.
 
 לא משתמשים ב-Buffer ולא באף כלי `mcp__Buffer__*`. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
@@ -53,8 +55,8 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 - `defaults.youtube`: `privacy: "public"`, `made_for_kids: false`, `category_id: "27"` (Education), `language: "he"`.
 - YouTube: `python scripts/youtube_upload.py queue.json --dry-run`, ואז בלי `--dry-run`. ההתחברות הראשונה פותחת דפדפן, ולכן רצה על מחשב עם דפדפן (לא בענן). ההרשאה `youtube.upload` מעלה אבל לא עורכת סרטון קיים.
 - Instagram: `python scripts/instagram_publish.py queue.json --dry-run`, ואז בלי. דורש חשבון Professional, `IG_USER_ID` ו-`IG_ACCESS_TOKEN`.
-- קצב לדקדמיה: `--daily-max 2` לכל פלטפורמה, עד שהבעלים מעלה אותו. מעלים בהדרגה.
-- אם אין עדיין הרשאות לאינסטגרם (`IG_ACCESS_TOKEN`), רושמים `instagram: skipped` וממשיכים.
+- קצב לדקדמיה: YouTube עד 6 ביום (`--daily-max 6`, ברירת המחדל של הסקריפט), עד שהבעלים מעלה אותו. מעלים בהדרגה.
+- אם אין הרשאות לאינסטגרם (`IG_ACCESS_TOKEN`), או כל עוד החריגה הזמנית בתוקף, רושמים `instagram: skipped` וממשיכים.
 - TikTok: ידני, דרך TikTok Studio (אין סקריפט). זו היוצאת מהכלל "בלי אוטומציית דפדפן" של shorts-uploader: מעלים דרך חלון בחירת הקבצים ב-Studio בחשבון מחובר, לא בעוגיות ולא בכלי צד שלישי.
 - אם קריאה נכשלת, לא מנסים שוב יותר מפעם אחת. מדווחים מה נכשל ובאיזו פלטפורמה. סרטון שפורסם לא מוחקים ולא מפרסמים מחדש.
 
