@@ -98,7 +98,7 @@ python scripts/queue_status.py queue.json
 - ההזמנה מתקבלת באינסטגרם: Settings → Apps and Websites → Tester Invites → אישור.
 - אחר כך לוחצים **Generate token** ליד החשבון. הטוקן וה-id (מופיע ליד שם החשבון) נשמרים רק במחשב המקומי, בקובץ מוחרג מ-git (למשל `ig_token.txt`). לעולם לא בצ'אט ולא בריפו.
 - בדיקה שהטוקן תקין: קריאה ל-`content_publishing_limit` מצליחה.
-- כתובת הווידאו: קישור raw ציבורי מריפו הסרטונים (`raw.githubusercontent.com/<owner>/<repo>/main/<path>.mp4`) עובד ל-Instagram, ואין צורך באחסון צד שלישי.
+- כתובת הווידאו: קישור raw ציבורי מריפו הסרטונים (`raw.githubusercontent.com/<owner>/<repo>/<sha>/<path>.mp4`, כתובת מוצמדת ל-commit כמו ב-`PUBLISHING-DAKI.md`) עובד ל-Instagram, ואין צורך באחסון צד שלישי.
 - אי אפשר לערוך כיתוב של פוסט קיים דרך ה-API. עורכים באפליקציה, או מוחקים ומפרסמים מחדש. לכן **בודקים את נושא הסרטון בפועל לפני שמכינים כיתוב**.
 
 **טיקטוק:**

@@ -10,7 +10,7 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 ~/.claude/skills/daki-dakademia/SKILL.md
 ```
 
-`SKILL.md` must sit directly inside each folder. Then check with `/skills` in Claude Code. The Daki skill starts by telling Claude to read `../explainer-shorts/SKILL.md` and `../explainer-shorts/GUIDELINES.md`, so the two folders must stay next to each other.
+`SKILL.md` must sit directly inside each folder. Then check with `/skills` in Claude Code. The Daki skill refers to `../explainer-shorts/` for what it does not cover (`SKILL.md` section 0 point 6 and section 3), so the two folders must stay next to each other.
 
 ## Contents
 - `SKILL.md`: order of authority, HARD RULES, read map per stage, general rules that do not apply

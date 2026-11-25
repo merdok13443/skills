@@ -53,13 +53,13 @@
 - [ ] הסוף משלים את הפתיחה כמשפט אחד, והפריים האחרון זהה לראשון, כולל הבעה ומיקום של דקי
 - [ ] כל חותמת T/F תואמת את ערך האמת של המשפט, בכל פריים כולל פריים 0
 - [ ] שוליים: תגית הסדרה, הכרטיסים, חותמות T/F, הכתוביות ודקי (עם השעון והכובע) בתוך x 150–930 ו-y 270–1500, בכל פריים כולל הראשון והאחרון, ו-`safezone_check.py final.mp4` עבר
-- [ ] 42–54 שניות, 62–78 מילים, מסר אחד ברור; הקריינות מ-Gemini בבקשה אחת (עד 3 כולל ניסיונות חוזרים)
+- [ ] 42–54 שניות (טריילר ופתיח: `INTRO-VIDEOS-DAKI.md`), 62–78 מילים, מסר אחד ברור; הקריינות מ-Gemini בבקשה אחת (עד 3 כולל ניסיונות חוזרים)
 - [ ] רקע היחידה (`--bg`) לפי פלטת הקורס, ושאר הצבעים בלי שינוי
 - [ ] אין אזכור של ספר, אוניברסיטה, מחבר, פרק או תרגיל, ואין תגית מקור על המסך; הדוגמאות מקוריות
 - [ ] מונחים מוגדרים בשימוש ראשון, סימון סטנדרטי ועקבי, רעיון אחד חזק עם מקום לכל פעימה (2 שניות לפחות לכל ויזואל)
 
 
-## Teaching quality rules (owner feedback on 1.1 v2, 2026-11-25)
+## Teaching quality rules (English section; the owner's decisions of 2026-11-25 are in force)
 - **The example decides the video.** It is chosen by a dedicated Opus step (`pipeline/prompts/example_researcher.md`) that researches and scores 4-5 candidates. It must be a real everyday scene the student has lived (group chat, lecturer's announcement, campus app, exam...), never a gimmick like codes or locks, and it must show both sides of the idea in the same scene.
 - **Not the obvious** (owner, 2026-11-25): the example has a moment that challenges the student a little (their first guess is wrong), and stays relatable and clear. After the everyday example come 2-4 tiny examples in math notation that show exactly what the concept is, in our own numbers. The 8 example tests (a sentence not a scene, a known subject, surprise from the world not the definition, the surprise is the message, a clean pair, a reliable source, short Hebrew, a math bridge) are in `pipeline/prompts/example_researcher.md`.
 - **Opus high + a visual hook** (owner, 2026-11-25): choosing the example and writing the script always run on Opus at high effort, and that step also designs the visual hook: a striking frame 0 (the example as a bold picture plus the topic tag) or an attention-grabbing effect in the first second. Frame 0 still equals the last frame (loop).
