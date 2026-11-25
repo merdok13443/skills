@@ -38,25 +38,22 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 
 ממשיכים רק כשהתשובה האחרונה היא `200` וה-`content-length` שווה לגודל הקובץ המקומי. אם לא, מחכים 30 שניות ובודקים שוב, עד 3 פעמים.
 
-הכתובת מוגשת כ-`application/octet-stream`. אם Buffer דוחה את הסרטון בגלל סוג הקובץ, מפעילים GitHub Pages במאגר (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save) ומשתמשים ב-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`, שמוגש כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
+הכתובת מוגשת כ-`application/octet-stream`. אם הפלטפורמה דוחה את הסרטון בגלל סוג הקובץ, מפעילים GitHub Pages במאגר (Settings > Pages > Deploy from a branch > `main` / `/ (root)` > Save) ומשתמשים ב-`https://merdok13443.github.io/dakademia-videos/<course-slug>/u01-e03.mp4`, שמוגש כ-`video/mp4`. מסשן ענן אי אפשר לבדוק את כתובת ה-Pages ישירות (הרשת חוסמת את github.io), אז בודקים אותה דרך הדפדפן של המשתמש.
 
 ## 3. טקסטים לפרסום
 
 כותבים לפי `METADATA-DAKI.md`: טקסט נפרד לכל פלטפורמה (כותרת ותיאור ל-YouTube, כיתוב לאינסטגרם, כיתוב ו-title לטיקטוק), סביב מונח ראשי אחד, בלי לחשוף את ה-payoff.
 
-## 4. פרסום ב-Buffer (מיד)
+## 4. פרסום עם הסקיל shorts-uploader (לא דרך Buffer)
 
-ארגון: "My organization". שלוש קריאות `create_post`, כל אחת עם `mode: "shareNow"`, `schedulingType: "automatic"` ו-`assets: [{ video: { url: "<כתובת מבדיקה 2>" } }]`:
+מפסיקים להשתמש ב-Buffer. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
-| ערוץ | channelId | metadata |
-|---|---|---|
-| YouTube | `6b0482648541f09ecb7a3b7a` | `youtube: { type: "short", title, categoryId: "27", privacy: "public", madeForKids: false }` (27 = Education); `text` = תיאור YouTube |
-| Instagram | `6b0482358541f09ecb7a3861` | `instagram: { type: "reel", shouldShareToFeed: true }`; `text` = כיתוב Instagram |
-| TikTok | `6b0482798541f09ecb7a3ce4` | `tiktok: { title }`; `text` = כיתוב TikTok |
-
-**מגבלת YouTube בתוכנית החינמית של Buffer:** 2 שורטים ביום לערוץ. לפני הפרסום בודקים ב-`list_posts` כמה פוסטים של YouTube נשלחו היום. אם כבר יש 2, מפרסמים ל-Instagram ול-TikTok כרגיל, וב-YouTube משתמשים ב-`addToQueue` (התור החינמי מוגבל ל-10 פוסטים לערוץ). אם גם התור מלא, לא מפרסמים ל-YouTube ומדווחים.
-
-אם קריאה נכשלת, לא מנסים שוב יותר מפעם אחת. מדווחים מה נכשל ובאיזה ערוץ. פוסט שפורסם לא מוחקים ולא מפרסמים מחדש.
+- בתור: `file` הוא קובץ ה-mp4 המקומי (יחסית לתיקייה שממנה מריצים), `title` ו-`description` ל-YouTube, `caption` ל-Instagram, ו-`instagram_video_url` הוא הכתובת הישירה מבדיקה 2.
+- `defaults.youtube`: `privacy: "public"`, `made_for_kids: false`, `category_id: "27"` (Education), `language: "he"`.
+- YouTube: `python scripts/youtube_upload.py queue.json --dry-run`, ואז בלי `--dry-run`. ההתחברות הראשונה פותחת דפדפן, ולכן רצה על מחשב עם דפדפן (לא בענן). ההרשאה `youtube.upload` מעלה אבל לא עורכת סרטון קיים.
+- Instagram: `python scripts/instagram_publish.py queue.json --dry-run`, ואז בלי. דורש חשבון Professional, `IG_USER_ID` ו-`IG_ACCESS_TOKEN`.
+- TikTok: ידני, דרך TikTok Studio (אין סקריפט).
+- אם קריאה נכשלת, לא מנסים שוב יותר מפעם אחת. מדווחים מה נכשל ובאיזו פלטפורמה. סרטון שפורסם לא מוחקים ולא מפרסמים מחדש.
 
 ## 5. תיעוד
 
@@ -71,11 +68,11 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
   "instagram": { "caption": "..." },
   "tiktok": { "title": "...", "caption": "..." },
   "published_at": "<ISO>",
-  "buffer": { "youtube": "<postId|queued|skipped>", "instagram": "<postId>", "tiktok": "<postId>" }
+  "published": { "youtube": "<videoId|skipped>", "instagram": "<mediaId|skipped>", "tiktok": "manual|skipped" }
 }
 ```
 
 ומדווחים למשתמש בשורה אחת: מה פורסם, איפה, ומה נדחה או נכשל.
 
 ## הגדרת קהל ב-YouTube (חובה)
-תמיד "לא מיועד לילדים" (`madeForKids: false` ב-Buffer, `made_for_kids: false` ב-shorts-uploader). הקהל שלנו הוא סטודנטים. לפי YouTube, סימון לילדים מכבה תגובות, התראות, מודעות מותאמות, כרטיסים והוספה לפלייליסט, והסרטון מומלץ בעיקר לצד סרטוני ילדים. הצהרה לא מדויקת עלולה לגרור בעיות מול YouTube. הסימון לא חוסם צפייה של ילדים. אם משתמש מבקש "לילדים", מציגים לו את ההשלכות ומקבלים אישור מפורש, ורק אז משנים. מקורות: support.google.com/youtube/answer/9527654, 9632097, 10774223.
+תמיד "לא מיועד לילדים" (`made_for_kids: false` ב-shorts-uploader). הקהל שלנו הוא סטודנטים. לפי YouTube, סימון לילדים מכבה תגובות, התראות, מודעות מותאמות, כרטיסים והוספה לפלייליסט, והסרטון מומלץ בעיקר לצד סרטוני ילדים. הצהרה לא מדויקת עלולה לגרור בעיות מול YouTube. הסימון לא חוסם צפייה של ילדים. אם משתמש מבקש "לילדים", מציגים לו את ההשלכות ומקבלים אישור מפורש, ורק אז משנים. מקורות: support.google.com/youtube/answer/9527654, 9632097, 10774223.
