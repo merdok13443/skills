@@ -8,6 +8,7 @@ Examples:
   python publish_state.py --state ../dakademia-videos/publish-state.json add discrete-math/u01-e07 --title "בדידה 1.7 | ..."
   python publish_state.py --state ... set discrete-math/u01-e07 youtube uploaded --url https://youtube.com/shorts/ID
   python publish_state.py --state ... set discrete-math/u01-e07 tiktok failed --note "Studio form error"
+  python publish_state.py --state ... archive discrete-math/u01-e07 --path archive/discrete-math/u01-e07.mp4
   python publish_state.py --state ... show
 """
 import argparse, json, sys, datetime, pathlib
@@ -39,7 +40,7 @@ def render(p, d):
                 c = f"[{c}]({s['url']})"
             cells.append(c)
         pn = "; ".join(f"{pl}: {v['platforms'][pl]['note']}" for pl in PLATFORMS if v.get("platforms", {}).get(pl, {}).get("note"))
-        lines.append(f"| `{vid}` | {v.get('title', '').replace('|', chr(92) + '|')} | " + " | ".join(cells) + f" | {'; '.join(x for x in (v.get('note', ''), pn) if x).replace('|', chr(92) + '|')} |")
+        lines.append(f"| `{vid}` | {('🗄 ' if v.get('archived') else '') + v.get('title', '').replace('|', chr(92) + '|')} | " + " | ".join(cells) + f" | {'; '.join(x for x in (v.get('note', ''), pn) if x).replace('|', chr(92) + '|')} |")
     pathlib.Path(p).with_name("PUBLISH-STATE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -50,6 +51,7 @@ def main():
     a = sub.add_parser("add"); a.add_argument("video"); a.add_argument("--title", default=""); a.add_argument("--note", default="")
     s = sub.add_parser("set"); s.add_argument("video"); s.add_argument("platform", choices=PLATFORMS)
     s.add_argument("status", choices=STATUSES); s.add_argument("--url"); s.add_argument("--note"); s.add_argument("--date")
+    r = sub.add_parser("archive"); r.add_argument("video"); r.add_argument("--path", default=""); r.add_argument("--note", default="")
     sub.add_parser("show")
     n = ap.parse_args()
     d = load(n.state)
@@ -68,6 +70,13 @@ def main():
         if n.url: e["url"] = n.url
         if n.note: e["note"] = n.note
         v.setdefault("platforms", {})[n.platform] = e
+        save(n.state, d)
+    elif n.cmd == "archive":
+        v = d["videos"].setdefault(n.video, {"platforms": {}})
+        v["archived"] = True
+        v["ready"] = False
+        if n.path: v["archive_path"] = n.path
+        if n.note: v["note"] = n.note
         save(n.state, d)
     else:
         for vid, v in sorted(d["videos"].items()):

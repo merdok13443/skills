@@ -20,7 +20,7 @@ Use when the user wants to publish many finished shorts (from `explainer-shorts`
 ## Rules for the agent
 1. Never ask for or store passwords. Auth is OAuth (YouTube) and a long-lived token (Instagram), kept in local files that are in `.gitignore`. Never commit `client_secret.json`, `token.json`, `.env`, `state.json`.
 2. Always dry-run first (`--dry-run`), then one real video, then the batch.
-3. Pace: default 10 uploads/day for YouTube and 20/day for Instagram, with random gaps, far below the official ceilings (see README, "limits"). A series skill may set a lower cadence (Dakademia: 2/day).
+3. Pace: default 6 uploads/day for YouTube (the user will raise it gradually) and 20/day for Instagram, with random gaps, far below the official ceilings (see README, "limits"). A series skill may set a lower cadence.
 4. Kids flag: the default is `false` (not made for kids); set `true` only when the content is actually directed at children and the user confirms explicitly. Why: README, "made for kids".
 5. TikTok: no safe free bulk API. Use TikTok Studio's own scheduler (web, "Schedule video") or manual upload. Do not use cookie/browser-automation tools on the user's main account (the only exception: the manual TikTok Studio upload on the owner's PC, see README).
 6. Limits change. Before a large batch re-check the official pages linked in README.

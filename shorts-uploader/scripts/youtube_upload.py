@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Bulk YouTube upload from a queue file via YouTube Data API v3 (official, free).
-Usage: python youtube_upload.py queue.json --client client_secret.json [--daily-max 10] [--dry-run]
+Usage: python youtube_upload.py queue.json --client client_secret.json [--daily-max 6] [--dry-run]
 """
 import argparse, os, sys, time, random
 sys.path.insert(0, os.path.dirname(__file__))
@@ -56,7 +56,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("queue"); ap.add_argument("--client", default="client_secret.json")
     ap.add_argument("--token", default="token_youtube.json"); ap.add_argument("--state", default="state.json")
-    ap.add_argument("--daily-max", type=int, default=10); ap.add_argument("--gap", nargs=2, type=int, default=[60, 240])
+    ap.add_argument("--daily-max", type=int, default=6); ap.add_argument("--gap", nargs=2, type=int, default=[60, 240])
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--retry-failed", action="store_true", help="retry items whose last attempt failed")
     a = ap.parse_args()

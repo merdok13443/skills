@@ -7,7 +7,7 @@
 
 | פלטפורמה | מה נמצא במקורות הרשמיים | ברירת המחדל בסקריפט |
 |---|---|---|
-| YouTube Data API v3 | `videos.insert` עולה יחידה אחת, בדלי נפרד של כ-100 קריאות ביום (שינוי מ-1.6.2026). הנעילה ל"פרטי" של פרויקטים לא מאומתים בוטלה ב-2.11.2026. קיימת גם שגיאה `uploadLimitExceeded`, מגבלה לכל ערוץ שאין לה מספר מפורסם | 10 ביום |
+| YouTube Data API v3 | `videos.insert` עולה יחידה אחת, בדלי נפרד של כ-100 קריאות ביום (שינוי מ-1.6.2026). הנעילה ל"פרטי" של פרויקטים לא מאומתים בוטלה ב-2.11.2026. קיימת גם שגיאה `uploadLimitExceeded`, מגבלה לכל ערוץ שאין לה מספר מפורסם | 6 ביום (יועלה בהדרגה) |
 | Instagram Graph API | 50 עד 100 פרסומים ל-24 שעות (המסמכים של Meta סותרים). הסקריפט שואל את `content_publishing_limit` ומציג את המספר האמיתי שלך | 20 ביום |
 | TikTok | ב-API, פוסטים של אפליקציה לא מאושרת נשארים פרטיים, והביקורת נדחית לרוב לשימוש אישי. אין סקריפט לטיקטוק | ידני |
 
@@ -43,7 +43,7 @@ cp queue.example.json queue.json   # ערוך לפי הסרטונים שלך
 
 ```bash
 python scripts/youtube_upload.py queue.json --dry-run     # בדיקה בלי להעלות
-python scripts/youtube_upload.py queue.json --daily-max 10
+python scripts/youtube_upload.py queue.json --daily-max 6
 python scripts/instagram_publish.py queue.json --dry-run
 python scripts/instagram_publish.py queue.json --daily-max 20
 python scripts/queue_status.py queue.json
