@@ -71,6 +71,7 @@ On-screen source tag; 32-38 s, 95-110 words, 150-170 wpm; Kokoro, edge-tts or Pi
 Right after QA passes: `PUBLISHING-DAKI.md` (mp4 to dakademia-videos via a PR to `dev`, texts by `METADATA-DAKI.md`, upload with shorts-uploader on the owner's PC, record the ids in `uNN-eNN.json`).
 
 ## 5. Critique and changing the guidelines
+- **Standing rule (owner, 2026-11-25):** whenever the owner gives feedback and praises the result, turn the lessons into guidelines automatically, in the owner file of each rule (no dated add-ons), and apply them to the next videos without being asked.
 - A video's critique goes into that video's folder, not into the skill.
 - Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages and folder contents `pipeline/README.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours `work/<course>/PALETTE.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
 

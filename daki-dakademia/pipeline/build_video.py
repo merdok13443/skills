@@ -235,7 +235,9 @@ def caption_phrases():
     caps = [c for c in caps if not any(c['a'] >= h0 and c['b'] <= h1 for (h0, h1) in hide)]
     seam = spec.get('seam_caption')
     if seam and caps:
-        a = round(max(caps[-1]['b'], T['lines'][-1]['e']) if caps[-1]['b'] < D else T['words'][-1]['e'], 3)
+        if caps[-1]['b'] >= D:       # the last caption must not stay up under the seam caption (they overlap when the tail after the voice is short)
+            caps[-1]['b'] = round(min(D, T['words'][-1]['e'] + .15), 3)
+        a = round(max(caps[-1]['b'], T['lines'][-1]['e']), 3)
         if D - a >= .15: caps.append({'a': a, 'b': D, 'w': [{'t': x, 's': 0, 'e': 0} for x in seam.split()]})
     return caps
 
@@ -263,7 +265,7 @@ plan = {'D': D, 'decky': {'x': dk['x'], 'y': dk['y'], 's': dk['s'], 'expr': dk.g
         'scenes': plan_scenes, 'els': plan_els, 'caps': caps, 'acts': plan_acts}
 
 # ---------------------------------------------------------------- write html
-css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg'])
+css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg']).replace('--b:#2B6CB0', '--b:' + spec.get('true_color', '#2B6CB0'))
 kicker = spec['kicker']
 page = f'''<!doctype html>
 <html lang="he" dir="rtl" data-resolution="portrait">
@@ -299,6 +301,9 @@ open('index.html', 'w', encoding='utf-8').write(page)
 os.makedirs('assets', exist_ok=True)
 shutil.copytree(os.path.join(HERE, 'assets'), 'assets', dirs_exist_ok=True)
 shutil.copy(MASCOT, 'assets/daki.js'); shutil.copy(os.path.join(HERE, 'runtime', 'dk-runtime.js'), 'assets/dk-runtime.js')
+if spec.get('true_color'):     # opt-in per video (owner 2026-11-25: T in green); default stays the palette blue
+    _p = 'assets/dk-runtime.js'; _src = open(_p, encoding='utf-8').read().replace('#2B6CB0', spec['true_color'])
+    open(_p, 'w', encoding='utf-8').write(_src)
 for f, c in (('hyperframes.json', None), ('package.json', None)):
     if not os.path.exists(f):
         shutil.copy(os.path.join(HERE, 'runtime', f), f)

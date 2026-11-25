@@ -136,8 +136,9 @@
     sLeave: a => sOut(a.t, a.d || .35),
     stamp: a => {               // slam the stamp at time t onto `hit`, with an imprint (mark) appearing exactly at t
       const hov = a.hover, t = a.t;
+      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);   // the face is set while the stamp is still hidden: no colour change in view
       sApproach(t, { x: hov[0], y: hov[1], r: 9 });
-      faceAt(Math.max(sFree - .3, 0), a.kind);
+      faceAt(tFace, a.kind);
       sTo(t - .15, .15, { x: a.hit[0], y: a.hit[1], r: 0 }, 'power4.in'); squash(t);
       if (a.mark) {
         tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.5 }, { scale: 1, duration: .22, ease: 'power4.out' }, t); wave(a.mark, t);
@@ -148,8 +149,9 @@
     },
     jam: a => {                 // the stamp comes down on something that has no truth value, stops short and jitters
       const t = a.t;
+      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);
       sApproach(t, { x: a.hover[0], y: a.hover[1], r: a.hr != null ? a.hr : -9 });
-      faceAt(Math.max(sFree - .3, 0), a.kind || 'n');
+      faceAt(tFace, a.kind || 'n');
       sTo(t - .15, .15, { x: a.down[0], y: a.down[1], r: 0 }, 'power4.in'); squash(t); jitter(t + .02, 5, 8);
       if (a.mark) { tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.4 }, { scale: 1, duration: .25, ease: 'power4.out' }, t); }
       if (a.leave !== false) sOut(t + (a.leave || 1.0));
