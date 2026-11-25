@@ -33,6 +33,8 @@ def read_check():
                     errs.append({'section': sec, 'code': f.get('code'), 'message': (f.get('message') or '')[:240], 'selector': f.get('selector'), 'time': f.get('time')})
     json.dump(errs, open(os.path.join(src, 'check_errors.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     return errs
+with stage(src, 'motion'):     # seconds, before the slow render: nothing cropped by the frame edge, stamp never teleports, every stamp reaches its target
+    if subprocess.run([sys.executable, os.path.join(HERE, 'motion_check.py'), src]).returncode: raise SystemExit('motion check failed: see motion_report.json (fix scene.json / the runtime, not index.html)')
 with stage(src, 'hf-check'):
     subprocess.run(HF + ['check', '--no-cache'], cwd=src, stdout=open(os.path.join(src, 'check.log'), 'w'), stderr=subprocess.STDOUT)
     ce = read_check()

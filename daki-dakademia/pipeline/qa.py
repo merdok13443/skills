@@ -50,6 +50,9 @@ else:
 br = json.load(open(os.path.join(src, 'build_report.json'))) if os.path.exists(os.path.join(src, 'build_report.json')) else {'errors': ['no build_report'], 'warnings': []}
 chk('build: no errors (stamp truth, ids, boxes, anchors)', not br['errors'], '; '.join(br['errors'])[:300])
 for w in br['warnings']: chk('build warning', False, w, warn=True)
+mr = os.path.join(src, 'motion_report.json')
+if os.path.exists(mr): chk('motion: nothing cropped by the frame edge, stamp reaches its targets', not json.load(open(mr))['errors'], '; '.join(json.load(open(mr))['errors'])[:300])
+else: chk('motion check', False, 'motion_report.json missing: run motion_check.py', warn=True)
 sys.path.insert(0, HERE)
 import voice_rules
 ve, vw = voice_rules.check(src)

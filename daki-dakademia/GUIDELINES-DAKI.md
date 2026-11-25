@@ -73,3 +73,10 @@
 - [ ] רקע היחידה (`--bg`) לפי פלטת הקורס, ושאר הצבעים בלי שינוי
 - [ ] אין אזכור של ספר, אוניברסיטה, מחבר, פרק או תרגיל, ואין תגית מקור על המסך; הדוגמאות מקוריות
 - [ ] מונחים מוגדרים בשימוש ראשון, סימון סטנדרטי ועקבי, רעיון אחד חזק עם מקום לכל פעימה (2 שניות לפחות לכל ויזואל)
+
+
+## Teaching quality rules (owner feedback on 1.1 v2, 2026-11-25)
+- **The example decides the video.** It is chosen by a dedicated Opus step (`pipeline/prompts/example_researcher.md`) that researches and scores 3 candidates. It must be a real everyday scene the student has lived (group chat, lecturer's announcement, campus app, exam...), never a gimmick like codes or locks, and it must show both sides of the idea in the same scene.
+- **One learning message** (<= 14 words) stated plainly, followed by a real pause (a line with pause >= 0.6) and repeated once as the recap. At most two supporting ideas; everything else waits for a later video. If a student cannot say the message after the video, the video failed.
+- **Slow enough to learn from:** 62-78 words in 42-54 s (aim 85-105 words per minute including pauses). `voice_rules.py` (also run by qa.py) fails above 130 wpm and checks the message line exists in `script.md` ("המסר:") and is spoken.
+- **Finished animation:** nothing is ever cropped by the frame edge, the stamp pops in and out in place (never flies in from outside the frame), two stamps close together chain instead of teleporting, and every stamp lands exactly on its target. `pipeline/motion_check.py` checks this on every frame before the render.

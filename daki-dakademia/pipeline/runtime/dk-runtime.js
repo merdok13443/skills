@@ -58,7 +58,24 @@
   gsap.set('#st', { svgOrigin: '0 0', x: HOV0.x, y: HOV0.y, rotation: HOV0.r });
   faceNow(P.stamp.face || 'n');
   let sc = { ...HOV0 };
-  const sTo = (t, dur, p, ease = 'power3.out') => { tl.fromTo('#st', { x: sc.x, y: sc.y, rotation: sc.r }, { x: p.x, y: p.y, rotation: p.r, duration: dur, ease }, t); sc = { ...p }; };
+  /* The stamp never leaves the frame: it appears (pops in) at its hover pose and disappears (lifts and fades) in place, so no frame ever
+     shows it cropped by the edge, and two stamps close together chain (move hover to hover) instead of teleporting. */
+  let sHid = false, sFree = 0;          // hidden?  time from which the stamp may be moved again (end of its last tween)
+  const sTo = (t, dur, p, ease = 'power3.out') => { tl.fromTo('#st', { x: sc.x, y: sc.y, rotation: sc.r }, { x: p.x, y: p.y, rotation: p.r, duration: dur, ease }, t); sc = { ...p }; sFree = t + dur; };
+  const sIn = (t, p, dur = .4) => {      // pop in at pose p
+    tl.fromTo('#st', { x: p.x, y: p.y + 60, rotation: p.r + 10, opacity: 0 }, { x: p.x, y: p.y, rotation: p.r, opacity: 1, duration: dur, ease: 'back.out(1.6)' }, t);
+    sc = { ...p }; sHid = false; sFree = t + dur;
+  };
+  const sOut = (t, dur = .35) => {       // lift a little and fade
+    tl.fromTo('#st', { x: sc.x, y: sc.y, rotation: sc.r, opacity: 1 }, { x: sc.x, y: sc.y - 40, rotation: sc.r + 8, opacity: 0, duration: dur, ease: 'power2.in' }, t);
+    sHid = true; sFree = t + dur;
+  };
+  const sGo = (t, dur, p, ease) => { if (sHid) sIn(t, p, Math.max(dur, .3)); else sTo(t, dur, p, ease); };   // move there, or pop in there when hidden
+  // acts of one stamp sequence: the move to the hover pose ends no later than t - .2, never before the stamp is free
+  const sApproach = (t, p) => {
+    const t0 = Math.max(t - 1.1, sFree + .02), dur = Math.min(.5, t - .2 - t0);
+    if (dur < .12) { sGo(Math.max(t - .5, sFree + .01), .12, p, 'power3.out'); } else sGo(t0, dur, p, 'power3.out');
+  };
   tl.fromTo('#st .sbob', { y: 0 }, { y: -7, duration: D / 70, ease: 'sine.inOut', yoyo: true, repeat: 69 }, 0);
   const squash = t => tl.fromTo('#st .sq', { scaleY: 1, scaleX: 1 }, { scaleY: .8, scaleX: 1.08, duration: .07, yoyo: true, repeat: 1, ease: 'power2.out' }, t);
   const jitter = (t, n = 5, a = 9) => { const b = sc.r; tl.fromTo('#st', { rotation: b - a }, { rotation: b + a, duration: .07, yoyo: true, repeat: n, ease: 'sine.inOut' }, t); tl.to('#st', { rotation: b, duration: .06 }, t + (n + 1) * .07); };
@@ -115,28 +132,27 @@
       if (a.rot) dRot(a.t, a.rot === true ? 7 : a.rot);
     },
     sFace: a => faceAt(a.t, a.kind),
-    sTo: a => sTo(a.t, a.d || .4, { x: a.x, y: a.y, r: a.r != null ? a.r : sc.r }, a.ease),
-    sLeave: a => sTo(a.t, a.d || .4, OFF, 'power2.in'),
+    sTo: a => sGo(a.t, a.d || .4, { x: a.x, y: a.y, r: a.r != null ? a.r : sc.r }, a.ease),
+    sLeave: a => sOut(a.t, a.d || .35),
     stamp: a => {               // slam the stamp at time t onto `hit`, with an imprint (mark) appearing exactly at t
       const hov = a.hover, t = a.t;
-      faceAt(t - 1.2, a.kind);
-      sc = { ...OFF };
-      sTo(t - 1.1, .5, { x: hov[0], y: hov[1], r: 9 }, 'power3.out');
+      sApproach(t, { x: hov[0], y: hov[1], r: 9 });
+      faceAt(Math.max(sFree - .3, 0), a.kind);
       sTo(t - .15, .15, { x: a.hit[0], y: a.hit[1], r: 0 }, 'power4.in'); squash(t);
       if (a.mark) {
         tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.5 }, { scale: 1, duration: .22, ease: 'power4.out' }, t); wave(a.mark, t);
       }
       shakeCam(t, 10);
       sTo(t + .05, .3, { x: hov[0], y: hov[1] - 35, r: 9 }, 'power2.out');
-      if (a.leave !== false) sTo(t + (a.leave || 1.0), .4, OFF, 'power2.in');
+      if (a.leave !== false) sOut(t + (a.leave || 1.0));
     },
     jam: a => {                 // the stamp comes down on something that has no truth value, stops short and jitters
-      const t = a.t; faceAt(t - 1.2, a.kind || 'n');
-      sc = { ...OFF };
-      sTo(t - 1.1, .5, { x: a.hover[0], y: a.hover[1], r: a.hr != null ? a.hr : -9 }, 'power3.out');
+      const t = a.t;
+      sApproach(t, { x: a.hover[0], y: a.hover[1], r: a.hr != null ? a.hr : -9 });
+      faceAt(Math.max(sFree - .3, 0), a.kind || 'n');
       sTo(t - .15, .15, { x: a.down[0], y: a.down[1], r: 0 }, 'power4.in'); squash(t); jitter(t + .02, 5, 8);
       if (a.mark) { tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.4 }, { scale: 1, duration: .25, ease: 'power4.out' }, t); }
-      if (a.leave !== false) sTo(t + (a.leave || 1.0), .4, OFF, 'power2.in');
+      if (a.leave !== false) sOut(t + (a.leave || 1.0));
     },
     sfx: () => { }              // consumed by the build (cues.json), nothing visual
   };

@@ -27,6 +27,28 @@ def check(src):
         say = ln.get('say', ln['text'])
         if re.search(r'[0-9]', say): err.append(f"digits in the voice text of line {ln['id']} (numbers must be Hebrew words)")
         if re.search(r'\b(?:Daki|Decky)\b', say + ln['text'], re.I): err.append(f"Latin mascot name in line {ln['id']}")
+    # teaching rules (owner feedback 2026-11-25: too fast, message unclear)
+    words = len(T.get('words', [])); D = T.get('duration') or 0
+    if words and D:
+        wpm = words / D * 60
+        if wpm > 130: err.append(f'too fast: {wpm:.0f} words per minute including pauses (max 130, aim for 85-105); fewer words or more pauses')
+        elif wpm > 110: warn.append(f'fast: {wpm:.0f} words per minute (aim for 85-105)')
+        if not 55 <= words <= 85: warn.append(f'{words} words (aim for 62-78 so that each idea has time to land)')
+    sm = os.path.join(src, 'script.md')
+    msg = None
+    if os.path.exists(sm):
+        m = re.search(r'^[\s*#>_-]*המסר[^:\n]*:[\s*_]*(.+?)[*_\s]*$', open(sm, encoding='utf-8').read(), re.M)
+        msg = m.group(1).strip(' *_"״') if m else None
+    if not msg: err.append("script.md has no 'המסר:' line (the ONE learning message)")
+    else:
+        norm = lambda w: re.sub(r'[^\w]', '', re.sub(r'[\u0591-\u05c7]', '', w))
+        mw = [norm(w) for w in msg.split() if norm(w)]
+        for ln in S.get('lines', []):
+            lw = {norm(w) for w in ln['text'].split()}
+            if mw and sum(w in lw or w[1:] in lw for w in mw) / len(mw) >= .6:
+                if ln.get('pause', 0) < .6: warn.append(f"the line that states the message ({ln['id']}) has pause {ln.get('pause', 0)} (< 0.6): give it time to land")
+                break
+        else: err.append('the message sentence is not stated in the narration (no line contains 60% of its words)')
     return err, warn
 if __name__ == '__main__':
     e, w = check(os.path.abspath(sys.argv[1]))
