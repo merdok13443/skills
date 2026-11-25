@@ -11,7 +11,7 @@ The project's working skill for Dakademia videos, a layer on top of `explainer-s
 1. The project instructions and what the owner writes in the thread.
 2. The HARD RULES in section 1 of this file.
 3. `pipeline/README.md`: stages, model per stage, commands, per-video folder contents.
-4. The other files of this skill: `GUIDELINES-DAKI.md` (content rules + the Dakademia checklist), `mascot/DAKI.md`, `TECHNICAL-DAKI.md`, `pipeline/SCENE_SPEC.md`, `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`, and `../explainer-shorts/HEBREW_NARRATION.md` (Gemini section).
+4. The other files of this skill: `GUIDELINES-DAKI.md` (content rules + the Dakademia checklist), `INTRO-VIDEOS-DAKI.md` (course trailer 0.0 and unit intros X.0 only: their length, author chain and hook; every other rule still applies to them), `mascot/DAKI.md`, `TECHNICAL-DAKI.md`, `pipeline/SCENE_SPEC.md`, `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`, and `../explainer-shorts/HEBREW_NARRATION.md` (Gemini section).
 5. Course files under `/mnt/project-files/work/<course>/`: course-specific content only (curriculum, notation, `PALETTE.md`, `pipeline/progress.json`). They never redefine stages, voice, publishing or git rules.
 6. `../explainer-shorts/` for anything not covered above, except the items in section 3.
 
@@ -20,7 +20,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 ## 1. HARD RULES
 **Production**
 - Produce a video only when the owner asks for that video, or inside a scheduled run (one video per run). Scheduled runs are paused since 2026-11-24; only the owner resumes them. Never start an extra video on your own.
-- Fully autonomous between stages: no human review, no "please listen to it", never leave a video "pending review". The only stops are the two steps that must run on the owner's PC (Gemini narration, YouTube/Instagram upload): if the PC is not reachable, stop at that step, write `waiting: voice` or `waiting: publish` in the video's README, and report it. Never switch to another TTS.
+- Fully autonomous between stages: no human review, no "please listen to it", never leave a video "pending review". The only stops are the two steps that must run on the owner's PC (Gemini narration, YouTube upload; Instagram too once it is enabled again): if the PC is not reachable, stop at that step, write `waiting: voice` or `waiting: publish` in the video's README, and report it. Never switch to another TTS.
 - Do not rebuild finished videos for new rules. To fix a finished video, make a minimal edit to its saved source (`scene.json` / `script.json`) and re-render.
 
 **Content**
@@ -42,7 +42,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 **Git, delivery, publishing**
 - In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`. Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
 - The final mp4 goes only to `merdok13443/dakademia-videos` (never into `skills`).
-- Publish only with the `shorts-uploader` skill, per `PUBLISHING-DAKI.md`. Never Buffer and never any `mcp__Buffer__*` tool. YouTube: Short, category Education, NOT made for kids. Instagram: Reel. TikTok: manual.
+- Publish only with the `shorts-uploader` skill, per `PUBLISHING-DAKI.md`. Never Buffer and never any `mcp__Buffer__*` tool. YouTube: Short, category Education, NOT made for kids, at most 6 uploads per day (raised only by the owner). **Temporary override (owner, 2026-11-25, until the owner says otherwise): publish to YouTube only; Instagram and TikTok are skipped (record `skipped`).** Later: Instagram Reel, TikTok manual.
 - Never commit secrets (tokens, `client_secret.json`, `.env`, state files).
 
 ## 2. Read map: what each stage reads
@@ -52,7 +52,7 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 |---|---|
 | Orchestrator (the thread) | this file, `pipeline/README.md`, the course's `progress.json` |
 | 1 content (Haiku) | the curriculum entry, the source PDFs, the course notation notes, section 1 "Content" above |
-| 1b example + message (Opus, high) | `pipeline/prompts/example_researcher.md` |
+| 1b example + message (Opus, high) | `pipeline/prompts/example_researcher.md` (trailer/intro videos: `INTRO-VIDEOS-DAKI.md` instead, Fable then Opus high) |
 | 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
 | 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
 | 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
@@ -63,7 +63,7 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), old `work/<course>/video-sources/` templates.
 
 ## 3. General-skill rules that do NOT apply to Dakademia
-On-screen source tag; 32-38 s, 95-110 words, 150-170 wpm; Kokoro, edge-tts or Piper voices; English narration; "an everyday physical object" as the topic; the Heebo font (Dakademia uses the pipeline's Rubik + JetBrains Mono); the general `engine/` build (Dakademia builds with `pipeline/make_video.py`); "watch it on a phone / listen by ear" (replaced by `qa.py`, `voice_rules.py`, `motion_check.py` and the Whisper alignment in `align_he.py`). The general checklist applies only where it does not conflict with the Dakademia checklist in `GUIDELINES-DAKI.md`.
+On-screen source tag; 32-38 s, 95-110 words, 150-170 wpm; Kokoro, edge-tts or Piper voices; English narration; "an everyday physical object" as the topic; the general rule 2 "topic name spoken by second 4" (Dakademia: the topic is shown large from frame 0 and the main message lands quickly; a late topic word is only a build warning); the general 32-38 s length for trailer/intro videos (they follow `INTRO-VIDEOS-DAKI.md`); the Heebo font (Dakademia uses the pipeline's Rubik + JetBrains Mono); the general `engine/` build (Dakademia builds with `pipeline/make_video.py`); "watch it on a phone / listen by ear" (replaced by `qa.py`, `voice_rules.py`, `motion_check.py` and the Whisper alignment in `align_he.py`). The general checklist applies only where it does not conflict with the Dakademia checklist in `GUIDELINES-DAKI.md`.
 
 ## 4. Publish
 Right after QA passes: `PUBLISHING-DAKI.md` (mp4 to dakademia-videos via a PR to `dev`, texts by `METADATA-DAKI.md`, upload with shorts-uploader on the owner's PC, record the ids in `uNN-eNN.json`).

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Automatic QA of a finished video.  usage: python qa.py <source-dir> <final.mp4>   -> qa_report.json, exit 1 on any FAIL
-Checks: duration 30-60 s, 1080x1920, 30 fps, audio stream, loudness (-14 +-1.5 LUFS, true peak <= -1), loop seam (first vs last
+Checks: duration 30-60 s (20-60 s when scene.json has type trailer/intro), 1080x1920, 30 fps, audio stream, loudness (-14 +-1.5 LUFS, true peak <= -1), loop seam (first vs last
 frame), safe margins (explainer-shorts/engine/safezone_check.py), build report (stamp truth, ids, boxes), payoff 65-75 %, fresh
 Decky (daki.js identical to the skill copy), voice/timing length, forbidden words in captions.
 The model only needs to look at ONE small contact sheet afterwards (python qa.py ... --sheet)."""
@@ -17,7 +17,10 @@ def run(cmd, **k): return subprocess.run(cmd, capture_output=True, text=True, **
 pr = json.loads(run(['ffprobe', '-v', 'error', '-show_streams', '-show_format', '-of', 'json', vid]).stdout)
 v = next(s for s in pr['streams'] if s['codec_type'] == 'video'); au = [s for s in pr['streams'] if s['codec_type'] == 'audio']
 dur = float(pr['format']['duration']); fr = eval(v['avg_frame_rate'])
-chk('duration 30-60 s', 30 <= dur <= 60, f'{dur:.2f}s')
+try: vtype = json.load(open(os.path.join(src, 'scene.json'))).get('type', 'lesson')   # 'trailer' / 'intro' videos are 20-45 s (INTRO-VIDEOS-DAKI.md)
+except Exception: vtype = 'lesson'
+lo = 20 if vtype in ('trailer', 'intro') else 30
+chk(f'duration {lo}-60 s', lo <= dur <= 60, f'{dur:.2f}s ({vtype})')
 chk('1080x1920', (v['width'], v['height']) == (1080, 1920), f"{v['width']}x{v['height']}")
 chk('30 fps', abs(fr - 30) < .01, f'{fr:.2f}')
 chk('audio present', bool(au), au[0]['codec_name'] if au else 'none')

@@ -15,7 +15,8 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 ## Contents
 - `SKILL.md`: order of authority, HARD RULES, read map per stage, general rules that do not apply
 - `GUIDELINES-DAKI.md`: content rules and the Dakademia checklist (Hebrew)
+- `INTRO-VIDEOS-DAKI.md`: course trailer 0.0 and unit intro X.0 videos (Hebrew)
 - `TECHNICAL-DAKI.md`: Daki code API, time sweep, acceptance checks
 - `METADATA-DAKI.md`: titles, captions and hashtags per platform, with an example and a feedback loop (Hebrew)
-- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish with the shorts-uploader skill (official APIs) to YouTube and Instagram, TikTok manual (Hebrew)
+- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish with the shorts-uploader skill (official APIs) to YouTube (Instagram and TikTok paused for now) (Hebrew)
 - `mascot/`: Daki as reusable SVG code (`daki.js`), spec (`DAKI.md`), profile pictures, character sheet, and `render.js` to regenerate them
