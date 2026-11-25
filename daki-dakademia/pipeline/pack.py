@@ -51,6 +51,7 @@ PACKS = {
     ],
     'visuals': [
         ('daki-dakademia/pipeline/SCENE_SPEC.md', None),
+        ('daki-dakademia/stamp/STAMP.md', None),
         ('daki-dakademia/mascot/DAKI.md', ['## הדמות', '## קבצים', '## שימוש בסצנה']),
         ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', '### משמעת עבודה לפני מסירה', "## צ'קליסט לסרטוני דקדמיה"]),
         ('explainer-shorts/GUIDELINES.md', ['## מעורבות', '## אזור בטוח', '## עיצוב', '## תנועה', '## טקסט']),

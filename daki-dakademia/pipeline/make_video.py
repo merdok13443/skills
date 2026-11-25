@@ -55,7 +55,7 @@ import hashlib
 def inputs_hash():
     """The generated build + the audio: identical hash = identical video (the build is deterministic)."""
     h = hashlib.sha256()
-    for f in ('index.html', 'cues.json', 'voice/voice.wav', 'assets/daki.js'):
+    for f in ('index.html', 'cues.json', 'voice/voice.wav', 'assets/daki.js', 'assets/stamp.js'):
         p = os.path.join(src, f)
         if os.path.exists(p): h.update(f.encode()); h.update(open(p, 'rb').read())
     return h.hexdigest()
