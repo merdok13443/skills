@@ -121,8 +121,10 @@ GEMINI_ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts',
 DECKY_STYLE = ('Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, '
                'talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv '
                'casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note '
-               'between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, slightly '
-               'faster than normal speech, smiling while speaking. Short punchy sentences with expressive rises and '
+               'between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, smiling '
+               'while speaking. The pace serves understanding: brisk and natural on simple, familiar lines; '
+               'slower and very clear, with a short pause, on the key message and on any step that is new or '
+               'tricky, so a first-year student follows every word. Short punchy sentences with expressive rises and '
                'falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer '
                'and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. '
                'Never monotone, never robotic, never an announcer.')

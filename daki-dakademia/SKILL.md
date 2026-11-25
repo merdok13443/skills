@@ -1,55 +1,76 @@
 ---
 name: daki-dakademia
-description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Daki / Decky (דקי הדקה). Use for any Dakademia video or whenever Daki is needed. Adds the mascot code and spec, unit background colours, loop, T/F stamp and no-sources rules, and automatic publishing via GitHub + the shorts-uploader skill, on top of the general explainer-shorts skill, which must be read first.
+description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Decky (דקי הדקה). Use for any Dakademia video or whenever Decky is needed. Holds the project's hard rules, the order of authority between all guideline files, a read map per production stage, the mascot, unit background colours, Gemini narration, and publishing via dakademia-videos + the shorts-uploader skill. Builds on the general explainer-shorts skill.
 ---
 
-# Daki + Dakademia (דקי הדקה ודקדמיה)
+# Decky + Dakademia (דקי הדקה ודקדמיה)
 
-This is the project's working skill for Dakademia videos. It is a layer on top of the general skill `explainer-shorts`. Both folders sit side by side in `~/.claude/skills/`.
+The project's working skill for Dakademia videos, a layer on top of `explainer-shorts`. Both folders sit side by side; `<skills>` below means `/home/user/skills` in a cloud session and `~/.claude/skills` on the owner's PC. Pull the latest `dev` first (`git -C <skills> pull origin dev`). The mascot is called Decky in English and דקי in Hebrew.
 
-## 0. Read the general skill first (every time)
-1. `../explainer-shorts/SKILL.md` (relative to this folder: the install folder where both skills sit side by side, `~/.claude/skills/`).
-2. `../explainer-shorts/GUIDELINES.md`: the quality bar (hook, viewer engagement, structure, pacing, text, sound, fact checking, checklist). Everything there applies here too.
-3. Then `../explainer-shorts/TECHNICAL.md` and `../explainer-shorts/HEBREW_NARRATION.md` (Dakademia videos are narrated in Hebrew), and `../explainer-shorts/engine/README.md` for commands.
+## 0. Order of authority (the only place this is defined)
+1. The project instructions and what the owner writes in the thread.
+2. The HARD RULES in section 1 of this file.
+3. `pipeline/README.md`: stages, model per stage, commands, per-video folder contents.
+4. The other files of this skill: `GUIDELINES-DAKI.md` (content rules + the Dakademia checklist), `mascot/DAKI.md`, `TECHNICAL-DAKI.md`, `pipeline/SCENE_SPEC.md`, `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`, and `../explainer-shorts/HEBREW_NARRATION.md` (Gemini section).
+5. Course files under `/mnt/project-files/work/<course>/`: course-specific content only (curriculum, notation, `PALETTE.md`, `pipeline/progress.json`). They never redefine stages, voice, publishing or git rules.
+6. `../explainer-shorts/` for anything not covered above, except the items in section 3.
 
-If a rule here differs from the general skill, this skill wins for Dakademia videos.
+If two files disagree, follow the higher one and mention the conflict in your report. Do not "fix" a conflict by appending a new rule somewhere (section 5).
 
-## 1. Then read the Daki / Dakademia layer
-- `GUIDELINES-DAKI.md`: project conventions (hierarchy, audience, no sources, original examples, unit background colours, loop, T/F stamps, payoff, pipeline workflow), the section "הדמות הקבועה: דקי", and the extra checklist.
-- `TECHNICAL-DAKI.md`: the mascot code API, time sweep, and acceptance checks.
-- `mascot/DAKI.md`: the full character spec (look, expressions, sweep, files, usage in a scene).
-- The project's living docs (they win over this skill if they disagree, and the course folder name differs per course; the path below is the first course):
-  - `/mnt/project-files/work/בדידה/GUIDELINES-discrete.md` (course lessons and rules)
-  - `/mnt/project-files/work/בדידה/pipeline/RUNBOOK.md` (production workflow, folders, delivery)
-  - `/mnt/project-files/work/בדידה/PALETTE.md` (unit background colours and usage rules)
+## 1. HARD RULES
+**Production**
+- Produce a video only when the owner asks for that video, or inside a scheduled run (one video per run). Scheduled runs are paused since 2026-11-24; only the owner resumes them. Never start an extra video on your own.
+- Fully autonomous between stages: no human review, no "please listen to it", never leave a video "pending review". The only stops are the two steps that must run on the owner's PC (Gemini narration, YouTube/Instagram upload): if the PC is not reachable, stop at that step, write `waiting: voice` or `waiting: publish` in the video's README, and report it. Never switch to another TTS.
+- Do not rebuild finished videos for new rules. To fix a finished video, make a minimal edit to its saved source (`scene.json` / `script.json`) and re-render.
 
-## 2. Daki in every video
-- Daki (Decky) appears in every Dakademia video. He is the host, not the hero: the object of the video stays in the centre and he reacts from a side or a corner.
-- Always the latest `mascot/daki.js` from this skill, copied fresh into each video's source (never from an earlier video or a template). Never redraw or restyle him.
-- Expressions by moment: `smirk` on the hook, `surprised` on the surprising fact, `thinking` on the open question, `aha` on the payoff, `rush` in the last seconds, `wink` on the last line and loop.
-- His rim sweep (red arc + hand) runs one lap over the video length. Keep it visible. In stills at t=0.1 and at 80% it must be visible, otherwise the check fails.
-- Face 160-200 px wide at least (`scale .45` and up).
-- Keep his whole box (cap, tassel, pencil, dial; about 340 px wide at `scale .45`) inside the safe rectangle, so his centre x is 320-760. Never cut by an edge.
-- Using him with the general engine: `index.html` loads `/mascot/daki.js` and `dakiMount(A, W, {...})`. `explainer-shorts/engine/render.js` resolves `/mascot/` from this skill automatically when both skills are installed side by side. Details in `TECHNICAL-DAKI.md`.
+**Content**
+- Audience: students with no background, starting the degree. Define every term at first use. ONE strong idea, ONE learning message, ONE real everyday example as the spine of the whole video. Standard notation only (e.g. propositional variables lowercase p, q, r, s).
+- Never mention any university, book, author, chapter, section or exercise number, anywhere (voice, screen, captions, file names, metadata, notes). No on-screen source tag. Examples are original: never the book's example, not even lightly adapted. Facts are still checked against the sources.
+- Every T/F stamp matches the truth of its sentence in every frame, frame 0 included. Every spoken word is correct.
+- The learning message must come across; pace serves it (owner, 2026-11-25): brisk on simple, familiar lines, slower with a pause on the message and on anything new or tricky. Length target 42-54 s (QA hard limits 30-60 s), about 62-78 Hebrew words, on average 85-105 wpm including pauses (QA fails above 130). 1080x1920, 30 fps.
+- Seamless loop: the last line flows into the first as one sentence; the last frame equals the first frame.
 
-## 3. Dakademia rules in short (details in GUIDELINES-DAKI.md)
-- Course > units > videos; one folder per video.
-- Audience: students with no background; define every term at first use; one strong idea; standard notation; one real-life example as the spine.
-- Original examples; never mention a book, university, author, chapter or exercise; no on-screen source tag.
-- Background colour per unit via a separate `--bg` variable from the course's PALETTE.md; change nothing else.
-- Seamless loop: the last line completes the first line; the last frame equals the first frame.
-- Every T/F stamp matches the truth of its sentence in every frame, frame 0 included.
-- Payoff at 65-75%.
-- Safe margins (lesson from 1.1, where YouTube Shorts cropped and crowded the edges): everything readable (kicker from y 270, cards, T/F stamps, captions, Daki) inside x 150-930, y 270-1500, frame 0 and last frame included; captions in y 1250-1450, at most 780 wide. Only background and grain bleed. `explainer-shorts/engine/safezone_check.py` must pass on stills and on `final.mp4` before publishing.
-- The pipeline runs autonomously, with no human review between steps and no extra video outside the schedule (see RUNBOOK.md).
+**Look**
+- Decky in every video, from the current `<skills>/daki-dakademia/mascot/daki.js` copied fresh (identical to the skill's file), never from an earlier video or template, never redrawn or restyled. Host, not hero. Look and expressions: `mascot/DAKI.md`.
+- Background: the unit's shade from `work/<course>/PALETTE.md`, as a separate `--bg`. Never change `--paper` (it is also the caption text colour).
+- Everything readable stays inside x 150-930, y 270-1500 in every frame, frame 0 and the last frame included; `safezone_check.py` must pass.
 
-## 4. Publish (right after the render passes)
-Before publishing: `python ../explainer-shorts/engine/safezone_check.py final.mp4` must pass (margins).
+**Voice**
+- Gemini TTS only, on the owner's PC (`GEMINI_API_KEY`): `tts_he.py --backend gemini`, voice Puck. Allowed models only `gemini-3.8-flash-tts` (first choice), `gemini-3.8-flash-lite-tts`, `gemini-3.1-flash-tts`, and the key is used only to generate narration audio. ONE request per video (at most 3 including retries), then `align_he.py`. Never edge-tts or Piper for Dakademia. Details: `../explainer-shorts/HEBREW_NARRATION.md`, Gemini section.
+- `voice.wav` always comes from the same `script.json` that produced `timing.json`.
 
-Follow `PUBLISHING-DAKI.md`: push `final.mp4` to the public repo `merdok13443/dakademia-videos` as `<course-slug>/uNN-eNN.mp4`, confirm its raw.githubusercontent.com URL returns the file, write the Hebrew title, captions and hashtags per platform by `METADATA-DAKI.md`, and publish with the `shorts-uploader` skill (official YouTube and Instagram APIs, not Buffer): YouTube Short (category Education, not made for kids), Instagram Reel (shared to feed); TikTok is manual. Record the video/media ids in `uNN-eNN.json` next to the video.
+**Git, delivery, publishing**
+- In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`. Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
+- The final mp4 goes only to `merdok13443/dakademia-videos` (never into `skills`).
+- Publish only with the `shorts-uploader` skill, per `PUBLISHING-DAKI.md`. Never Buffer and never any `mcp__Buffer__*` tool. YouTube: Short, category Education, NOT made for kids. Instagram: Reel. TikTok: manual.
+- Never commit secrets (tokens, `client_secret.json`, `.env`, state files).
 
-## 5. Review and learn
-After a video, write the critique in Hebrew as the general skill says, add general lessons to `../explainer-shorts/GUIDELINES.md` and Daki/Dakademia-specific ones to `GUIDELINES-DAKI.md`.
+## 2. Read map: what each stage reads
+Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
+
+| Stage | Reads |
+|---|---|
+| Orchestrator (the thread) | this file, `pipeline/README.md`, the course's `progress.json` |
+| 1 content (Haiku) | the curriculum entry, the source PDFs, the course notation notes, section 1 "Content" above |
+| 1b example + message (Opus) | `pipeline/prompts/example_researcher.md` |
+| 2 script (Opus) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
+| 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
+| 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
+| 6 visuals (Sonnet) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 7-8 make + QA | `pipeline/README.md`, `qa_report.json` |
+| 9 deliver + publish | `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`; `../shorts-uploader/README.md` only for setup or errors |
+
+Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), old `work/<course>/video-sources/` templates.
+
+## 3. General-skill rules that do NOT apply to Dakademia
+On-screen source tag; 32-38 s, 95-110 words, 150-170 wpm; Kokoro, edge-tts or Piper voices; English narration; "an everyday physical object" as the topic; the Heebo font (Dakademia uses the pipeline's Rubik + JetBrains Mono); the general `engine/` build (Dakademia builds with `pipeline/make_video.py`); "watch it on a phone / listen by ear" (replaced by `qa.py`, `voice_rules.py`, `motion_check.py` and the Whisper alignment in `align_he.py`). The general checklist applies only where it does not conflict with the Dakademia checklist in `GUIDELINES-DAKI.md`.
+
+## 4. Publish
+Right after QA passes: `PUBLISHING-DAKI.md` (mp4 to dakademia-videos via a PR to `dev`, texts by `METADATA-DAKI.md`, upload with shorts-uploader on the owner's PC, record the ids in `uNN-eNN.json`).
+
+## 5. Critique and changing the guidelines
+- A video's critique goes into that video's folder, not into the skill.
+- Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages and folder contents `pipeline/README.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours `work/<course>/PALETTE.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
 
 ## Communication
-The user writes in Hebrew, so reply in Hebrew. The videos are in Hebrew.
+The owner writes in Hebrew, so reply in Hebrew. The videos are in Hebrew.

@@ -1,20 +1,19 @@
 ---
 name: explainer-shorts
-description: Make a 32-38 s vertical explainer Short or Reel for any series, narrated in English (Kokoro) or Hebrew (edge-tts Hila), with the free local pipeline and the saved guidelines (hook, viewer engagement, structure, pacing, text, sound, fact-checking), lessons, engine and example scenes. General skill; series-specific skills (mascot, project rules) layer on top.
+description: Make a 32-38 s vertical explainer Short or Reel for any series, narrated in English (Kokoro) or Hebrew (edge-tts, Piper or Gemini), with the free local pipeline and the saved guidelines (hook, viewer engagement, structure, pacing, text, sound, fact-checking), lessons, engine and example scenes. General skill; series-specific skills (mascot, project rules) layer on top.
 ---
 
 # Explainer Shorts
 
 Use this skill whenever the user asks for a short teaching video (Short, Reel, TikTok, explainer), or to improve one. All files sit next to this SKILL.md.
 
-**Series layer:** this is the general skill and it stands on its own. If a series-specific skill is installed next to it in `~/.claude/skills/` (for example one that adds a fixed mascot and project rules), read its SKILL.md after this one and follow its additions. Where the two differ, the series skill wins for that series.
+**Series layer:** this is the general skill and it stands on its own. If a series-specific skill is installed next to it in `~/.claude/skills/` (for example one that adds a fixed mascot and project rules), read its SKILL.md after this one and follow its additions. Where the two differ, the series skill wins for that series, and it lists which general rules do not apply (for Dakademia: `../daki-dakademia/SKILL.md`, which also has its own build pipeline and read map).
 
 ## 1. Read first (every time)
 - `GUIDELINES.md`: the general rules and lessons, in Hebrew. These are the quality bar, so follow all of it.
 - `TECHNICAL.md`: concrete values (colours, fonts, sizes, timings, mix settings) and code-level lessons.
 - `engine/README.md`: setup and commands.
-- The newest critique in `critiques/` and the newest `research/roundN.md`, so you don't repeat open issues.
-- Reference scenes: `examples/v3` to `examples/v6`. Reuse the helpers from the newest `scene.js` (kin, slam, rise, whip, zoomOut, ratchet, eyesAt, battery).
+- Optional history, only when building with this general engine: the newest critique in `critiques/`, the newest `research/roundN.md`, and the reference scenes `examples/v3` to `examples/v6` (helpers in the newest `scene.js`: kin, slam, rise, whip, zoomOut, ratchet, eyesAt, battery).
 
 ## 2. Plan
 - **Topic:** an everyday physical object, with one counter-intuitive angle. Use a structure that differs from the last episode.
@@ -38,7 +37,7 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
 6. Loudness: `ffmpeg -af ebur128`, aiming for about -14 to -15 LUFS.
 7. Margins on the final video: `python engine/safezone_check.py final.mp4` must pass (frame 0 and the last frame included) before publishing.
 
-**Hebrew narration:** step 1 changes. Use `python engine/tts_he.py <proj>` (edge-tts, default voice he-IL-HilaNeural, male alternative he-IL-AvriNeural, with exact word timings), then `bash engine/mktiming.sh <proj>`. Skip `align.py`. Aim for about 60-70 Hebrew words at about 100 wpm. Copy `index.html` from `examples/he1` for RTL captions (Heebo font). See `HEBREW_NARRATION.md`.
+**Hebrew narration:** step 1 changes; see `HEBREW_NARRATION.md`. Default for a general series: `python engine/tts_he.py <proj>` (edge-tts Hila, exact word timings), then `bash engine/mktiming.sh <proj>`, about 60-70 Hebrew words at about 100 wpm. Dakademia uses Gemini only (`--backend gemini`, then `align_he.py`), as its series skill says. Copy `index.html` from `examples/he1` for RTL captions (Heebo font). See `HEBREW_NARRATION.md`.
 
 The engine needs Python (kokoro-onnx, soundfile, scipy, pillow, pocketsphinx), Node with playwright and gsap, and ffmpeg. See `engine/README.md`.
 
@@ -46,8 +45,8 @@ If the HyperFrames skill is installed, it can replace the engine, but the same G
 
 ## 4. Review and learn
 - Pull about 24 frames from `final.mp4` into a contact sheet.
-- Write an honest critique in Hebrew (what works and what doesn't, by severity) and save it in `critiques/`.
-- Add any new general lesson to `GUIDELINES.md`, and any new technical one to `TECHNICAL.md`.
+- Write an honest critique in Hebrew (what works and what doesn't, by severity) next to the video (a series skill may say where).
+- A new lesson changes the guidelines only when the user approves it: edit the existing rule in `GUIDELINES.md` or `TECHNICAL.md` in place rather than appending a dated section.
 
 ## Communication
-The user writes in Hebrew, so reply in Hebrew. The video itself is in English. Use Sonnet subagents for heavy research.
+The user writes in Hebrew, so reply in Hebrew. The video is in the series' language (English by default).
