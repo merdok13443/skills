@@ -118,6 +118,18 @@ def synth_edge(text):
 GEMINI_MODEL = 'gemini-3.8-flash-tts'
 GEMINI_ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts',
                   'gemini-3.1-flash-tts'}
+def style_for(spec):
+    # a line marked "emphasis":"funfact" in script.json is a verified fun fact: slow, clear and emphasized (owner 2026-11-25).
+    # Still ONE request: the instruction goes into the same style annotation, quoting the sentence (the style is not read aloud).
+    s = spec.get('style', DECKY_STYLE)
+    ff = [ln.get('say', ln['text']).strip() for ln in spec.get('lines', []) if ln.get('emphasis') == 'funfact']
+    if ff:
+        s += (' One sentence in this text is a surprising real-world fun fact: "' + '" and "'.join(ff) + '". Say that sentence clearly slower than the rest, '
+              'with emphasis and a touch of wonder, stressing the surprising word or number, with a short beat of silence just before it. '
+              'Do not change, add or skip any word, and return to the normal lively pace right after it.')
+    return s
+
+
 DECKY_STYLE = ('Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, '
                'talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv '
                'casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note '
@@ -208,7 +220,7 @@ def synth_gemini(text):
     it = _gc.interactions.create(
         model=model,
         input=[{'type': 'user_input', 'content': [{'type': 'text', 'text': prepare_voice_text(text),
-                'annotations': [{'type': 'speech_metadata', 'style': spec.get('style', DECKY_STYLE)}]}]}],
+                'annotations': [{'type': 'speech_metadata', 'style': style_for(spec)}]}]}],
         response_format={'type': 'audio'},
         generation_config={'speech_config': [{'voice': spec.get('voice', 'Puck')}]})
     a, sr = sf.read(io.BytesIO(base64.b64decode(it.output_audio.data)), dtype='float32')
