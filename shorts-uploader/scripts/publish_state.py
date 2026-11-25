@@ -38,7 +38,7 @@ def render(p, d):
             if s.get("url"):
                 c = f"[{c}]({s['url']})"
             cells.append(c)
-        lines.append(f"| `{vid}` | {v.get('title', '')} | " + " | ".join(cells) + f" | {v.get('note', '')} |")
+        lines.append(f"| `{vid}` | {v.get('title', '').replace('|', chr(92) + '|')} | " + " | ".join(cells) + f" | {v.get('note', '').replace('|', chr(92) + '|')} |")
     pathlib.Path(p).with_name("PUBLISH-STATE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
