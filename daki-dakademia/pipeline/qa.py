@@ -44,7 +44,7 @@ if r.returncode == 0:
 else:
     # frames that only catch the stamp flying in or out (stamp/jam entrance and exit) are a design feature, not a layout error
     plan = json.load(open(os.path.join(src, 'plan.json')))
-    wins = [(a['t'] - 1.3, a['t'] + a.get('leave', 1.0) + 0.4) for a in plan['acts'] if a['do'] in ('stamp', 'jam')]
+    wins = [(a['t'] - .4, a['t'] + .9) for a in plan['acts'] if a['do'] in ('stamp', 'jam', 'verdict', 'nojam')]
     for sc in plan['scenes']:      # whip transitions slide whole scenes through the margins by design
         if sc.get('enter'): wins.append((sc['t0'] - .05, sc['t0'] + sc['enter']['dur'] + .1))
         if sc.get('exit'): wins.append((sc['t1'] - sc['exit']['dur'] - .05, sc['t1'] + .05))
@@ -67,6 +67,15 @@ chk('voice rules + TTS request budget (<= 3 per video)', not ve, '; '.join(ve))
 for w in vw: chk('voice rules warning', False, w, warn=True)
 mf = json.load(open(os.path.join(src, 'manifest.json')))
 if mf.get('payoff_pct') is not None: chk('payoff 65-75 %', 65 <= mf['payoff_pct'] <= 75, f"{mf['payoff_pct']}%")
+chk('stamp: stamp.js identical to the shared component (daki-dakademia/stamp/stamp.js)', os.path.exists(os.path.join(src, 'assets/stamp.js')) and filecmp.cmp(os.path.join(src, 'assets/stamp.js'), os.path.join(HERE, '..', 'stamp', 'stamp.js'), shallow=False))
+# top header: 'course · N.M · episode title' (owner rule, it kept going missing). The build parses it; here we also look at frame 0.
+hd = mf.get('header') or {}
+chk('top header: course · N.M · episode title', bool(hd.get('ok')), hd.get('text', 'missing from manifest.json (old build)'))
+with tempfile.TemporaryDirectory() as td:
+    a = os.path.join(td, 'h.png'); run(['ffmpeg', '-y', '-loglevel', 'error', '-ss', '0.2', '-i', vid, '-frames:v', '1', a])
+    band = np.asarray(Image.open(a).convert('L'), float)[272:330, 150:930]
+    ink = float((band < band.mean() - 60).mean() * 100)
+    chk('top header visible in the rendered frame (ink in y 272-330)', ink > 2.5, f'{ink:.1f}% ink pixels')
 chk('Decky: daki.js identical to the skill copy', filecmp.cmp(os.path.join(src, 'assets/daki.js'), os.path.join(HERE, '..', 'mascot', 'daki.js'), shallow=False))
 T = json.load(open(os.path.join(src, 'voice/timing.json')))
 chk('voice length equals video length', abs(T['duration'] - dur) < .1, f"timing {T['duration']}s video {dur:.2f}s")

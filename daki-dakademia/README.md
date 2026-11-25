@@ -19,4 +19,5 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 - `TECHNICAL-DAKI.md`: Daki code API, time sweep, acceptance checks
 - `METADATA-DAKI.md`: titles, captions and hashtags per platform, with an example and a feedback loop (Hebrew)
 - `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish with the shorts-uploader skill (official APIs) to YouTube (Instagram and TikTok paused for now) (Hebrew)
+- `stamp/`: the shared T/F verdict stamp (`stamp.js`, spec `STAMP.md`), used by every video like Daki
 - `mascot/`: Daki as reusable SVG code (`daki.js`), spec (`DAKI.md`), profile pictures, character sheet, and `render.js` to regenerate them

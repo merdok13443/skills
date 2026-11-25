@@ -1,6 +1,6 @@
 /* Dakademia scene runtime. Interprets window.PLAN (produced by build_video.py) into one paused GSAP timeline.
    Everything is seek-deterministic (no Date.now, no live callbacks). Decky comes from assets/daki.js untouched.
-   PLAN = {D, decky:{x,y,s,expr}, stamp:{hov,off}, scenes:[{id,t0,t1,enter,exit}], caps:[...], acts:[...]} */
+   PLAN = {D, decky:{x,y,s,expr}, scenes:[{id,t0,t1,enter,exit}], caps:[...], acts:[...]} */
 (function () {
   const P = window.PLAN, D = P.D, NS = 'http://www.w3.org/2000/svg';
   window.__timelines = window.__timelines || {};
@@ -39,46 +39,12 @@
   const dTo = (t, dur, x, y, s, ease = 'power3.inOut') => { tl.fromTo(d.wrap, { x: dcur.x, y: dcur.y, scale: dcur.s }, { x, y, scale: s, duration: dur, ease }, t); dcur = { x, y, s }; };
   const dRot = (t, deg = 7) => tl.fromTo(d.wrap, { rotation: -deg }, { rotation: 0, duration: .5, ease: 'elastic.out(1,.3)' }, t);
 
-  /* ---------- stamp (the T/F rubber stamp) ---------- */
-  const STAMP = `<g class="sbob"><g class="sq">
-  <g class="sT"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">T</text></g>
-  <g class="sF"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">F</text></g>
-  <g class="sN"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/></g>
-  <rect x="-30" y="-128" width="60" height="58" fill="#D6C6AA" stroke="#1C1A17" stroke-width="8"/>
-  <rect x="-54" y="-232" width="108" height="112" rx="42" fill="#2F5D8C" stroke="#1C1A17" stroke-width="9"/>
-  <path d="M-34 -204 Q-38 -180 -30 -160" stroke="#fff" stroke-width="9" fill="none" opacity=".6" stroke-linecap="round"/>
-  <circle cx="0" cy="-262" r="62" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
-  <circle cx="-54" cy="-286" r="26" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
-  <path d="M-30 -300 Q0 -318 30 -300" stroke="#1C1A17" stroke-width="7" fill="none" stroke-linecap="round" opacity=".5"/></g></g>`;
-  $('#st').innerHTML = STAMP;
-  const faceAt = (t, k) => ['T', 'F', 'N'].forEach(x => tl.set('#st .s' + x, { opacity: x === k.toUpperCase() ? 1 : 0 }, t));
-  const faceNow = k => ['T', 'F', 'N'].forEach(x => gsap.set('#st .s' + x, { opacity: x === k.toUpperCase() ? 1 : 0 }));
-  const OFF = P.stamp.off, HOV0 = P.stamp.hov;
-  gsap.set('#st .sq', { svgOrigin: '0 0' });
-  gsap.set('#st', { svgOrigin: '0 0', x: HOV0.x, y: HOV0.y, rotation: HOV0.r });
-  faceNow(P.stamp.face || 'n');
-  let sc = { ...HOV0 };
-  /* The stamp never leaves the frame: it appears (pops in) at its hover pose and disappears (lifts and fades) in place, so no frame ever
-     shows it cropped by the edge, and two stamps close together chain (move hover to hover) instead of teleporting. */
-  let sHid = false, sFree = 0;          // hidden?  time from which the stamp may be moved again (end of its last tween)
-  const sTo = (t, dur, p, ease = 'power3.out') => { tl.fromTo('#st', { x: sc.x, y: sc.y, rotation: sc.r }, { x: p.x, y: p.y, rotation: p.r, duration: dur, ease }, t); sc = { ...p }; sFree = t + dur; };
-  const sIn = (t, p, dur = .4) => {      // pop in at pose p
-    tl.fromTo('#st', { x: p.x, y: p.y + 60, rotation: p.r + 10, opacity: 0 }, { x: p.x, y: p.y, rotation: p.r, opacity: 1, duration: dur, ease: 'back.out(1.6)' }, t);
-    sc = { ...p }; sHid = false; sFree = t + dur;
-  };
-  const sOut = (t, dur = .35) => {       // lift a little and fade
-    tl.fromTo('#st', { x: sc.x, y: sc.y, rotation: sc.r, opacity: 1 }, { x: sc.x, y: sc.y - 40, rotation: sc.r + 8, opacity: 0, duration: dur, ease: 'power2.in' }, t);
-    sHid = true; sFree = t + dur;
-  };
-  const sGo = (t, dur, p, ease) => { if (sHid) sIn(t, p, Math.max(dur, .3)); else sTo(t, dur, p, ease); };   // move there, or pop in there when hidden
-  // acts of one stamp sequence: the move to the hover pose ends no later than t - .2, never before the stamp is free
-  const sApproach = (t, p) => {
-    const t0 = Math.max(t - 1.1, sFree + .02), dur = Math.min(.5, t - .2 - t0);
-    if (dur < .12) { sGo(Math.max(t - .5, sFree + .01), .12, p, 'power3.out'); } else sGo(t0, dur, p, 'power3.out');
-  };
-  tl.fromTo('#st .sbob', { y: 0 }, { y: -7, duration: D / 70, ease: 'sine.inOut', yoyo: true, repeat: 69 }, 0);
-  const squash = t => tl.fromTo('#st .sq', { scaleY: 1, scaleX: 1 }, { scaleY: .8, scaleX: 1.08, duration: .07, yoyo: true, repeat: 1, ease: 'power2.out' }, t);
-  const jitter = (t, n = 5, a = 9) => { const b = sc.r; tl.fromTo('#st', { rotation: b - a }, { rotation: b + a, duration: .07, yoyo: true, repeat: n, ease: 'sine.inOut' }, t); tl.to('#st', { rotation: b, duration: .06 }, t + (n + 1) * .07); };
+  /* ---------- the T/F verdict stamp: the shared component assets/stamp.js (from daki-dakademia/stamp/), never redrawn here ---------- */
+  const ST = dkStamp.mount(gsap, tl, $('#st'));
+  // fill every verdict slot / imprint placeholder the build wrote into the cards
+  document.querySelectorAll('.vslot').forEach(e => { e.innerHTML = dkStamp.slot(+e.dataset.d, e.dataset.q === '1'); });
+  document.querySelectorAll('.vimp').forEach(e => { e.innerHTML = dkStamp.imprint(e.dataset.kind, +e.dataset.d); gsap.set(e, { opacity: e.dataset.on === '1' ? 1 : 0 }); });
+  document.querySelectorAll('.vslot').forEach(e => { if (e.dataset.on === '1') gsap.set(e, { opacity: 0 }); });
 
   /* ---------- helpers ---------- */
   const pop = (sel, t, dd = .24, from = 1.8) => { gsap.set(sel, { opacity: 0 }); tl.fromTo(sel, { scale: from, opacity: 0 }, { scale: 1, opacity: 1, duration: dd, ease: 'power4.out' }, t); };
@@ -97,7 +63,7 @@
     if (e.rot) gsap.set(sel, { rotation: e.rot });
     if (e.svgOrigin) gsap.set(sel, { svgOrigin: e.svgOrigin });
   });
-  gsap.set('.mark', { rotation: -9 });
+  if (document.querySelector('.mark')) gsap.set('.mark', { rotation: -9 });   // legacy imprints
 
   /* ---------- verbs ---------- */
   const V = {
@@ -131,31 +97,16 @@
       if (a.x != null) dTo(a.t, a.d || .45, a.x, a.y, a.s != null ? a.s : dcur.s, a.ease);
       if (a.rot) dRot(a.t, a.rot === true ? 7 : a.rot);
     },
-    sFace: a => faceAt(a.t, a.kind),
-    sTo: a => sGo(a.t, a.d || .4, { x: a.x, y: a.y, r: a.r != null ? a.r : sc.r }, a.ease),
-    sLeave: a => sOut(a.t, a.d || .35),
-    stamp: a => {               // slam the stamp at time t onto `hit`, with an imprint (mark) appearing exactly at t
-      const hov = a.hover, t = a.t;
-      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);   // the face is set while the stamp is still hidden: no colour change in view
-      sApproach(t, { x: hov[0], y: hov[1], r: 9 });
-      faceAt(tFace, a.kind);
-      sTo(t - .15, .15, { x: a.hit[0], y: a.hit[1], r: 0 }, 'power4.in'); squash(t);
-      if (a.mark) {
-        tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.5 }, { scale: 1, duration: .22, ease: 'power4.out' }, t); wave(a.mark, t);
-      }
-      shakeCam(t, 10);
-      sTo(t + .05, .3, { x: hov[0], y: hov[1] - 35, r: 9 }, 'power2.out');
-      if (a.leave !== false) sOut(t + (a.leave || 1.0));
+    verdict: a => { ST.land(a.t, a.x, a.y, { d: a.d, imprint: $(a.imp), slotEl: $(a.slot) }); shakeCam(a.t, 7); },     // the one way to stamp (SCENE_SPEC.md)
+    nojam: a => ST.jam(a.t, a.x, a.y, { d: a.d }),
+    // legacy verbs (scene.json written before the shared stamp): same component, the tool never shows a letter and is hidden when idle
+    stamp: a => {
+      const m = a.mark ? $(a.mark) : null;
+      if (m) { tl.set(m, { opacity: 1 }, a.t); tl.fromTo(m, { scale: 1.3 }, { scale: 1, duration: .22, ease: 'power4.out' }, a.t); wave(a.mark, a.t); }
+      ST.land(a.t, a.hit[0], a.hit[1] - dkStamp.D0 * dkStamp.LAND_DY, {});
     },
-    jam: a => {                 // the stamp comes down on something that has no truth value, stops short and jitters
-      const t = a.t;
-      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);
-      sApproach(t, { x: a.hover[0], y: a.hover[1], r: a.hr != null ? a.hr : -9 });
-      faceAt(tFace, a.kind || 'n');
-      sTo(t - .15, .15, { x: a.down[0], y: a.down[1], r: 0 }, 'power4.in'); squash(t); jitter(t + .02, 5, 8);
-      if (a.mark) { tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.4 }, { scale: 1, duration: .25, ease: 'power4.out' }, t); }
-      if (a.leave !== false) sOut(t + (a.leave || 1.0));
-    },
+    jam: a => { if (a.mark) tl.set(a.mark, { opacity: 1 }, a.t); ST.jam(a.t, a.down[0], a.down[1] - dkStamp.D0 * dkStamp.LAND_DY + 34, {}); },
+    sFace: () => { }, sTo: () => { }, sLeave: () => { },
     sfx: () => { }              // consumed by the build (cues.json), nothing visual
   };
 
