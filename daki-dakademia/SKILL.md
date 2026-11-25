@@ -21,6 +21,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 **Production**
 - Produce a video only when the owner asks for that video, or inside a scheduled run (one video per run). Scheduled runs are paused since 2026-11-24; only the owner resumes them. Never start an extra video on your own.
 - Fully autonomous between stages: no human review, no "please listen to it", never leave a video "pending review". The only stops are the two steps that must run on the owner's PC (Gemini narration, YouTube upload; Instagram too once it is enabled again): if the PC is not reachable, stop at that step, write `waiting: voice` or `waiting: publish` in the video's README, and report it. Never switch to another TTS.
+- **A stage fails (owner, 2026-11-25), e.g. no narration:** first try to fix the cause while keeping every guideline. No workarounds that break a rule: no other TTS or model, no requests beyond the cap of 3, no skipped checks, no lowered limits, no hand-patched `index.html`. If it still fails after the fixes allowed by the rules, stop that video, set it `blocked` with a clear note of the stage and the cause, report it plainly and wait; the owner will come to help. Do not start another video instead.
 - Do not rebuild finished videos for new rules. To fix a finished video, make a minimal edit to its saved source (`scene.json` / `script.json`) and re-render.
 
 **Content**
