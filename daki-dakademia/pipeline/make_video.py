@@ -13,6 +13,11 @@ HF = ['npx', '--yes', 'hyperframes@0.9.84']
 def sh(cmd, **k):
     r = subprocess.run(cmd, cwd=src, **k)
     if r.returncode: raise SystemExit(f'FAILED: {" ".join(cmd)[:120]} (exit {r.returncode})')
+sys.path.insert(0, HERE)
+import voice_rules
+_e, _w = voice_rules.check(src)
+for x in _w: print('voice WARN', x)
+if _e: raise SystemExit('voice rules: ' + '; '.join(_e) + '  (fix the narration before building; see voice_rules.py)')
 with stage(src, 'build'): sh([sys.executable, os.path.join(HERE, 'build_video.py'), src])
 def read_check():
     """hyperframes check -> check_errors.json (only errors: code, message, selector, time). Returns the error count."""

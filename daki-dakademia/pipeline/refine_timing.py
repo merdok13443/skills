@@ -9,6 +9,8 @@ import json, os, re, shutil, sys
 import numpy as np, soundfile as sf
 src = os.path.abspath(sys.argv[1]); vd = os.path.join(src, 'voice')
 T = json.load(open(os.path.join(vd, 'timing.json'), encoding='utf-8'))
+if T.get('needs_align'): sys.exit('whole-take narration (one request): line boundaries are unknown. Run engine/align_he.py on the PC first, refine_timing is not for this.')
+if T.get('aligned'): sys.exit('timing.json is already aligned by a speech model; nothing to refine.')
 shutil.copy(os.path.join(vd, 'timing.json'), os.path.join(vd, 'timing.raw.json'))
 a, sr = sf.read(os.path.join(vd, 'voice.wav'))
 if a.ndim > 1: a = a.mean(1)

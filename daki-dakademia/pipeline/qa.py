@@ -50,6 +50,11 @@ else:
 br = json.load(open(os.path.join(src, 'build_report.json'))) if os.path.exists(os.path.join(src, 'build_report.json')) else {'errors': ['no build_report'], 'warnings': []}
 chk('build: no errors (stamp truth, ids, boxes, anchors)', not br['errors'], '; '.join(br['errors'])[:300])
 for w in br['warnings']: chk('build warning', False, w, warn=True)
+sys.path.insert(0, HERE)
+import voice_rules
+ve, vw = voice_rules.check(src)
+chk('voice rules + TTS request budget (<= 3 per video)', not ve, '; '.join(ve))
+for w in vw: chk('voice rules warning', False, w, warn=True)
 mf = json.load(open(os.path.join(src, 'manifest.json')))
 if mf.get('payoff_pct') is not None: chk('payoff 65-75 %', 65 <= mf['payoff_pct'] <= 75, f"{mf['payoff_pct']}%")
 chk('Decky: daki.js identical to the skill copy', filecmp.cmp(os.path.join(src, 'assets/daki.js'), os.path.join(HERE, '..', 'mascot', 'daki.js'), shallow=False))
