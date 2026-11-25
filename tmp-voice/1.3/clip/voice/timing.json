@@ -1,0 +1,47 @@
+{
+ "lines": [
+  {
+   "id": "hook1",
+   "s": 0.0,
+   "e": 1.78,
+   "text": "אז ווייז הומצאה בישראל,"
+  }
+ ],
+ "words": [
+  {
+   "w": "אז",
+   "s": 0.0,
+   "e": 0.3,
+   "line": "hook1"
+  },
+  {
+   "w": "ווייז",
+   "s": 0.3,
+   "e": 0.76,
+   "line": "hook1"
+  },
+  {
+   "w": "הומצאה",
+   "s": 0.76,
+   "e": 1.36,
+   "line": "hook1"
+  },
+  {
+   "w": "בישראל,",
+   "s": 1.36,
+   "e": 1.78,
+   "line": "hook1"
+  }
+ ],
+ "lang": "he",
+ "backend": "gemini",
+ "duration": 1.956,
+ "requests": 1,
+ "model": "gemini-3.8-flash-tts",
+ "aligned": {
+  "by": "whisper",
+  "model": "ivrit-ai/whisper-large-v3-turbo-ct2",
+  "matched": 4,
+  "words": 4
+ }
+}
