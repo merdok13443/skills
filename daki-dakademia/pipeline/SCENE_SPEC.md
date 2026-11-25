@@ -16,7 +16,7 @@ Everything is timed by **anchors** that resolve against the real voice, so if th
   "bpm":96, "seed":11,                  // music
   "decky":{"x":690,"y":1040,"s":0.5,"expr":"smirk"},          // frame-0 pose
   "stamp":{"hov":{"x":540,"y":700,"r":8},"face":"n"},         // frame-0 pose of the T/F stamp (n = blank)
-  "topic":{"word":"פסוק","el":"tpk"},       // RULE (very important): the topic name is spoken by second 4 and shown large (>= 90 px) from frame 0; the build errors otherwise. el = a tag with vis:true in the first scene
+  "topic":{"word":"פסוק","el":"tpk"},       // RULE (very important): the topic name is shown large (>= 90 px) from frame 0 (the build errors otherwise) and spoken early, ideally by second 4 (a warning since 2026-11-25). el = a tag with vis:true in the first scene
   "seam_caption":"אמת או שקר?",         // last caption: completes the first line (loop)
   "captions":{"skip_lines":["punch"],"hide":[["l:punch","le:punch"]],"max_words":5,"max_chars":22},
   "sfx":[{"at":"w:cmd.2","type":"glitch","gain":0.8}],        // extra sound cues (types: pop tick whoosh swoosh riser hit ding blip thud glitch)
