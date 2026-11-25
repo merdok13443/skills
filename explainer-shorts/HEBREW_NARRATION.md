@@ -22,7 +22,7 @@ sh engine/mktiming.sh he1
 
 ## Gemini TTS: the fixed voice of Decky (דקי)
 
-This is the locked, stable voice of the mascot Decky for every Dakademia video. Heard and approved by the project owner on 2026-11-25 ("sounds great, energetic"); the sample was 10.49 s.
+This is the locked, stable voice of the mascot Decky for every Dakademia video. Heard and approved by the project owner on 2026-11-25 ("sounds great, energetic"); the sample was 10.49 s. Pace rule (owner, 2026-11-25): the lesson's message must come across, so speed follows how hard the line is (the style prompt below says this instead of "slightly faster than normal speech").
 
 **Standing rule (project owner, 2026-11-25):** the Gemini API key is used ONLY with these TTS models: `gemini-3.8-flash-tts` (default and the one that produced the approved voice), `gemini-3.8-flash-lite-tts`, `gemini-3.1-flash-tts` (also accepted as `-preview`), and ONLY to generate narration audio. No other model, no other use. `tts_he.py` keeps this allowlist and exits if the script asks for anything else.
 
@@ -42,7 +42,7 @@ python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
 
 > Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, smiling while speaking. The pace serves understanding: brisk and natural on simple, familiar lines; slower and very clear, with a short pause, on the key message and on any step that is new or tricky, so a first-year student follows every word. Short punchy sentences with expressive rises and falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. Never monotone, never robotic, never an announcer.
 
-   The approved sample used the earlier wording of this prompt (young Israeli guy plus classic newscaster qualities, no real person named). The version above pushes the Israeli accent harder, which is the owner's top priority, and keeps the energy. On 2026-11-25 the owner replaced "slightly faster than normal speech" with the pace rule above: the lesson's message must come across, so speed follows how hard the line is. **Never name or imitate a real person in the prompt.** Describe qualities instead.
+   The approved sample used the earlier wording of this prompt (young Israeli guy plus classic newscaster qualities, no real person named). The version above pushes the Israeli accent harder, which is the owner's top priority, and keeps the energy. **Never name or imitate a real person in the prompt.** Describe qualities instead.
 6. **Pace:** one request per script line, spaced about 6.5 s apart (10 requests per minute). A script of about eight lines uses eight of the 50 daily requests.
 
 ### Text rules for the voice (applied automatically by `prepare_voice_text` in `tts_he.py`)
