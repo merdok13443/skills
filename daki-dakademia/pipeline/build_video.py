@@ -46,6 +46,8 @@ def anchor(a, ctx=''):
             lid, txt = ref.split('~', 1); nth = 1
             if '#' in txt: txt, n = txt.split('#'); nth = int(n)
             hits = [w for w in byline.get(lid, []) if norm(w['w']) == norm(txt)]
+            if not hits:                                   # tolerate one prefix letter (ו ה ב ל מ כ ש): w:ex~פקודה finds ופקודה
+                hits = [w for w in byline.get(lid, []) if norm(w['w']).endswith(norm(txt)) and len(norm(w['w'])) <= len(norm(txt)) + 1]
             if len(hits) < nth: errs.append(f'{ctx}: word {txt!r} (#{nth}) not found in line {lid}'); return 0
             w = hits[nth - 1]
         else:

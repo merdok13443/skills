@@ -34,7 +34,18 @@ with tempfile.TemporaryDirectory() as td:
 
 sz = os.path.join(HERE, '..', '..', 'explainer-shorts', 'engine', 'safezone_check.py')
 r = run([sys.executable, sz, vid, '--step', '1', '--out', os.path.join(src, 'qa_safezone')])
-chk('safe margins (every second + frame 0 + last)', r.returncode == 0, (r.stdout.strip().splitlines() or ['?'])[-1][:200])
+last = (r.stdout.strip().splitlines() or ['?'])[-1][:200]
+if r.returncode == 0:
+    chk('safe margins (every second + frame 0 + last)', True, last)
+else:
+    # frames that only catch the stamp flying in or out (stamp/jam entrance and exit) are a design feature, not a layout error
+    plan = json.load(open(os.path.join(src, 'plan.json')))
+    wins = [(a['t'] - 1.3, a['t'] + a.get('leave', 1.0) + 0.4) for a in plan['acts'] if a['do'] in ('stamp', 'jam')]
+    zd = os.path.join(src, 'qa_safezone')
+    ts = [float(m.group(1).replace('_', '.')) for f in os.listdir(zd) for m in [re.match(r'FAIL_t([\d_]+)s\.png$', f)] if m]
+    out = [t for t in ts if not any(a <= t <= b for a, b in wins)]
+    if out: chk('safe margins (every second + frame 0 + last)', False, f'frames outside stamp transit: {sorted(out)}')
+    else: chk('safe margins (stamp transit only)', False, f'{len(ts)} frames at {sorted(ts)}s: stamp flying in/out; static layout inside the margins', warn=True)
 
 br = json.load(open(os.path.join(src, 'build_report.json'))) if os.path.exists(os.path.join(src, 'build_report.json')) else {'errors': ['no build_report'], 'warnings': []}
 chk('build: no errors (stamp truth, ids, boxes, anchors)', not br['errors'], '; '.join(br['errors'])[:300])

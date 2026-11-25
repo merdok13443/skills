@@ -38,8 +38,10 @@ for ln in T['lines']:
     if len(runs) < len(cuts): continue                       # fewer real pauses than punctuation marks: keep the estimate
     if len(runs) > len(cuts):                                # keep the longest ones, in time order
         runs = sorted(sorted(runs, key=lambda r: r[0] - r[1])[:len(cuts)])
-    wt = np.array([weight(w['w']) for w in ws])
+    wt = np.array([weight(w['w']) for w in ws]); cum = np.cumsum(wt) / wt.sum()
     bounds = [(s + r0 / 100, s + r1 / 100) for r0, r1 in runs]
+    # sanity: every detected pause must sit near where the letter weights say the punctuation is, else keep the estimate
+    if any(abs((b0 + b1) / 2 - (s + (e - s) * cum[c])) > .5 for (b0, b1), c in zip(bounds, cuts)): continue
     # build phrases between cuts; skip cuts without a detected pause
     edges = [(None, s)]                                      # phrase starts
     phrases, start_i, start_t = [], 0, s
