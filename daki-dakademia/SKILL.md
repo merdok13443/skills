@@ -43,7 +43,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - `voice.wav` always comes from the same `script.json` that produced `timing.json`.
 
 **Git, delivery, publishing**
-- In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`. Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
+- In `merdok13443/skills` and `merdok13443/dakademia-videos`: branch from `dev`, open PRs against `dev`, and merge your finished PR into `dev` (owner wish, 2026-11-25). Never push or open a PR to `main` (only a dev -> main PR the owner asks for).
 - The final mp4 goes only to `merdok13443/dakademia-videos` (never into `skills`).
 - Publish only with the `shorts-uploader` skill, per `PUBLISHING-DAKI.md`. Never Buffer and never any `mcp__Buffer__*` tool. YouTube: Short, category Education, NOT made for kids, at most 6 uploads per day (raised only by the owner). **Temporary override (owner, 2026-11-25, until the owner says otherwise): publish to YouTube only; Instagram and TikTok are skipped (record `skipped`).** Later: Instagram Reel, TikTok manual.
 - Never commit secrets (tokens, `client_secret.json`, `.env`, state files).
@@ -57,9 +57,9 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 | 1 content (Haiku) | the curriculum entry, the source PDFs, the course notation notes, section 1 "Content" above |
 | 1b example + message (Opus, high) | `pipeline/prompts/example_researcher.md` (trailer/intro videos: `INTRO-VIDEOS-DAKI.md` instead, Fable then Opus high) |
 | 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
-| 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
+| 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (owner feedback patterns + checklist), the source text for the facts |
 | 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
-| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, `GUIDELINES-DAKI.md` (the owner feedback patterns, the pre-delivery discipline section and the checklist: most visual lessons live there), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
 | 7-8 make + QA | `pipeline/README.md`, `qa_report.json` |
 | 9 deliver + publish | `pipeline/VIDEO-PACKAGE.md` (the package), `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`; `../shorts-uploader/README.md` only for setup or errors |
 
