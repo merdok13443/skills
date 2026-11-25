@@ -1,6 +1,6 @@
 ---
 name: daki-dakademia
-description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Daki / Decky (דקי הדקה). Use for any Dakademia video or whenever Daki is needed. Adds the mascot code and spec, unit background colours, loop, T/F stamp and no-sources rules, and automatic publishing via GitHub + Buffer, on top of the general explainer-shorts skill, which must be read first.
+description: Series layer for Dakademia (דקדמיה) videos - Hebrew vertical explainer Shorts for beginner university students (course > units > videos), hosted by the mascot Daki / Decky (דקי הדקה). Use for any Dakademia video or whenever Daki is needed. Adds the mascot code and spec, unit background colours, loop, T/F stamp and no-sources rules, and automatic publishing via GitHub + the shorts-uploader skill, on top of the general explainer-shorts skill, which must be read first.
 ---
 
 # Daki + Dakademia (דקי הדקה ודקדמיה)
