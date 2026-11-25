@@ -34,6 +34,7 @@ def main():
     ap.add_argument("queue"); ap.add_argument("--state", default="state.json")
     ap.add_argument("--daily-max", type=int, default=20); ap.add_argument("--gap", nargs=2, type=int, default=[120, 400])
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--retry-failed", action="store_true", help="retry items whose last attempt failed")
     a = ap.parse_args()
     uid, tok = os.environ.get("IG_USER_ID"), os.environ.get("IG_ACCESS_TOKEN")
     if not a.dry_run and not (uid and tok):
@@ -47,6 +48,8 @@ def main():
         rec = st.setdefault(it["id"], {})
         if rec.get("instagram", {}).get("status") == "done" or not it.get("instagram_video_url"):
             continue
+        if rec.get("instagram", {}).get("status") == "failed" and not a.retry_failed:
+            print(f"[{it['id']}] failed earlier; skipped (use --retry-failed after checking Instagram)"); continue
         if done_today(st, "instagram") >= a.daily_max:
             print(f"Daily max {a.daily_max} reached; rerun tomorrow."); break
         print(f"[{it['id']}] {it.get('caption','')[:50]}")

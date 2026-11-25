@@ -31,7 +31,7 @@ Gemini backend ("backend": "gemini"):
   REQUESTS ARE SCARCE (daily quota is small): the default mode is "whole" = ONE request for the
   whole script (lines joined by newlines, "<short pause>" after lines whose "pause" >= 0.5), at
   most 3 requests per video including retries. "--mode lines" (one request per line) is only for
-  debugging a single line and is refused for scripts of more than 3 lines unless --allow-many.
+  debugging a single line and is refused for scripts of more than 3 lines (no override).
   Gemini returns no word timings. In whole mode line boundaries are unknown too, so
   engine/align_he.py (Whisper on the PC) is REQUIRED afterwards: timing.json has "needs_align": true
   until it ran. timing.json also records "requests" (QA fails a video that used more than 3).
@@ -50,7 +50,7 @@ SR = 24000
 args = sys.argv[1:]
 proj = args[0]
 spec = json.load(open(os.path.join(proj, 'script.json'), encoding='utf-8'))
-backend = args[args.index('--backend') + 1] if '--backend' in args else spec.get('backend', 'edge')
+backend = args[args.index('--backend') + 1] if '--backend' in args else spec.get('backend', 'gemini')
 lead, tail = spec.get('lead', 0.15), spec.get('tail', 0.6)
 mode = args[args.index('--mode') + 1] if '--mode' in args else spec.get('gemini_mode', 'whole')
 n_requests = [0]
@@ -117,7 +117,7 @@ def synth_edge(text):
 # Standing rule: this key is used ONLY for this model and ONLY for narration audio.
 GEMINI_MODEL = 'gemini-3.8-flash-tts'
 GEMINI_ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts',
-                  'gemini-3.1-flash-tts', 'gemini-3.1-flash-tts-preview'}
+                  'gemini-3.1-flash-tts'}
 DECKY_STYLE = ('Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, '
                'talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv '
                'casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note '
@@ -263,9 +263,8 @@ if backend == 'gemini' and mode == 'whole':
     timing['needs_align'] = True
     out.append(a); t += dur
 else:
-    if backend == 'gemini' and len(spec['lines']) > 3 and '--allow-many' not in args:
-        sys.exit('Refusing one Gemini request per line for %d lines (daily quota). Use --mode whole, '
-                 'or add --allow-many if you really mean it.' % len(spec['lines']))
+    if backend == 'gemini' and len(spec['lines']) > 3:
+        sys.exit('Refusing one Gemini request per line for %d lines (daily quota). Use --mode whole.' % len(spec['lines']))
     for ln in spec['lines']:
         a, marks = synth(ln.get('say', ln['text']))
         s0, e0 = trim_bounds(a, SR)

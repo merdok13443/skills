@@ -22,7 +22,7 @@ Use when the user wants to publish many finished shorts (from `explainer-shorts`
 2. Always dry-run first (`--dry-run`), then one real video, then the batch.
 3. Pace: default 10 uploads/day for YouTube and 20/day for Instagram, with random gaps, far below the official ceilings (see README, "limits"). A series skill may set a lower cadence (Dakademia: 2/day).
 4. Kids flag: the default is `false` (not made for kids); set `true` only when the content is actually directed at children and the user confirms explicitly. Why: README, "made for kids".
-5. TikTok: no safe free bulk API. Use TikTok Studio's own scheduler (web, "Schedule video") or manual upload. Do not use cookie/browser-automation tools on the user's main account.
+5. TikTok: no safe free bulk API. Use TikTok Studio's own scheduler (web, "Schedule video") or manual upload. Do not use cookie/browser-automation tools on the user's main account (the only exception: the manual TikTok Studio upload on the owner's PC, see README).
 6. Limits change. Before a large batch re-check the official pages linked in README.
 7. After every finished video that is approved for publishing, try all three platforms: YouTube (required), Instagram and TikTok (best-effort, not mandatory). Always report the status of each one. Before writing a caption, check what the video is actually about.
 8. Keep a persistent publish state: `publish-state.json` (plus the generated `PUBLISH-STATE.md`) in the videos repo. Update it with `scripts/publish_state.py` (`add` when a video is ready, `set <video> <platform> <status> --url ...` after each upload attempt). It must always show which videos exist and where each one is already up. Statuses: pending, uploaded, under_review, failed, skipped, unknown.

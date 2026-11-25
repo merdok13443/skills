@@ -58,6 +58,7 @@ def main():
     ap.add_argument("--token", default="token_youtube.json"); ap.add_argument("--state", default="state.json")
     ap.add_argument("--daily-max", type=int, default=10); ap.add_argument("--gap", nargs=2, type=int, default=[60, 240])
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--retry-failed", action="store_true", help="retry items whose last attempt failed")
     a = ap.parse_args()
     defaults, items = load_queue(a.queue)
     d = defaults.get("youtube", {})
@@ -67,6 +68,8 @@ def main():
         rec = st.setdefault(it["id"], {})
         if rec.get("youtube", {}).get("status") == "done":
             continue
+        if rec.get("youtube", {}).get("status") == "failed" and not a.retry_failed:
+            print(f"[{it['id']}] failed earlier; skipped (use --retry-failed after checking YouTube, to avoid a double upload)"); continue
         if done_today(st, "youtube") >= a.daily_max:
             print(f"Daily max {a.daily_max} reached; rerun tomorrow."); break
         if not os.path.exists(it["file"]):
