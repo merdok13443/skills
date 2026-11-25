@@ -21,6 +21,6 @@ Use when the user wants to publish many finished shorts (from `explainer-shorts`
 1. Never ask for or store passwords. Auth is OAuth (YouTube) and a long-lived token (Instagram), kept in local files that are in `.gitignore`. Never commit `client_secret.json`, `token.json`, `.env`, `state.json`.
 2. Always dry-run first (`--dry-run`), then one real video, then the batch.
 3. Pace: default 10 uploads/day for YouTube and 20/day for Instagram, with random gaps. These are far below the official ceilings on purpose (see README, "limits").
-4. Kids content: confirm the made-for-kids value with the user before the first YouTube upload. Default in the queue is `true`.
+4. Kids flag: the default is `false` (not made for kids). Our content is for adult learners; a kids label turns off comments, notifications, personalized ads, cards/end screens and playlist saving, and YouTube says such videos are recommended next to kids' videos. Set `true` only when the content is actually directed at children (FTC test); the user must confirm that explicitly.
 5. TikTok: no safe free bulk API. Use TikTok Studio's own scheduler (web, "Schedule video") or manual upload. Do not use cookie/browser-automation tools on the user's main account.
 6. Limits change. Before a large batch re-check the official pages linked in README.

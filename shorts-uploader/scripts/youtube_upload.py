@@ -33,7 +33,7 @@ def upload(yt, item, d):
         title += " #Shorts"
     status = {
         "privacyStatus": item.get("privacy", d.get("privacy", "public")),
-        "selfDeclaredMadeForKids": bool(item.get("made_for_kids", d.get("made_for_kids", True))),
+        "selfDeclaredMadeForKids": bool(item.get("made_for_kids", d.get("made_for_kids", False))),
     }
     if item.get("publish_at"):          # RFC3339, e.g. 2026-12-01T16:00:00Z ; requires private
         status["privacyStatus"] = "private"

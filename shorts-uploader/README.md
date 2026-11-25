@@ -55,7 +55,7 @@ python scripts/queue_status.py queue.json
 - סדר מומלץ: dry-run, אחר כך סרטון אחד אמיתי, ואז כל התור.
 
 ## תוכן לילדים (YouTube "made for kids")
-- הסקריפט שולח תמיד `selfDeclaredMadeForKids` במפורש. ברירת המחדל בתור היא `true`.
+- הסקריפט שולח תמיד `selfDeclaredMadeForKids` במפורש. ברירת המחדל בתור היא `false` (לא לילדים), כי התוכן שלנו מיועד לסטודנטים. סימון "לילדים" מכבה תגובות והתראות, ומומלץ לצד תוכן של ילדים. מסמנים `true` רק כשהתוכן באמת מיועד לילדים (מבחן ה-FTC) ובאישור מפורש של המשתמש.
 - המשמעות: תגובות, מודעות מותאמות והתראות מבוטלות, וגם כרטיסים ומסכי סיום. תוכן שמיועד לילדי בית ספר נחשב ככזה.
 - אם ההצהרה שגויה אפשר להיחשף לבעיות מול יוטיוב. אם יש ספק, התייעץ.
 - באינסטגרם ובטיקטוק אין תווית כזו. הגיל המינימלי הוא 13, ולא אימתתי מקור רשמי שמתאר כללים ייעודיים לתוכן לילדים.
@@ -82,3 +82,10 @@ python scripts/queue_status.py queue.json
 - https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/content_publishing_limit
 - https://developers.tiktok.com/doc/content-sharing-guidelines
 - https://www.tiktok.com/business/es/blog/6940168110557102082
+
+## הערות מהרצה אמיתית (2026-11-25)
+- בנוסף ליצירת ה-client, צריך **להפעיל את YouTube Data API v3** בפרויקט (אחרת שגיאת 403), ולהוסיף את חשבון הערוץ כ-**Test user** (אחרת "access_denied").
+- ההתחברות הראשונה פותחת דפדפן על localhost, ולכן חייבת לרוץ על מחשב עם דפדפן ולא בסביבת ענן.
+- ההרשאה `youtube.upload` מאפשרת רק להעלות. לשינוי סרטון קיים (למשל מפרטי לציבורי) צריך הרשאת `youtube` נפרדת, או לשנות ב-Studio.
+- אחרי הפריט האחרון יש המתנה אקראית של 1-4 דקות. אפשר לקצר עם `--gap 1 2`. בהרצה ברקע משתמשים ב-`python -u` כדי לראות לוג.
+- `defaultLanguage` נקרא רק מ-`defaults.youtube.language`, לא מהפריט.
