@@ -42,15 +42,56 @@ python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>   # required af
 
 > Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, smiling while speaking. The pace serves understanding: brisk and natural on simple, familiar lines; slower and very clear, with a short pause, on the key message and on any step that is new or tricky, so a first-year student follows every word. Short punchy sentences with expressive rises and falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. Never monotone, never robotic, never an announcer.
 
+   (Format 2, below, builds this same voice in a fixed structure plus a line-by-line delivery map; the prompt quoted here is what `--legacy` scripts still send.)
+
    **Fun fact line (owner, 2026-11-25):** when the script has a fun fact, its line carries `"emphasis":"funfact"` in `script.json` and the previous line has `pause` >= 0.6. `tts_he.py` (`style_for`) then adds one instruction to the SAME style annotation (no extra request): say that sentence clearly slower, with emphasis and wonder, stressing the surprising word or number. The sentence is quoted inside the style only; the text stays verbatim.
 
    The approved sample used the earlier wording of this prompt (young Israeli guy plus classic newscaster qualities, no real person named). The version above pushes the Israeli accent harder, which is the owner's top priority, and keeps the energy. **Never name or imitate a real person in the prompt.** Describe qualities instead.
 6. **Budget: ONE request per video (project owner, 2026-11-25).** The daily quota is small, so `tts_he.py --backend gemini` defaults to `--mode whole`: the whole script goes in a single request (lines joined by newlines, `<short pause>` after lines whose `pause` is 0.5 or more). At most 3 requests per video including retries; `--mode lines` (one request per line) is refused for scripts of more than 3 lines (no override). `timing.json` records `requests`, and the Dakademia QA fails a video that used more than 3. A whole take has no line boundaries, so `align_he.py` (Whisper on the PC) is required afterwards; until it ran, `timing.json` carries `"needs_align": true`.
 
+### Unified narration format (format 2; owner, 2026-11-25)
+One fixed structure for every Dakademia narration: the same voice definition every time, and per line a delivery tone, a stress word and inline markers, so the narration has many pauses, emphasis and a moving melody like the best recent videos. It is still ONE request per video (one text, one `speech_metadata.style`), the same three allowed models, the same voice. `engine/narration_format.py` builds the request from `script.json`; `pipeline/voice.py` checks it before any request. A script without `"format": 2` is the old format and still works with `--legacy` (re-takes of earlier videos only); new scripts use format 2.
+
+**What the request looks like** (Interactions API, as in section "How it was done"):
+1. `text` = the transcript, verbatim, one line per script line, with the markers turned into tags and the line's `pause` turned into a closing tag (>= 0.5 s `<short pause>`, >= 1.0 s `<long pause>`; never two tags in a row).
+2. `speech_metadata.style` = the style annotation, always built in this order (the model reads it, never says it):
+   - **Voice (fixed, same words in every video; changed only on the owner's request):** identity (Decky, a young native Israeli guy), sound (authentic everyday Tel Aviv Hebrew, a voice note between friends, upbeat, warm, smiling), pace rule (brisk on familiar lines, slow and clear on the message and on anything new or tricky) and movement rule (never the same contour on two lines in a row; questions rise and hang; conclusions fall with confidence; the surprising word gets a small lift and a smile; real silence after an important line).
+   - **Line by line:** every line whose tone is hook, ask, message, reveal, funfact, recap or loop is named by its first words (caption text, no niqqud) and gets its tone direction, plus `land on "<word>"` when the line has a `stress` word. Lines with tone brisk or build are described once in a closing sentence.
+   - A closing guard: do not change, add or skip any word, never read the directions aloud.
+   The whole annotation stays under 2200 characters (the check fails above it), because long style blocks make the voice drift.
+
+**Per line in `script.json` (format 2):**
+```
+{"id": "msg", "text": "...", "say": "... {p} ...", "pause": 1.0, "target": 5.6, "tone": "message", "stress": "אמת"}
+```
+| tone | use for | delivery |
+|---|---|---|
+| `hook` | the opening question | a teasing question, rising and hanging |
+| `ask` | a question to the viewer inside the video | really asking, rising, a beat to guess |
+| `brisk` | simple, familiar lines | quick, light, casual |
+| `build` | steps toward the point | steady and clear, leaning toward the point |
+| `message` | THE message line (and the payoff) | slow, clear, warm and certain, a falling end, then silence |
+| `reveal` | the answer or twist | a beat of silence, then the answer lands with a lift and a smile |
+| `funfact` | the fun-fact line (replaces `"emphasis":"funfact"`, which still works) | clearly slower, with wonder, a beat before the surprising word or number |
+| `recap` | the plain recap | relaxed, confident, a bit quicker, winding up |
+| `loop` | the last line | open, light, unfinished, flowing into the first line |
+
+**Inline markers in `say`** (not words: they do not count toward the "same number of words as `text`"; never in `text`, never as raw tags): `{p}` short pause, `{P}` long pause, `{breath}`, `{chuckle}`, `{gasp}`, `{sigh}`. The tool writes them as `<short pause>` etc. for the 3.8 models and as `[short pause]` etc. for `gemini-3.1-flash-tts` (square brackets, per Google's 3.1 docs). Tags are English even in a Hebrew text. Put a marker where a person would take a breath: before an answer inside a line (`... {p} אמת או שקר?`), before the surprising word, after a definition. Only human vocalisations and pauses, no sound-effect tags. Hebrew has no capital letters: emphasis comes from `stress`, from position (a colon or a comma before the key word), from short sentences and from the pause before it.
+
+**Minimums, checked before any request** (`narration_format.check`): every line has a valid tone; one line has tone `message`; at least 5 different tones in the script; no 3 lines in a row with the same tone; at least 6 pauses (lines with `pause` >= 0.5 plus inline markers); at least 2 inline markers (warning); no unknown or adjacent markers; stress words are in their line; the last line is `loop` (warning).
+
+**How it was researched** (2026-11-25, all from public pages; the 3.8 specifics come from Google's current speech-generation page):
+- Google's page for the 3.8 models: the `text` field is a strict verbatim transcript; sustained delivery (emotion, pace, volume) goes in `speech_metadata.style`; point-in-time events go in inline tags (`<short pause>`, `<long pause>`, `<breath>`, `<laugh>`, `<sigh>`, `<gasp>`, `<chuckle>`, `<whispers>`, ...); tags are English even for non-English text; pace and emphasis also come from punctuation (commas, dashes, ellipses); keep style short and reuse the same style across turns for a stable baseline; avoid meta-instructions such as "keep the same timbre".
+- Google's blog for 3.1: tags in square brackets, two tags never adjacent, a tag needs text or punctuation around it, "accents are triggered by style prompts".
+- Practitioner guides for 3.1 (a Google AI developer article and a LiveKit guide): a named persona, a concrete scene, a pace note and an accent note work better than adjectives; "flatness" words such as quiet, monotone or no rush make the voice crash; do not quote transcript words in the notes of a prompt that is part of the text; keep the tags consistent with the register of the scene.
+What we took: the fixed persona block (consistency), tags only for pauses and breaths (reliable, official), delivery as plain-language direction in the style field (not in the text), punctuation and pauses for rhythm, and a ceiling on the style length. What we did NOT take: the "audio profile / scene / director's notes" headers (made for 3.1, where the style is part of the text and the headers were read aloud in some reports); here the style is a separate field that is never spoken.
+
+**Check on the first video that uses it** (not provable from the cloud, no key there): `align_he.py` already transcribes the take and fails if a script word is missing or an extra word was said, which catches a style or a tag read aloud. Listen once for: `<long pause>` length (`inject_pauses.py` only ever adds silence, never cuts it, so a pause longer than wanted shows in `fit_check.py`), and whether the line map's quoted first words leak into the speech. If one does, shorten the stress words or drop `stress` for that line; record the result here.
+
 ### Text rules for the voice (applied automatically by `prepare_voice_text` in `tts_he.py`)
 - **Numbers are always Hebrew words, never digits.** The script converts `80%` to `שמונים אחוז`, `3.14` to `שלוש נקודה אחת ארבע`, `ו-17` to `ושבע עשרה`, up to 9999. It uses the feminine/abstract counting forms, so for a counted noun of another gender, or a bigger number, write the words yourself in the line's `"say"` field. The script exits with an error if a digit or the Latin name reaches the voice.
 - **The name is spelled דקי in Hebrew letters, never "Daki" or "Decky" in Latin, and pronounced like "דקה" (DA-ka, stress on the first syllable).** The script replaces `דקי` with the niqqud form `דַּקִּי` before sending (override with `"name_say"` in script.json). If the owner reports a wrong stress on the name, try `דָּקִי` or `דֶּקִי` in `"name_say"` and record the winner here.
-- Prefer short sentences, commas for breath. `<short pause>` inline tags are allowed in the text.
+- Prefer short sentences, commas for breath. In format 2 write pauses and breaths as the markers `{p}`, `{P}`, `{breath}` in `say` (see "Unified narration format"); raw `<tags>` are only for legacy scripts.
 
 ### Timing and checks
 Gemini returns no word timestamps, so `align_he.py` is required afterwards. Its Whisper transcript is also the automatic voice check: every word of the script is heard, numbers are read as words, and the name is דקי. Accent and energy are fixed by the locked voice and style prompt; change them only on the owner's request.

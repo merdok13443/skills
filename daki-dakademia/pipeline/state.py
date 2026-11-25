@@ -30,8 +30,14 @@ Commands (course = the folder name, e.g. בדידה):
   gate    [--publish-state P] [--cap 6]    producer step 1: exit 0 only inside 10:00-21:00 Asia/Jerusalem, no fresh queue lock,
                                            and fewer than <cap> YouTube uploads today in publish-state.json
   next-to-propose <course> [--ahead 6]     proposer: ids that need a proposal so that <ahead> videos are proposed or approved
-  propose <course> <id> --message M --example E [--card C]   proposer: store a proposal (status proposed)
-  decide  <course> <id> approve|reject     proposer: record the owner's answer on the card
+  next-to-select <course> [--ahead 6]      topic stage (Fable): same list as next-to-propose; no owner card is involved
+  select  <course> <id> --message M --example E [--topic PATH]
+                                           topic stage (Fable): store the autonomous choice, status approved at once (selected_by fable);
+                                           PATH is the topic.json the stage wrote into the video folder
+  chosen  <course>                         compact list of every message/example already chosen (id, status, message, example), so the
+                                           topic stage never repeats an example and keeps the course varied
+  propose <course> <id> --message M --example E [--card C]   only when the owner asks to see/approve one: store a proposal (status proposed)
+  decide  <course> <id> approve|reject     only for such an owner card: record the answer
   check   <course>                         validate the files and list videos whose queue and progress statuses disagree
 
 Exit codes: 0 ok, 2 usage/data error, 3 busy (fresh lock), 4 nothing to do / gate closed.
@@ -173,7 +179,7 @@ def card(course, vid):
     if ce:
         out['curriculum'] = {k: v for k, v in ce.items() if k not in ('id', 'title', 'number')}
     if qe:
-        out['approved'] = {k: qe.get(k) for k in ('status', 'message', 'example') if qe.get(k) is not None}
+        out['approved'] = {k: qe.get(k) for k in ('status', 'message', 'example', 'selected_by', 'topic') if qe.get(k) is not None}
     return out
 
 
@@ -440,6 +446,32 @@ def cmd_propose(course, vid, message, example, card_id):
     print(f'{vid}: proposed')
 
 
+def cmd_select(course, vid, message, example, topic):
+    # the autonomous topic stage (Fable): no owner approval card; the owner reviews the finished video before upload
+    if len(message.split()) > 14:
+        die(f'the message has {len(message.split())} words; the rule is 14 or fewer')
+    t = iso()
+
+    def g(d):
+        e = entry(d['videos'], vid)
+        if e is None:
+            die(f'video {vid} is not in queue.json')
+        if e.get('status') in ('in_progress', 'done', 'blocked'):
+            die(f'video {vid} is {e.get("status")}; the topic stage only selects pending, rejected or proposed videos')
+        e.update({'status': 'approved', 'message': message, 'example': example, 'selected_by': 'fable',
+                  'proposed_at': t, 'approved_at': t})
+        if topic:
+            e['topic'] = topic
+    update(paths(course)['queue'], g)
+    print(f'{vid}: selected (approved)')
+
+
+def cmd_chosen(course):
+    q = load(paths(course)['queue'])
+    dump([{'id': v['id'], 'status': v.get('status'), 'message': v.get('message'), 'example': v.get('example')}
+          for v in q['videos'] if v.get('course', course) == course and v.get('message')])
+
+
 def cmd_decide(course, vid, answer):
     if answer not in ('approve', 'reject'):
         die('decide takes approve or reject')
@@ -529,7 +561,7 @@ def main(argv):
     elif c == 'gate':
         ps = opt(a, '--publish-state'); cap = int(opt(a, '--cap', '6'))
         cmd_gate(ps, cap)
-    elif c == 'next-to-propose':
+    elif c in ('next-to-propose', 'next-to-select'):
         ahead = int(opt(a, '--ahead', '6'))
         cmd_next_to_propose(a[0], ahead)
     elif c == 'propose':
@@ -537,6 +569,13 @@ def main(argv):
         if not m or not e:
             die('propose needs --message and --example')
         cmd_propose(a[0], a[1], m, e, cid)
+    elif c == 'select':
+        m = opt(a, '--message'); e = opt(a, '--example'); tp = opt(a, '--topic')
+        if not m or not e:
+            die('select needs --message and --example')
+        cmd_select(a[0], a[1], m, e, tp)
+    elif c == 'chosen':
+        cmd_chosen(a[0])
     elif c == 'decide':
         cmd_decide(a[0], a[1], a[2])
     elif c == 'check':
