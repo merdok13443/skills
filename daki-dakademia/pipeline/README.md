@@ -23,3 +23,5 @@ Gemini narration only, on the owner's PC (the API key lives there).
 ```
 Files: `stage_log.py` (timing of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js is copied FRESH from `../mascot/daki.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
 Narration research (Gemini TTS has no duration control; pace via `style`, pauses via tags/punctuation; budget text per line with fit_check): see `../../explainer-shorts/HEBREW_NARRATION.md` and the project's `research/industrial-production-plan.md`.
+
+Intro videos (course trailer 0.0 and unit intro X.0, `type` trailer/intro in the curriculum JSON) follow the same stages but with a different author chain: Fable writes the first script and the visual presentation (stages 1b-2), Opus high designs the eye-catching effects and the hook and revises. Rules and rationale: `../INTRO-VIDEOS-DAKI.md`.
