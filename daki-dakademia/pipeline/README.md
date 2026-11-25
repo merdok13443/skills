@@ -33,7 +33,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 Facts are checked against the "קטעי מקור" of draft-haiku.md; a source page is opened only for a claim not covered there.
                 A second or third pass reviews the changed lines plus the whole-script checks (word count, duration, payoff %, message, loop),
                 not every line again.
-4. audio        CLOUD (default): commit <src>'s voice/script.json to merdok13443/dakademia-videos `dev` as work/<id>/voice/script.json (plus script.md as work/<id>/script.md for the message check; a branch+PR, merged;
+4. audio        CLOUD (default): commit <src>'s voice/script.json to merdok13443/dakademia-videos `dev` as work/<id>/voice/script.json (plus script.md as work/<id>/script.md, REQUIRED: voice_rules checks its 'המסר:' line; a branch+PR, merged;
                 the video's other files stay in the project), then run the workflow `Narration (Gemini voice)` with video=<id> (dry_run first on a new setup;
                 `mcp__github__actions_run_trigger`, ref dev, or the GitHub mobile app). It runs python voice.py on that folder: pre-check of script.json
                 (no request is wasted) -> ONE Gemini request (engine/tts_he.py, whole mode) -> engine/align_he.py (Whisper word times, REQUIRED after a
