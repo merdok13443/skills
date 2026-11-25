@@ -18,6 +18,23 @@ sh engine/mktiming.sh he1
 - **Quality check:** a Whisper Hebrew transcription (ivrit-ai large-v3-turbo) of the Avri demo matched the script word for word. "80%" was read correctly as שמונים אחוז. The Hila demo was also correct; Whisper only spelled זוחל and סוללה slightly differently.
 - **Caveats:** it uses Microsoft's Edge read-aloud endpoint, which is free but unofficial and can change. Keep the generated `voice.wav` with each project.
 
+## Gemini TTS (Dakademia narration for Decky)
+
+```
+pip install google-genai>=2.25.0 soundfile scipy numpy
+# key once, on the PC:  setx GEMINI_API_KEY "<key>"   (then open a new terminal)
+python engine/tts_he.py <proj> --backend gemini
+python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
+```
+
+**Standing rule (project owner, 2026-11-25):** the Gemini API key is used ONLY with the model `gemini-3.8-flash-tts` and ONLY to generate narration audio. No other model, no other use. `tts_he.py` hard-codes the model and exits if the script asks for another.
+
+- **Limits:** one request per script line, spaced about 6.5 s apart (10 requests/minute). The Google Cloud project is capped at 50 requests per day for this model.
+- **Voice:** default `Puck` (Upbeat). A/B candidates: `Sadachbia` (Lively), `Achird` (Friendly), `Fenrir` (Excitable). Pick once and keep it for the series.
+- **Style (Decky):** young Israeli guy, quick, curious, a little cheeky, a friend who already passed the course; upbeat, slightly faster than normal speech, smiling, short punchy sentences, never a lecturer or announcer, a short pause before the punchline. Default text is `DECKY_STYLE` in `tts_he.py`; override with `"style"` in script.json.
+- **Timing:** no word timestamps, so run `align_he.py` afterwards.
+- **Output:** WAV, 24 kHz mono.
+
 ## Offline fallback: Piper + noa
 
 ```

@@ -2,6 +2,7 @@
 
 Usage:  python engine/tts_he.py <proj>                (backend from script.json, default "edge")
         python engine/tts_he.py <proj> --backend piper
+        python engine/tts_he.py <proj> --backend gemini   (needs GEMINI_API_KEY, see below)
 
 script.json (Hebrew):
 {
@@ -19,6 +20,15 @@ script.json (Hebrew):
 "text" is what the captions show. "say" (optional) is what the voice reads, e.g. nikud
 or a phonetic respelling to fix a mispronounced word. Keep the same number of words in
 "say" as in "text" so the word timings map 1:1.
+
+Gemini backend ("backend": "gemini"):
+  Uses ONLY the model gemini-3.8-flash-tts and ONLY to generate narration audio. This is a
+  standing rule from the project owner: no other model and no other use of the API key.
+  The key is read from the GEMINI_API_KEY environment variable (never stored in files).
+  "voice": a Gemini prebuilt voice (default "Puck"); "style": delivery instruction (default:
+  Decky's style below). One request per line, spaced to stay under 10 requests/minute; the
+  project's daily quota is capped at 50 requests, so a script of ~8 lines costs ~8 of them.
+  Gemini returns no word timings: run engine/align_he.py afterwards (estimates otherwise).
 
 Word timings:
   edge  -> real WordBoundary events from the service (no alignment step needed).
@@ -95,6 +105,39 @@ def synth_edge(text):
     return to_mono_sr(a, sr), marks
 
 
+# ---------------- gemini ----------------
+# Standing rule: this key is used ONLY for this model and ONLY for narration audio.
+GEMINI_MODEL = 'gemini-3.8-flash-tts'
+DECKY_STYLE = ('A young Israeli guy, quick, curious and a little cheeky, explaining to a friend '
+               'who just started university. Upbeat and energetic, slightly faster than normal '
+               'speech, smiling while speaking. Short punchy sentences. Never lecturing, never an '
+               'announcer. A brief pause before the punchline, and a spark of excitement on the aha moment.')
+_gc, _last = None, [0.0]
+def synth_gemini(text):
+    import base64, io, time
+    global _gc
+    if spec.get('model', GEMINI_MODEL) != GEMINI_MODEL:
+        sys.exit('Only ' + GEMINI_MODEL + ' may be used with the Gemini key (standing project rule).')
+    key = os.environ.get('GEMINI_API_KEY')
+    if not key:
+        sys.exit('GEMINI_API_KEY is not set.')
+    from google import genai
+    if _gc is None:
+        _gc = genai.Client(api_key=key)
+    wait = 6.5 - (time.time() - _last[0])          # stay under 10 requests/minute
+    if wait > 0:
+        time.sleep(wait)
+    _last[0] = time.time()
+    it = _gc.interactions.create(
+        model=GEMINI_MODEL,
+        input=[{'type': 'user_input', 'content': [{'type': 'text', 'text': text,
+                'annotations': [{'type': 'speech_metadata', 'style': spec.get('style', DECKY_STYLE)}]}]}],
+        response_format={'type': 'audio'},
+        generation_config={'speech_config': [{'voice': spec.get('voice', 'Puck')}]})
+    a, sr = sf.read(io.BytesIO(base64.b64decode(it.output_audio.data)), dtype='float32')
+    return to_mono_sr(a, sr), []
+
+
 # ---------------- piper ----------------
 _pv = None
 def synth_piper(text):
@@ -121,7 +164,7 @@ def map_marks(words, marks, dur, cut):
     return out
 
 
-synth = {'edge': synth_edge, 'piper': synth_piper}[backend]
+synth = {'edge': synth_edge, 'piper': synth_piper, 'gemini': synth_gemini}[backend]
 out = [np.zeros(int(lead * SR), dtype=np.float32)]
 t = lead
 timing = {'lines': [], 'words': [], 'lang': 'he', 'backend': backend}
