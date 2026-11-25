@@ -3,6 +3,7 @@
 Every finished video keeps its COMPLETE source in the project folder, so it can be edited, re-rendered or turned into another language later without redoing the work: texts of every stage, narration (script, audio, word times), scene and the exact build, QA, publishing data and the final mp4. Rule owner: this file (layout and contents); stage 9 of `README.md` points here.
 
 ## Where and how it is named
+The folder's place and name follow `../LAYOUT.md` (after the migration: `courses/<slug>/videos/uNN <unit>/uNN-eNN <name>/`, experiments in `_experiments/`); `python layout.py folder <course> <N.M>` prints it. Until the migration (legacy layout):
 `/mnt/project-files/videos/<course>/<unit number> <unit name>/<N.M> <video name>/` (a path in the project folder, not in a git repo).
 - Unit and video names come from `work/<course>/topics/curriculum.json` (the `dir` / `out` paths in the course's `progress.json` are the authority). Leave out only characters Windows forbids (`: ? " < > | \ /`); keep `(∧)`, Hebrew and spaces. Examples: `0 טריילר/0.0 על הקורס/`, `1 לוגיקה פסוקית קשרים ולוחות אמת/1.3 וגם (∧)/`.
 - One folder per video, one unit folder per unit. Never a second folder for the same unit (a unit that is renamed in the curriculum: move the old folder's content in, do not keep both).
