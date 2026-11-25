@@ -10,6 +10,7 @@ Hard requirements (owner feedback 2026-11-25: too fast, message unclear):
 3. Everyday scene as the spine; plain words; never read sender names.
 4. Payoff (the insight) at 65-75% of the estimated duration, a lead-in line and a line of its own.
 5. Loop: the LAST line flows into the FIRST (the hook, a question) as one sentence.
+5b. VISUAL HOOK (owner rule 2026-11-25): design the opening visually, not only in words. Either frame 0 is striking on its own (a bold, recognizable picture of the example plus the topic tag, readable as a thumbnail), or an attention-grabbing effect fires in the first 0.3-1 s (a slam, a ripple, a reveal, a camera punch) while frame 0 still equals the last frame for the loop. Write it in script.md under "הוק ויזואלי:" (frame 0 + the first-second effect) so scene.json can build it.
 6. Sounds like a young Israeli talking to a friend. No exclamation marks, no "...איך?", no "הסוד של". Accurate logic; stamps agree with the example's truth values.
 7. TOPIC NAME (very important rule of the series): the narration says the topic name by second 4 (in the hook) and it is shown large on screen from frame 0. Define every term at first use, in plain words. Voice the common misconception once and correct it at the payoff. The ONE message is its own beat BEFORE the payoff; the payoff (65-75%) is the insight that corrects the misconception.
 8. Never mention a university, book, author, chapter or exercise.
