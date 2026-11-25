@@ -27,7 +27,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - Audience: students with no background, starting the degree. Define every term at first use. ONE strong idea, ONE learning message, ONE real everyday example as the spine of the whole video. Standard notation only (e.g. propositional variables lowercase p, q, r, s).
 - Never mention any university, book, author, chapter, section or exercise number, anywhere (voice, screen, captions, file names, metadata, notes). No on-screen source tag. Examples are original: never the book's example, not even lightly adapted. Facts are still checked against the sources.
 - Every T/F stamp matches the truth of its sentence in every frame, frame 0 included. Every spoken word is correct.
-- Length: target 42-54 s (QA hard limits 30-60 s); 62-78 Hebrew words, 85-105 wpm including pauses (QA fails above 130). 1080x1920, 30 fps.
+- The learning message must come across; pace serves it (owner, 2026-11-25): brisk on simple, familiar lines, slower with a pause on the message and on anything new or tricky. Length target 42-54 s (QA hard limits 30-60 s), about 62-78 Hebrew words, on average 85-105 wpm including pauses (QA fails above 130). 1080x1920, 30 fps.
 - Seamless loop: the last line flows into the first as one sentence; the last frame equals the first frame.
 
 **Look**
