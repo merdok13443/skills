@@ -73,3 +73,15 @@
 - **One learning message** (<= 14 words) stated plainly, followed by a real pause (a line with pause >= 0.6) and repeated once as the recap. At most two supporting ideas; everything else waits for a later video. If a student cannot say the message after the video, the video failed.
 - **Pace follows difficulty** (owner decision 2026-11-25): brisk on simple, familiar lines, slower and clear with a short pause on the message and on new or tricky steps, not slow everywhere. Limits: 62-78 words in 42-54 s. `voice_rules.py` (also run by qa.py) fails above 130 wpm and checks the message line exists in `script.md` ("המסר:") and is spoken.
 - **Finished animation:** nothing is ever cropped by the frame edge, the stamp pops in and out in place (never flies in from outside the frame), two stamps close together chain instead of teleporting, and every stamp lands exactly on its target. `pipeline/motion_check.py` checks this on every frame before the render.
+
+## Owner patterns for examples and messages (recurring feedback, 2026-11-25; apply as principles, not as specific cases)
+These came up again and again in the owner's feedback. Each is a pattern to apply to every video, not a fix for one example.
+- **Riddle with a tension beat.** Open the example as a question the viewer can try to answer, hold a real pause (a line with pause >= 0.6) so they commit to a guess, then reveal. The reveal is the message.
+- **Two related facts with a visible connection.** The pair shares one subject and one visible link, and only the key property changes (true/false, holds/fails). Never two unrelated trivia lines placed side by side.
+- **One concept per video, kept pure.** Do not drag a neighbouring concept into the example (for instance no "but" inside the "and" video); a neighbour gets its own video or a later note.
+- **Rules and promises: the violation must feel clearly wrong.** If every outcome sounds fine to the viewer there is no tension. Pick a case where the broken case is obviously unfair and the not-tested case has an unmistakable resolution (the promise is not broken just because its condition never happened).
+- **Relevant to this audience.** Israeli students aged 18-25 should recognise the subject from their own week (daily apps, beliefs they were taught, campus and army life). Obscure trivia, a dry rule list or a distant myth "does not speak to the crowd": drop it. A widely taught belief that turns out false is a strong pattern.
+- **The surprise comes from the world, never from wording tricks** (see the 8 tests). The first guess should be confidently wrong and fully clear after one sentence.
+- **Do not overclaim.** Check every framing sentence against the sources and the standard, and choose the weakest accurate wording (a tool, not "the language of"; "invented", not "developed", where that is what is actually false). When asked "are you sure?", answer with the source.
+- **Verified sources, before showing the owner.** Every fact in the example has a reliable source recorded in `example.md`; an unverifiable fact is dropped.
+- **Show the owner only the message and one example sentence**, as a card; do not ask anything else.
