@@ -32,6 +32,7 @@ python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
 - **Limits:** one request per script line, spaced about 6.5 s apart (10 requests/minute). The Google Cloud project is capped at 50 requests per day for this model.
 - **Voice:** default `Puck` (Upbeat). A/B candidates: `Sadachbia` (Lively), `Achird` (Friendly), `Fenrir` (Excitable). Pick once and keep it for the series.
 - **Style (Decky):** young Israeli guy, quick, curious, a little cheeky, a friend who already passed the course; upbeat, slightly faster than normal speech, smiling, short punchy sentences, never a lecturer or announcer, a short pause before the punchline. Default text is `DECKY_STYLE` in `tts_he.py`; override with `"style"` in script.json.
+- **API version:** the client must use `http_options={'api_version': 'v1beta'}` (or env `GOOGLE_GENAI_API_VERSION=v1beta`). With the SDK default, every TTS model answers 404 "Model not found" (seen 2026-11-25; matches a Google forum report from 2026-11-11, not yet confirmed working).
 - **Timing:** no word timestamps, so run `align_he.py` afterwards.
 - **Output:** WAV, 24 kHz mono.
 

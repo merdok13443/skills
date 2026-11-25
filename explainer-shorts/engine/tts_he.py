@@ -127,7 +127,8 @@ def synth_gemini(text):
         sys.exit('GEMINI_API_KEY is not set.')
     from google import genai
     if _gc is None:
-        _gc = genai.Client(api_key=key)
+        # TTS models are served on v1beta only; the SDK default (v1) answers 404 "Model not found".
+        _gc = genai.Client(api_key=key, http_options={'api_version': 'v1beta'})
     wait = 6.5 - (time.time() - _last[0])          # stay under 10 requests/minute
     if wait > 0:
         time.sleep(wait)
