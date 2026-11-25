@@ -1,0 +1,68 @@
+@font-face{font-family:"Rubik";font-weight:800;src:url("assets/fonts/rubik-hebrew-800-normal.woff2") format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Rubik";font-weight:800;src:url("assets/fonts/rubik-latin-800-normal.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Rubik";font-weight:900;src:url("assets/fonts/rubik-hebrew-900-normal.woff2") format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Rubik";font-weight:900;src:url("assets/fonts/rubik-latin-900-normal.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"JBMono";font-weight:500;src:url("assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2")}
+@font-face{font-family:"JBMono";font-weight:700;src:url("assets/fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2")}
+
+:root{--bg:%%BG%%;--paper:#EEE6D8;--card:#FFFDF6;--ink:#1C1A17;--mute:#6A604F;--y:#F2B705;--r:#E0452B;--b:#2B6CB0;--tan:#D6C6AA}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Rubik",sans-serif;color:var(--ink);background:var(--bg);direction:rtl}
+bdi,.ltr{direction:ltr;unicode-bidi:isolate}
+.mono{font-family:"JBMono",monospace;font-weight:700}
+.full{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#bgink{background:var(--ink);opacity:0;z-index:1}
+#cam{z-index:2;transform-origin:540px 900px}
+#jsvg{z-index:2}
+.scene{z-index:3}
+#ssvg{z-index:5;pointer-events:none}
+.grain{z-index:6;background:url("assets/grain.png");background-size:256px 256px;opacity:.55;mix-blend-mode:multiply;pointer-events:none}
+.vig{z-index:6;pointer-events:none;background:radial-gradient(ellipse at 50% 46%,transparent 58%,rgba(60,40,20,.20) 100%)}
+#kicker{position:absolute;left:150px;width:780px;top:276px;z-index:7;text-align:center;font-weight:800;font-size:44px;letter-spacing:.03em;color:var(--ink)}
+#kicker i{display:inline-block;width:20px;height:20px;background:var(--r);border:4px solid var(--ink);transform:rotate(45deg);margin:0 26px 4px 16px;vertical-align:middle}
+.cap{position:absolute;left:150px;width:780px;top:1250px;z-index:8;text-align:center;font-weight:800;font-size:60px;line-height:1.36;color:var(--paper)}
+.cap .pill{display:inline;background:rgba(28,26,23,.95);padding:6px 28px 12px;border-radius:28px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cap .w.on{color:var(--y)}
+#flash{background:#fff;opacity:0;z-index:9;pointer-events:none}
+
+/* cards, marks, pads */
+.card{position:absolute;background:var(--card);border:10px solid var(--ink);border-radius:44px;box-shadow:14px 16px 0 var(--ink);display:flex;align-items:center;justify-content:center;text-align:center}
+.card>span{display:block;line-height:1.14}
+.mark{position:absolute;width:250px;height:250px;border-radius:50%;background:rgba(255,253,246,.94);display:flex;align-items:center;justify-content:center;font-family:"JBMono",monospace;font-weight:700;font-size:176px;line-height:1}
+.mark>span{display:block;transform:translateY(-6px)}
+.mark.t{color:var(--b);border:14px solid var(--b);box-shadow:inset 0 0 0 7px var(--card),inset 0 0 0 11px var(--b),8px 10px 0 var(--ink)}
+.mark.f{color:var(--r);border:14px solid var(--r);box-shadow:inset 0 0 0 7px var(--card),inset 0 0 0 11px var(--r),8px 10px 0 var(--ink)}
+.mark.q{color:var(--ink);border:12px dashed var(--ink);font-family:"Rubik",sans-serif;font-weight:900;font-size:190px;box-shadow:8px 10px 0 var(--ink)}
+.wave{position:absolute;left:-20px;top:-20px;right:-20px;bottom:-20px;border-radius:50%;border:8px solid currentColor;opacity:0}
+.pad{position:absolute;border:10px solid var(--ink);border-radius:36px;box-shadow:10px 12px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--card)}
+.pad.t{background:var(--b)} .pad.f{background:var(--r)}
+.pad .l{font-family:"JBMono",monospace;font-weight:700;line-height:1}
+.pad .n{font-weight:900;line-height:1}
+.disc{position:absolute;width:270px;height:270px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:"JBMono",monospace;font-weight:700;font-size:170px;line-height:1;color:var(--card);border:12px solid var(--card)}
+.disc>span{display:block;transform:translateY(-6px)}
+.disc.t{background:var(--b)} .disc.f{background:var(--r)}
+.kin{position:absolute;left:0;width:1080px;text-align:center;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--card)}
+.kin em{font-style:normal;color:var(--y)}
+.num{position:absolute;font-family:"JBMono",monospace;font-weight:700;line-height:1;text-align:center;direction:ltr}
+
+.chip{position:absolute;display:flex;align-items:center;justify-content:center;background:var(--y);border:8px solid var(--ink);border-radius:30px;box-shadow:8px 10px 0 var(--ink);font-weight:900;color:var(--ink);line-height:1;padding:0 26px 6px}
+.pad.row{flex-direction:row;gap:26px}
+.pad.row .n{font-size:66px}
+.cap .pill bdi{font-family:"Rubik",sans-serif}
+.cap .w{display:inline;color:var(--paper)}
+.tk{display:inline-block;position:relative}
+.tk.x{width:.6em;height:1em;vertical-align:baseline}
+.tk.x>b{position:absolute;left:0;top:0;font-weight:700}
+.strike{position:absolute;width:420px;height:16px;background:var(--ink);border-radius:8px;border:3px solid var(--card);transform:rotate(-35deg);transform-origin:50% 50%}
+
+.sw{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#dsvg{z-index:4}
+.card.sm{border-width:8px;border-radius:34px;box-shadow:10px 12px 0 var(--ink)}
+.tag{position:absolute;display:flex;align-items:center;justify-content:center;background:var(--card);border:8px solid var(--ink);border-radius:30px;box-shadow:8px 10px 0 var(--ink);font-weight:900;color:var(--ink);line-height:1;padding:0 26px 8px}
+.tag.y{background:var(--y)}
+.pic{position:absolute;left:0;top:0;width:1080px;height:520px}
+
+.cap.clip{pointer-events:none}
+.sw .raw{position:absolute}
+.dash{position:absolute;border:8px dashed var(--y);border-radius:22px}

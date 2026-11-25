@@ -27,8 +27,8 @@ This is the locked, stable voice of the mascot Decky for every Dakademia video. 
 ```
 pip install "google-genai>=2.25.0" soundfile scipy numpy
 # key once, on the PC (then open a new terminal):  setx GEMINI_API_KEY "<key>"
-python engine/tts_he.py <proj> --backend gemini
-python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
+python engine/tts_he.py <proj> --backend gemini      # ONE request for the whole script
+python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>   # required after a whole take
 ```
 
 ### How it was done (what made it work)
@@ -41,7 +41,7 @@ python engine/align_he.py <proj> && sh engine/mktiming.sh <proj>
 > Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, slightly faster than normal speech, smiling while speaking. Short punchy sentences with expressive rises and falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. Never monotone, never robotic, never an announcer.
 
    The approved sample used the earlier wording of this prompt (young Israeli guy plus classic newscaster qualities, no real person named). The version above pushes the Israeli accent harder, which is the owner's top priority, and keeps the energy. **Never name or imitate a real person in the prompt.** Describe qualities instead.
-6. **Pace:** one request per script line, spaced about 6.5 s apart (10 requests per minute). A script of about eight lines uses eight of the 50 daily requests.
+6. **Budget: ONE request per video (project owner, 2026-11-25).** The daily quota is small, so `tts_he.py --backend gemini` defaults to `--mode whole`: the whole script goes in a single request (lines joined by newlines, `<short pause>` after lines whose `pause` is 0.5 or more). At most 3 requests per video including retries; `--mode lines` (one request per line) is refused for scripts of more than 3 lines unless `--allow-many`. `timing.json` records `requests`, and the Dakademia QA fails a video that used more than 3. A whole take has no line boundaries, so `align_he.py` (Whisper on the PC) is required afterwards; until it ran, `timing.json` carries `"needs_align": true`.
 
 ### Text rules for the voice (applied automatically by `prepare_voice_text` in `tts_he.py`)
 - **Numbers are always Hebrew words, never digits.** The script converts `80%` to `שמונים אחוז`, `3.14` to `שלוש נקודה אחת ארבע`, `ו-17` to `ושבע עשרה`, up to 9999. It uses the feminine/abstract counting forms, so for a counted noun of another gender, or a bigger number, write the words yourself in the line's `"say"` field. The script exits with an error if a digit or the Latin name reaches the voice.

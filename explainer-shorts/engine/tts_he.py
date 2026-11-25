@@ -27,9 +27,14 @@ Gemini backend ("backend": "gemini"):
   Standing rule from the project owner: no other model and no other use of the API key.
   The key is read from the GEMINI_API_KEY environment variable (never stored in files).
   "voice": a Gemini prebuilt voice (default "Puck"); "style": delivery instruction (default:
-  Decky's style below). One request per line, spaced to stay under 10 requests/minute; the
-  project's daily quota is capped at 50 requests, so a script of ~8 lines costs ~8 of them.
-  Gemini returns no word timings: run engine/align_he.py afterwards (estimates otherwise).
+  Decky's style below).
+  REQUESTS ARE SCARCE (daily quota is small): the default mode is "whole" = ONE request for the
+  whole script (lines joined by newlines, "<short pause>" after lines whose "pause" >= 0.5), at
+  most 3 requests per video including retries. "--mode lines" (one request per line) is only for
+  debugging a single line and is refused for scripts of more than 3 lines unless --allow-many.
+  Gemini returns no word timings. In whole mode line boundaries are unknown too, so
+  engine/align_he.py (Whisper on the PC) is REQUIRED afterwards: timing.json has "needs_align": true
+  until it ran. timing.json also records "requests" (QA fails a video that used more than 3).
 
 Word timings:
   edge  -> real WordBoundary events from the service (no alignment step needed).
@@ -47,6 +52,8 @@ proj = args[0]
 spec = json.load(open(os.path.join(proj, 'script.json'), encoding='utf-8'))
 backend = args[args.index('--backend') + 1] if '--backend' in args else spec.get('backend', 'edge')
 lead, tail = spec.get('lead', 0.15), spec.get('tail', 0.6)
+mode = args[args.index('--mode') + 1] if '--mode' in args else spec.get('gemini_mode', 'whole')
+n_requests = [0]
 
 
 def trim_bounds(a, sr, thr=0.01):
@@ -195,6 +202,7 @@ def synth_gemini(text):
     if wait > 0:
         time.sleep(wait)
     _last[0] = time.time()
+    n_requests[0] += 1
     it = _gc.interactions.create(
         model=model,
         input=[{'type': 'user_input', 'content': [{'type': 'text', 'text': prepare_voice_text(text),
@@ -236,27 +244,53 @@ out = [np.zeros(int(lead * SR), dtype=np.float32)]
 t = lead
 timing = {'lines': [], 'words': [], 'lang': 'he', 'backend': backend}
 exact = 0
-for ln in spec['lines']:
-    a, marks = synth(ln.get('say', ln['text']))
+if backend == 'gemini' and mode == 'whole':
+    # ONE request for the whole script; word and line times are estimated until align_he.py runs
+    text = '\n'.join(ln.get('say', ln['text']).strip() + (' <short pause>' if ln.get('pause', 0.25) >= 0.5 else '')
+                     for ln in spec['lines'])
+    a, _ = synth(text)
     s0, e0 = trim_bounds(a, SR)
     a = a[s0:e0]; dur = len(a) / SR
-    words = ln['text'].split()
-    spans = map_marks(words, marks, dur, s0 / SR) if marks else None
-    if spans:
-        exact += 1
-    else:
-        spans = estimate(words, dur)
-    for w, (s, e) in zip(words, spans):
-        timing['words'].append({'w': w, 's': round(t + s, 3), 'e': round(t + e, 3), 'line': ln['id']})
-    timing['lines'].append({'id': ln['id'], 's': round(t, 3), 'e': round(t + dur, 3), 'text': ln['text']})
+    all_words = [(ln['id'], w) for ln in spec['lines'] for w in ln['text'].split()]
+    spans = estimate([w for _, w in all_words], dur)
+    for (lid, w), (s, e) in zip(all_words, spans):
+        timing['words'].append({'w': w, 's': round(t + s, 3), 'e': round(t + e, 3), 'line': lid})
+    for ln in spec['lines']:
+        ws = [w for w in timing['words'] if w['line'] == ln['id']]
+        timing['lines'].append({'id': ln['id'], 's': ws[0]['s'], 'e': ws[-1]['e'], 'text': ln['text']})
+    timing['needs_align'] = True
     out.append(a); t += dur
-    p = ln.get('pause', 0.25)
-    out.append(np.zeros(int(p * SR), dtype=np.float32)); t += p
+else:
+    if backend == 'gemini' and len(spec['lines']) > 3 and '--allow-many' not in args:
+        sys.exit('Refusing one Gemini request per line for %d lines (daily quota). Use --mode whole, '
+                 'or add --allow-many if you really mean it.' % len(spec['lines']))
+    for ln in spec['lines']:
+        a, marks = synth(ln.get('say', ln['text']))
+        s0, e0 = trim_bounds(a, SR)
+        a = a[s0:e0]; dur = len(a) / SR
+        words = ln['text'].split()
+        spans = map_marks(words, marks, dur, s0 / SR) if marks else None
+        if spans:
+            exact += 1
+        else:
+            spans = estimate(words, dur)
+        for w, (s, e) in zip(words, spans):
+            timing['words'].append({'w': w, 's': round(t + s, 3), 'e': round(t + e, 3), 'line': ln['id']})
+        timing['lines'].append({'id': ln['id'], 's': round(t, 3), 'e': round(t + dur, 3), 'text': ln['text']})
+        out.append(a); t += dur
+        p = ln.get('pause', 0.25)
+        out.append(np.zeros(int(p * SR), dtype=np.float32)); t += p
 out.append(np.zeros(int(tail * SR), dtype=np.float32))
 audio = np.concatenate(out)
 sf.write(os.path.join(proj, 'voice.wav'), audio, SR)
 timing['duration'] = round(len(audio) / SR, 3)
+if backend == 'gemini':
+    timing['requests'] = n_requests[0]
+    timing['model'] = spec.get('model', GEMINI_MODEL)
 json.dump(timing, open(os.path.join(proj, 'timing.json'), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
-print('backend', backend, 'duration', timing['duration'], 'words', len(timing['words']),
+print('backend', backend, 'mode', mode if backend == 'gemini' else '-', 'requests', n_requests[0] if backend == 'gemini' else '-',
+      'duration', timing['duration'], 'words', len(timing['words']),
       'wpm', round(len(timing['words']) / timing['duration'] * 60),
       'lines with exact word marks', f'{exact}/{len(spec["lines"])}')
+if timing.get('needs_align'):
+    print('NEXT: python engine/align_he.py', proj, ' (required: line and word times are estimates)')

@@ -4,6 +4,7 @@ python engine/align_he.py <proj> [--model ivrit-ai/whisper-large-v3-turbo-ct2]
 
 Transcribes voice.wav with faster-whisper (word timestamps), matches the recognised words
 to the script words in order, and interpolates any word it could not match.
+After tts_he.py in whole mode (one Gemini request) this step is REQUIRED: it also finds the line boundaries.
 Install once: pip install faster-whisper   (the model downloads from huggingface.co on first run;
 a smaller fallback is --model small).
 """
@@ -56,5 +57,10 @@ for i, w in enumerate(W):
 for l in T['lines']:
     ws = [w for w in W if w['line'] == l['id']]
     l['s'], l['e'] = ws[0]['s'], ws[-1]['e']
+matched = sum(1 for k in range(len(W)) if A[k] in B)
+T.pop('needs_align', None)
+T['aligned'] = {'by': 'whisper', 'model': model, 'matched': matched, 'words': len(W)}
 json.dump(T, open(tp, 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
-print(f'aligned {sum(1 for k in range(len(W)) if A[k] in B)}/{len(W)} words matched by the recogniser')
+print(f'aligned {matched}/{len(W)} words matched by the recogniser')
+if matched < 0.6 * len(W):
+    print('WARNING: less than 60% of the words matched; check voice.wav against the script (skipped or changed words?)')
