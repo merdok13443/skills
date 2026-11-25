@@ -5,7 +5,7 @@ python engine/align_he.py <proj> [--model ivrit-ai/whisper-large-v3-turbo-ct2]
 Transcribes voice.wav with faster-whisper (word timestamps), matches the recognised words
 to the script words in order, and interpolates any word it could not match.
 After tts_he.py in whole mode (one Gemini request) this step is REQUIRED: it also finds the line boundaries.
-Install once: pip install faster-whisper   (the model downloads from huggingface.co on first run;
+Install once: pip install faster-whisper "av==16.0.1"   (faster-whisper 1.2.1 breaks on av 17+: 'metadata_errors' TypeError; the model downloads from huggingface.co on first run;
 a smaller fallback is --model small).
 """
 import difflib, json, os, re, sys
