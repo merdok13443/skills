@@ -44,3 +44,7 @@ tl.call(() => d.setExpr('aha'), null, cue('payoff'));
 
 ## פרומפט לכלי תמונות (אם פעם מייצרים את דקי בכלי AI)
 > Flat 2D vector mascot, thick dark ink outlines (#1C1A17), hard offset ink drop shadow, no gradients. A round stopwatch character: yellow (#F2B705) round body, cream (#FBF6EC) dial face with short ink tick marks, red (#E0452B) push-button at the 10 o'clock position and a small yellow one at 2 o'clock, a blue pencil tucked behind the body at lower left, small motion arcs and sparkles around it. Big white oval eyes with black pupils and a white catchlight, light red blush cheeks, one eyebrow raised on the right side of the image, confident half smile. A black graduation mortarboard tilted slightly, red tassel hanging from its right corner. Simple, friendly, cheeky. Plain background.
+
+## הקול של דקי (קבוע ויציב)
+- קול ישראלי, צעיר, אנרגטי ושובב: Gemini TTS, מודל `gemini-3.8-flash-tts`, הקול Puck, גרסת API `v1beta`, עם פרומפט הסגנון הקבוע `DECKY_STYLE` שבקובץ `explainer-shorts/engine/tts_he.py`. כל ההסברים, הפרומפט המלא והכללים (מספרים תמיד כמילים, השם נכתב "דקי" באותיות עבריות ונקרא כמו "דקה") ב-`explainer-shorts/HEBREW_NARRATION.md`, בפרק "Gemini TTS: the fixed voice of Decky".
+- הקול אושר ב-2026-11-25. לא מחליפים קול, מודל או סגנון בלי אישור של הבעלים. המפתח משמש רק למודלי TTS ורק ליצירת קריינות.
