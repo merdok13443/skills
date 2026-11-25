@@ -1,6 +1,6 @@
 {
   "defaults": {
-    "youtube": {"privacy": "public", "made_for_kids": true, "category_id": "27", "language": "he"},
+    "youtube": {"privacy": "public", "made_for_kids": false, "category_id": "27", "language": "he"},
     "instagram": {"share_to_feed": true}
   },
   "items": [
