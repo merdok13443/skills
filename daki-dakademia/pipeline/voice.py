@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Stage 4 in ONE command, on the machine that has GEMINI_API_KEY (the owner's PC, or a cloud session that has the key).
+"""Stage 4 in ONE command, on a machine that has GEMINI_API_KEY (the cloud workflow, the owner's PC, or a session that has the key).
 
-usage: python voice.py <source-dir> [--skills <skills root>] [--retake] [--legacy]
+usage: python voice.py <source-dir> [--skills <skills root>] [--retake] [--legacy] [--check]
+
+Where it runs: in the cloud by default, as the GitHub Actions workflow `Narration (Gemini voice)` of
+merdok13443/dakademia-videos (secret GEMINI_API_KEY; script.json committed to dev under work/<id>/voice/; results committed
+back to dev). The owner's PC works too. --check: only the pre-check (and the key being present), no request.
 
 Runs, in order, and stops at the first failure with a clear message:
   0. pre-check of <src>/voice/script.json BEFORE any request (so no request is wasted on a script that QA would reject):
@@ -90,6 +94,10 @@ def main(a):
     errs = precheck(S, '--legacy' in a)
     if errs:
         sys.exit('script.json is not ready for the voice (no request sent):\n  ' + '\n  '.join(errs))
+    if '--check' in a:
+        print('script.json is ready for the voice (pre-check passed, no request sent); GEMINI_API_KEY ' +
+              ('present' if os.environ.get('GEMINI_API_KEY') else 'MISSING'))
+        return
     h = hashlib.sha256(open(sp, 'rb').read()).hexdigest()
     stamp = os.path.join(vd, 'voice_stamp.json')
     have = os.path.exists(os.path.join(vd, 'voice.wav')) and os.path.exists(stamp) and json.load(open(stamp)).get('script') == h
@@ -97,7 +105,7 @@ def main(a):
         print('== voice.wav already made from this exact script.json: no new request (use --retake to force one)')
     else:
         if not os.environ.get('GEMINI_API_KEY'):
-            sys.exit('GEMINI_API_KEY is not set on this machine: run this on the owner\'s PC (or record waiting: voice)')
+            sys.exit('GEMINI_API_KEY is not set here: run the cloud workflow `Narration (Gemini voice)` (secret GEMINI_API_KEY), or the owner\'s PC (or record waiting: voice)')
         run([os.path.join(eng, 'tts_he.py'), vd, '--backend', 'gemini'], 'tts_he (one Gemini request)')
         json.dump({'script': h}, open(stamp, 'w'))
         for f in ('voice.preinject.wav', 'timing.preinject.json'):      # a new take: the old pause injection no longer applies
