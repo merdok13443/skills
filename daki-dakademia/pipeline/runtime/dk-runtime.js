@@ -41,11 +41,11 @@
 
   /* ---------- stamp (the T/F rubber stamp) ---------- */
   const STAMP = `<g class="sbob"><g class="sq">
-  <g class="sT"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2B6CB0"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">T</text></g>
-  <g class="sF"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#E0452B"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">F</text></g>
-  <g class="sN"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#8C8273"/></g>
+  <g class="sT"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">T</text></g>
+  <g class="sF"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">F</text></g>
+  <g class="sN"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/></g>
   <rect x="-30" y="-128" width="60" height="58" fill="#D6C6AA" stroke="#1C1A17" stroke-width="8"/>
-  <rect x="-54" y="-232" width="108" height="112" rx="42" fill="#E0452B" stroke="#1C1A17" stroke-width="9"/>
+  <rect x="-54" y="-232" width="108" height="112" rx="42" fill="#2F5D8C" stroke="#1C1A17" stroke-width="9"/>
   <path d="M-34 -204 Q-38 -180 -30 -160" stroke="#fff" stroke-width="9" fill="none" opacity=".6" stroke-linecap="round"/>
   <circle cx="0" cy="-262" r="62" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
   <circle cx="-54" cy="-286" r="26" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
