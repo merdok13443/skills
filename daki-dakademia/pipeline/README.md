@@ -18,8 +18,16 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 Source text: python sources.py "<course sources dir>" --list (sizes); a book up to ~40k tokens is read whole
                 (--all --books <name>), a bigger one through its pages: --terms "<title>,<tags>" --books <name> --pages 12.
                 draft-haiku.md ends with "## קטעי מקור": every fact used, with a short quote and its [book p.N] marker.
-1b. example     OPUS (high): researches and picks ONE central real everyday example + the ONE learning message   example.md   (prompts/example_researcher.md)
-                A video whose message and example were approved in the queue reuses them as given (state.py card, `approved`).
+1b. topic       FABLE (claude-fable-5-2), AUTONOMOUS, no owner approval card (owner 2026-11-25): picks the example and the ONE learning message, and
+                guarantees that the topic is timely and relevant, the example challenging and fitting, and above all that it carries the concept's
+                message so the viewer learns it. Reads the owner's curated record of past decisions (prompts/topic_decisions.md: ~15 cases, patterns
+                that worked and failed) and `state.py chosen` (never repeats). Writes topic.json + topic.md, then
+                `python state.py select <course> <id> --message M --example E --topic <topic.json>` (status approved at once).   (prompts/topic_selector.md)
+                The owner reviews the FINISHED video before it is uploaded (unchanged); that is the only owner check. When the owner approves or
+                rejects anything, the case is appended to topic_decisions.md (standing rule).
+1b-2. example   OPUS (high): develops Fable's choice into example.md (re-checks facts and tests, beats, notation examples, the visual hook). It does not
+                pick another example; a failed fact or test goes back to the topic stage as topic-objection.md (at most 3 rounds, then `blocked`).   example.md   (prompts/example_researcher.md)
+                Intro and trailer videos keep their own chain (`../INTRO-VIDEOS-DAKI.md`).
 2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
 3. review       Sonnet critique + Haiku accuracy check in ONE pass; loop back only on a real ERROR (at most 3 times).
                 Facts are checked against the "קטעי מקור" of draft-haiku.md; a source page is opened only for a claim not covered there.

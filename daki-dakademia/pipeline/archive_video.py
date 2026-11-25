@@ -12,7 +12,7 @@ STAGES = ['01-content', '02-example', '03-script', '04-voice', '05-build', '06-q
 # working-dir file -> package location
 MAP = {
  'draft-haiku.md': '01-content', 'content.md': '01-content',
- 'example.md': '02-example',
+ 'example.md': '02-example', 'topic.json': '02-example', 'topic.md': '02-example', 'topic-objection.md': '02-example',
  'script.md': '03-script', 'review.md': '03-script', 'critique.md': '03-script', 'fact-check.md': '03-script', 'fact-check-haiku.md': '03-script', 'fable-notes.md': '03-script', 'display.md': '03-script',
  'voice/script.json': '04-voice', 'voice/voice.wav': '04-voice', 'voice/timing.json': '04-voice',
  'voice/voice.preinject.wav': '04-voice', 'voice/timing.preinject.json': '04-voice', 'voice/timing.raw.json': '04-voice',

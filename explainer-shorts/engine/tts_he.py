@@ -45,6 +45,8 @@ import asyncio, json, os, re, subprocess, sys, tempfile
 import numpy as np, soundfile as sf
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import narration_format as nf          # unified narration format 2 (HEBREW_NARRATION.md); scripts without "format" stay legacy
 ROOT = os.path.dirname(HERE)
 SR = 24000
 args = sys.argv[1:]
@@ -121,6 +123,8 @@ GEMINI_ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts',
 def style_for(spec):
     # a line marked "emphasis":"funfact" in script.json is a verified fun fact: slow, clear and emphasized (owner 2026-11-25).
     # Still ONE request: the instruction goes into the same style annotation, quoting the sentence (the style is not read aloud).
+    if nf.is_format2(spec):
+        return nf.build_style(spec)      # fixed voice + per-line tones, one style annotation (still ONE request)
     s = spec.get('style', DECKY_STYLE)
     ff = [ln.get('say', ln['text']).strip() for ln in spec.get('lines', []) if ln.get('emphasis') == 'funfact']
     if ff:
@@ -260,8 +264,16 @@ timing = {'lines': [], 'words': [], 'lang': 'he', 'backend': backend}
 exact = 0
 if backend == 'gemini' and mode == 'whole':
     # ONE request for the whole script; word and line times are estimated until align_he.py runs
-    text = '\n'.join(ln.get('say', ln['text']).strip() + (' <short pause>' if ln.get('pause', 0.25) >= 0.5 else '')
-                     for ln in spec['lines'])
+    if nf.is_format2(spec):
+        errs, warns = nf.check(spec)
+        if errs:
+            sys.exit('format 2 script rejected before any request:\n  ' + '\n  '.join(errs))
+        for w in warns:
+            print('warning:', w)
+        text = '\n'.join(nf.voice_line(ln, spec.get('model', GEMINI_MODEL)) for ln in spec['lines'])
+    else:
+        text = '\n'.join(ln.get('say', ln['text']).strip() + (' <short pause>' if ln.get('pause', 0.25) >= 0.5 else '')
+                         for ln in spec['lines'])
     a, _ = synth(text)
     s0, e0 = trim_bounds(a, SR)
     a = a[s0:e0]; dur = len(a) / SR
@@ -278,7 +290,7 @@ else:
     if backend == 'gemini' and len(spec['lines']) > 3:
         sys.exit('Refusing one Gemini request per line for %d lines (daily quota). Use --mode whole.' % len(spec['lines']))
     for ln in spec['lines']:
-        a, marks = synth(ln.get('say', ln['text']))
+        a, marks = synth(nf.voice_line(ln, spec.get('model', GEMINI_MODEL)) if nf.is_format2(spec) else ln.get('say', ln['text']))
         s0, e0 = trim_bounds(a, SR)
         a = a[s0:e0]; dur = len(a) / SR
         words = ln['text'].split()

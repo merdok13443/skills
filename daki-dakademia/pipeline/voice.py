@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Stage 4 in ONE command, on the machine that has GEMINI_API_KEY (the owner's PC, or a cloud session that has the key).
 
-usage: python voice.py <source-dir> [--skills <skills root>] [--retake]
+usage: python voice.py <source-dir> [--skills <skills root>] [--retake] [--legacy]
 
 Runs, in order, and stops at the first failure with a clear message:
   0. pre-check of <src>/voice/script.json BEFORE any request (so no request is wasted on a script that QA would reject):
      backend gemini, an allowed model, voice Puck, no custom style, no digits or Latin mascot name in the voice text,
-     "say" has the same word count as "text", at most 14 lines.
+     "say" has the same word count as "text" (markers and punctuation-only tokens are not words), at most 14 lines, and the
+     unified narration format 2 (HEBREW_NARRATION.md: a tone per line, enough pauses and tone variety, markers valid).
+     --legacy: allow an old script without "format" (a re-take of a video made before format 2).
   1. explainer-shorts/engine/tts_he.py <src>/voice --backend gemini   ONE Gemini request for the whole script (whole mode).
      Skipped when voice.wav already exists for exactly this script.json (voice/voice_stamp.json), so a re-run never
      spends a second request by accident; --retake forces a new take (it counts toward the budget of 3).
@@ -29,6 +31,8 @@ except Exception:
     pass
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, '..', '..', 'explainer-shorts', 'engine'))
+import narration_format as nf
 ALLOWED = {'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts', 'gemini-3.1-flash-tts'}
 
 
@@ -36,8 +40,15 @@ def opt(a, n, d=None):
     return a[a.index(n) + 1] if n in a else d
 
 
-def precheck(S):
+def precheck(S, legacy=False):
     e = []
+    if not nf.is_format2(S) and not legacy:
+        e.append('script.json has no "format": 2 (the unified narration format: a tone per line, pauses, markers; HEBREW_NARRATION.md). '
+                 'Add it, or pass --legacy for a re-take of an old script')
+    fe, fw = nf.check(S)
+    e.extend(fe)
+    for w in fw:
+        print('warning:', w)
     if S.get('backend') != 'gemini':
         e.append(f"backend is {S.get('backend')!r}; Decky's voice is gemini")
     if S.get('model', 'gemini-3.8-flash-tts') not in ALLOWED:
@@ -55,8 +66,8 @@ def precheck(S):
             e.append(f"line {ln['id']}: digits in the voice text (numbers are Hebrew words; put them in 'say')")
         if re.search(r'\b(?:Daki|Decky)\b', say + ln['text'], re.I):
             e.append(f"line {ln['id']}: Latin mascot name")
-        if 'say' in ln and len(ln['say'].split()) != len(ln['text'].split()):
-            e.append(f"line {ln['id']}: 'say' has {len(ln['say'].split())} words, 'text' has {len(ln['text'].split())}")
+        if 'say' in ln and nf.word_count(ln['say']) != nf.word_count(ln['text']):
+            e.append(f"line {ln['id']}: 'say' has {nf.word_count(ln['say'])} words, 'text' has {nf.word_count(ln['text'])}")
     return e
 
 
@@ -76,7 +87,7 @@ def main(a):
     vd = os.path.join(src, 'voice')
     sp = os.path.join(vd, 'script.json')
     S = json.load(open(sp, encoding='utf-8'))
-    errs = precheck(S)
+    errs = precheck(S, '--legacy' in a)
     if errs:
         sys.exit('script.json is not ready for the voice (no request sent):\n  ' + '\n  '.join(errs))
     h = hashlib.sha256(open(sp, 'rb').read()).hexdigest()
