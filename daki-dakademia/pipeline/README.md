@@ -9,8 +9,9 @@ the scripts only replace a model reading big files or typing commands. Every scr
 
 ```
 0. orchestrate  the thread. Course state ONLY through state.py (never open progress.json / queue.json / curriculum.json / PALETTE.md):
+                <course> = the slug (discrete-math); paths only from layout.py (../LAYOUT.md); python layout_check.py at start and end
                 python state.py lock <course> [--id N.M] [--queue]   lock + the video card (curriculum entry, unit, --bg, approved message/example)
-                python state.py done|fail|wait <course> <id> ...      finish, block or wait, releases the locks (RUNBOOK rules)
+                python state.py done|fail|wait <course> <id> ...      finish, block or wait, releases the locks (pipeline/RUNBOOK.md rules)
                 Each stage agent gets its context pack:  python pack.py <stage> --course <course> --video <id> --out <src>/pack-<stage>.md
                 and is told to read that ONE file (plus the stage's own inputs below). After each agent, log its real tokens:
                 python stage_log.py <src> --record <stage> --model <m> --effort <e> --tokens <n from the agent's completion notice>

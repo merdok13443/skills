@@ -81,7 +81,9 @@ def check_video_folder(r, vf, unit_code=None, packages=False):
     elif unit_code and m.group(1) != unit_code:
         r.e(f'video {n!r} is in unit folder {unit_code}: {rel(vf)}')
     for f in os.listdir(vf):
-        if f.lower().endswith('.mp4') and not f.startswith(n.split(' ')[0]) and f != n + '.mp4':
+        c = n.split(' ')[0]
+        legacy = f'{int(c[1:3])}.{int(c[5:7])} ' if L.CODE_RE.match(c) else None     # finals named before the migration keep their name
+        if f.lower().endswith('.mp4') and not f.startswith(c) and not (legacy and f.startswith(legacy)):
             r.w(f'mp4 named differently from its folder: {rel(os.path.join(vf, f))}')
     if packages and any(f.lower().endswith('.mp4') for f in os.listdir(vf)):
         av = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'archive_video.py')

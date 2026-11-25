@@ -46,8 +46,21 @@ def exam_season(d):
     return d.month in (1, 2, 6, 7)
 
 
+def course_meta(course):
+    """courses/<slug>/course.json when the project folder is there (LAYOUT.md), else the COURSES fallback."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import layout as L
+        info = L.course_info(course)
+        if info:
+            return {'short': info['short'], 'full': info['name'], 'tag': info['hashtag'], 'field': info.get('field_tag', '')}
+    except Exception:
+        pass
+    return COURSES.get(course)
+
+
 def build(m, course, today):
-    c = COURSES.get(course)
+    c = course_meta(course)
     if not c:
         sys.exit(f'unknown course {course!r}: add it to COURSES in metadata.py (and the hashtag table in METADATA-DAKI.md)')
     unit, ep = (int(x) for x in str(m['video']).split('.'))

@@ -39,7 +39,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - Decky in every video, from the current `<skills>/daki-dakademia/mascot/daki.js` copied fresh (identical to the skill's file), never from an earlier video or template, never redrawn or restyled. Host, not hero. Look and expressions: `mascot/DAKI.md`.
 - The T/F stamp is a shared component like Decky: `stamp/stamp.js`, copied fresh by the build (QA checks it is identical). Neutral blue tool with no letter, hidden when idle, lands in the card's dashed slot, imprint green T / red F. Never drawn per video. Spec: `stamp/STAMP.md`.
 - The top header "course · N.M · episode title" is in every video, built from `header` in scene.json; the build and the QA fail without it.
-- Background: the unit's shade from `work/<course>/PALETTE.md`, as a separate `--bg`. Never change `--paper` (it is also the caption text colour).
+- Background: the unit's shade from the course's `PALETTE.md` (the video card gives it), as a separate `--bg`. Never change `--paper` (it is also the caption text colour).
 - Everything readable stays inside x 150-930, y 270-1500 in every frame, frame 0 and the last frame included; `safezone_check.py` must pass.
 
 **Voice**
@@ -68,7 +68,7 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`. Each
 | 7-8 make + QA | `pipeline/README.md`, `qa_report.json`, the one contact sheet |
 | 9 deliver + publish | pack `deliver`: `pipeline/VIDEO-PACKAGE.md` (the package), `METADATA-DAKI.md` (principle, keywords, YouTube, rules for all texts), `PUBLISHING-DAKI.md` section 4; the commands in `pipeline/README.md` stage 9; `../shorts-uploader/README.md` only for setup or errors |
 
-Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), old `work/<course>/video-sources/` templates.
+Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), the course's `reference/` folder (old templates and topic lists), `notes/`, `archive/`.
 
 ## 3. General-skill rules that do NOT apply to Dakademia
 On-screen source tag; 32-38 s, 95-110 words, 150-170 wpm; Kokoro, edge-tts or Piper voices; English narration; "an everyday physical object" as the topic; the general rule 3 "the example is the spine of the whole video, hook to summary" (in Dakademia the example opens and anchors, the centre explains the concept); the general rule 2 "topic name spoken by second 4" (Dakademia: the topic is shown large from frame 0 and the main message lands quickly; a late topic word is only a build warning); the general 32-38 s length for trailer/intro videos (they follow `INTRO-VIDEOS-DAKI.md`); the Heebo font (Dakademia uses the pipeline's Rubik + JetBrains Mono); the general `engine/` build (Dakademia builds with `pipeline/make_video.py`); "watch it on a phone / listen by ear" (replaced by `qa.py`, `voice_rules.py`, `motion_check.py` and the Whisper alignment in `align_he.py`). The general checklist applies only where it does not conflict with the Dakademia checklist in `GUIDELINES-DAKI.md`.
@@ -79,7 +79,7 @@ Right after QA passes: `PUBLISHING-DAKI.md` (mp4 to dakademia-videos via a PR to
 ## 5. Critique and changing the guidelines
 - **Standing rule (owner, 2026-11-25):** whenever the owner gives feedback and praises the result, turn the lessons into guidelines automatically, in the owner file of each rule (no dated add-ons), and apply them to the next videos without being asked.
 - A video's critique goes into that video's folder, not into the skill.
-- Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages `pipeline/README.md`; folder layout and naming `LAYOUT.md`; the per-video folder package `pipeline/VIDEO-PACKAGE.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; the T/F stamp `stamp/STAMP.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours `work/<course>/PALETTE.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
+- Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages `pipeline/README.md`; folder layout and naming `LAYOUT.md`; the per-video folder package `pipeline/VIDEO-PACKAGE.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; the T/F stamp `stamp/STAMP.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours the course's `PALETTE.md`; run procedure `pipeline/RUNBOOK.md` + `pipeline/QUEUE-RUNBOOK.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
 
 ## Communication
 The owner writes in Hebrew, so reply in Hebrew. The videos are in Hebrew.

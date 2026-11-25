@@ -7,13 +7,15 @@ re-reads the file right before writing, writes a temp file and renames it (no ha
 then re-reads it to confirm it is valid. Same rules as the course RUNBOOK and the queue runbook;
 this script only does the bookkeeping, so nothing about how a video is made changes.
 
-Files (root = $DAKI_ROOT or /mnt/project-files):
-  <root>/work/<course>/pipeline/progress.json   production state + the run lock
-  <root>/work/<course>/topics/curriculum.json   the approved curriculum (read only)
-  <root>/work/<course>/PALETTE.md               unit background colours (read only)
-  <root>/work/queue/queue.json                  approval queue (message + example per video) + the producer lock
+Files (root = $DAKI_ROOT or /mnt/project-files; every path comes from layout.py, see ../LAYOUT.md):
+  courses/<slug>/state/progress.json   production state + the run lock
+  courses/<slug>/curriculum.json       the approved curriculum (read only)
+  courses/<slug>/PALETTE.md            unit background colours (read only)
+  queue/queue.json                     approval queue (message + example per video) + the producer lock
+  (legacy layout until the migration: work/<course>/pipeline/progress.json, work/<course>/topics/curriculum.json,
+   work/<course>/PALETTE.md, work/queue/queue.json)
 
-Commands (course = the folder name, e.g. בדידה):
+Commands (course = the slug, e.g. discrete-math; the legacy folder name, e.g. בדידה, also works):
   card    <course> <id>                    everything a stage needs about one video, as compact JSON:
                                            progress entry, curriculum entry, unit name/goal, --bg colour, approved message/example
   show    <course>                         one-line counts, the lock, the next video
@@ -39,6 +41,9 @@ Commands (course = the folder name, e.g. בדידה):
   propose <course> <id> --message M --example E [--card C]   only when the owner asks to see/approve one: store a proposal (status proposed)
   decide  <course> <id> approve|reject     only for such an owner card: record the answer
   check   <course>                         validate the files and list videos whose queue and progress statuses disagree
+  init    <slug>                           new course: build state/progress.json from curriculum.json (dir/out from layout.py)
+  migrate-paths <course> [--dry-run]       after a layout migration: rewrite dir/out of every progress entry (PATHMAP.json, then
+                                           layout.py for folders that do not exist yet), course ids in progress and queue -> slug
 
 Exit codes: 0 ok, 2 usage/data error, 3 busy (fresh lock), 4 nothing to do / gate closed.
 """
@@ -49,12 +54,15 @@ import re
 import sys
 import tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import layout as L  # noqa: E402
+
 try:
     sys.stdout.reconfigure(encoding='utf-8'); sys.stderr.reconfigure(encoding='utf-8')
 except Exception:
     pass
 
-ROOT = os.environ.get('DAKI_ROOT', '/mnt/project-files')
+ROOT = L.ROOT
 LOCK_HOURS = 4
 TZ_OFFSET_FALLBACK = 2          # Asia/Jerusalem winter offset, used only when zoneinfo is missing
 
@@ -74,11 +82,7 @@ def die(msg, code=2):
 
 # ------------------------------------------------------------------ files
 def paths(course):
-    w = os.path.join(ROOT, 'work', course)
-    return {'progress': os.path.join(w, 'pipeline', 'progress.json'),
-            'curriculum': os.path.join(w, 'topics', 'curriculum.json'),
-            'palette': os.path.join(w, 'PALETTE.md'),
-            'queue': os.path.join(ROOT, 'work', 'queue', 'queue.json')}
+    return L.paths(course)
 
 
 def load(p, required=True):
@@ -216,7 +220,7 @@ def cmd_lock(course, vid=None, queue_mode=False):
             print(f"queue lock is fresh ({q['lock'].get('video')}, {q['lock'].get('started_utc')}): previous run still active, skipping")
             sys.exit(3)
         if vid is None:
-            cand = [v for v in q['videos'] if v.get('status') == 'approved' and v.get('course', course) == course]
+            cand = [v for v in q['videos'] if v.get('status') == 'approved' and L.same_course(v.get('course', course), course)]
             if not cand:
                 print('no approved video in the queue')
                 sys.exit(4)
@@ -395,7 +399,7 @@ def cmd_gate(pub_state, cap, course=None):
     if not (10 <= loc.hour < 21):
         print(f'outside the 10:00-21:00 window ({loc:%H:%M} Asia/Jerusalem)')
         sys.exit(4)
-    qp = os.path.join(ROOT, 'work', 'queue', 'queue.json')
+    qp = L.queue_path()
     q = load(qp, required=False)
     if q and fresh(q.get('lock')):
         print(f"queue lock is fresh ({q['lock'].get('video')})")
@@ -416,7 +420,7 @@ def cmd_gate(pub_state, cap, course=None):
 
 def cmd_next_to_propose(course, ahead):
     q = load(paths(course)['queue'])
-    vs = [v for v in q['videos'] if v.get('course', course) == course]
+    vs = [v for v in q['videos'] if L.same_course(v.get('course', course), course)]
     have = sum(1 for v in vs if v.get('status') in ('proposed', 'approved'))
     need = max(0, ahead - have)
     ids = [v['id'] for v in vs if v.get('status') in ('pending', 'rejected')][:need]
@@ -469,7 +473,7 @@ def cmd_select(course, vid, message, example, topic):
 def cmd_chosen(course):
     q = load(paths(course)['queue'])
     dump([{'id': v['id'], 'status': v.get('status'), 'message': v.get('message'), 'example': v.get('example')}
-          for v in q['videos'] if v.get('course', course) == course and v.get('message')])
+          for v in q['videos'] if L.same_course(v.get('course', course), course) and v.get('message')])
 
 
 def cmd_decide(course, vid, answer):
@@ -500,7 +504,7 @@ def cmd_check(course):
     if len(ids) != len(set(ids)):
         print('progress.json: duplicate ids'); ok = False
     if q:
-        qs = {v['id']: v.get('status') for v in q['videos'] if v.get('course', course) == course}
+        qs = {v['id']: v.get('status') for v in q['videos'] if L.same_course(v.get('course', course), course)}
         for v in prog['videos']:
             a, b = v.get('status'), qs.get(v['id'])
             if b is None:
@@ -509,6 +513,66 @@ def cmd_check(course):
                 print(f"{v['id']}: progress {a} vs queue {b}"); ok = False
     print('state OK' if ok else 'state has differences (fix with: state.py set ...)')
     sys.exit(0 if ok else 2)
+
+
+def cmd_init(course):
+    s = L.slug(course)
+    P = paths(s)
+    if os.path.exists(P['progress']):
+        die(f'{P["progress"]} exists already')
+    c = load(P['curriculum'])
+    vids = []
+    items = ([c['trailer']] if c.get('trailer') else []) + [v for u in c.get('units', []) for v in u.get('videos', [])]
+    for v in items:
+        d = L.video_dir(s, v['id'])
+        vids.append({'id': str(v['id']), 'unit': int(str(v['id']).split('.')[0]), 'type': v.get('type', 'lesson'),
+                     'title': v.get('title'), 'out': f'{d}/{os.path.basename(d)}.mp4', 'status': 'pending', 'attempts': 0, 'dir': d})
+    os.makedirs(os.path.dirname(P['progress']), exist_ok=True)
+    save(P['progress'], {'course': s, 'lock': None, 'log': [{'video': 'all', 'utc': iso(), 'msg': 'init from curriculum.json'}],
+                         'folder_rule': 'LAYOUT.md + VIDEO-PACKAGE.md', 'videos': vids})
+    print(f'{len(vids)} videos -> {P["progress"]}')
+
+
+def cmd_migrate_paths(course, dry):
+    s = L.slug(course)
+    P = paths(s)
+    changes = []
+
+    def g(d):
+        d['course'] = s
+        for v in d['videos']:
+            for k in ('dir', 'out'):
+                if v.get(k):
+                    new = L.resolve(v[k])
+                    if new == v[k] and L.is_new() and not os.path.exists(L.j(v[k])):
+                        nd = L.video_dir(s, v['id'])
+                        new = nd if k == 'dir' else f'{nd}/{os.path.basename(nd)}.mp4'
+                    if new != v[k]:
+                        changes.append((v['id'], k, v[k], new))
+                        v[k] = new
+        return d
+    if dry:
+        g(load(P['progress']))
+    else:
+        update(P['progress'], g)
+    cp = P['curriculum']
+    if os.path.exists(cp) and load(cp).get('courseId') != s:
+        changes.append(('curriculum', 'courseId', load(cp).get('courseId'), s))
+        if not dry:
+            update(cp, lambda d: d.__setitem__('courseId', s))
+    for c in changes[:12]:
+        print(*c, sep='  |  ')
+    print(f'{len(changes)} paths {"would change" if dry else "changed"}')
+
+    def gq(q):
+        n = 0
+        for v in q['videos']:
+            if v.get('course') and v['course'] != s and L.same_course(v['course'], s):
+                v['course'] = s; n += 1
+        return n
+    if os.path.exists(P['queue']):
+        n = gq(load(P['queue'])) if dry else update(P['queue'], gq)
+        print(f'queue.json: {n} course ids {"would be" if dry else ""} set to {s}')
 
 
 # ------------------------------------------------------------------ cli
@@ -580,6 +644,11 @@ def main(argv):
         cmd_decide(a[0], a[1], a[2])
     elif c == 'check':
         cmd_check(a[0])
+    elif c == 'init':
+        cmd_init(a[0])
+    elif c == 'migrate-paths':
+        dry = flag(a, '--dry-run')
+        cmd_migrate_paths(a[0], dry)
     else:
         die(f'unknown command {c!r}\n' + __doc__)
 
