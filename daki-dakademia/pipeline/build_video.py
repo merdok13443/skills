@@ -235,7 +235,9 @@ def caption_phrases():
     caps = [c for c in caps if not any(c['a'] >= h0 and c['b'] <= h1 for (h0, h1) in hide)]
     seam = spec.get('seam_caption')
     if seam and caps:
-        a = round(max(caps[-1]['b'], T['lines'][-1]['e']) if caps[-1]['b'] < D else T['words'][-1]['e'], 3)
+        if caps[-1]['b'] >= D:       # the last caption must not stay up under the seam caption (they overlap when the tail after the voice is short)
+            caps[-1]['b'] = round(min(D, T['words'][-1]['e'] + .15), 3)
+        a = round(max(caps[-1]['b'], T['lines'][-1]['e']), 3)
         if D - a >= .15: caps.append({'a': a, 'b': D, 'w': [{'t': x, 's': 0, 'e': 0} for x in seam.split()]})
     return caps
 
