@@ -32,6 +32,12 @@ except Exception:
     pass
 
 LOCK_HOURS = 4
+# course.json for the courses that existed before the migration (LAYOUT.md section 2); later courses use layout.py new-course
+LEGACY_INFO = {
+    'discrete-math': {'name': 'מתמטיקה בדידה', 'short': 'בדידה', 'hashtag': '#בדידה', 'field_tag': '#מתמטיקה', 'status': 'active'},
+    'databases': {'name': 'בסיסי נתונים', 'short': 'בסיסי נתונים', 'hashtag': '#בסיסינתונים', 'field_tag': '#מדעיהמחשב',
+                  'status': 'planned'},
+}
 
 
 def fresh(lock):
@@ -121,6 +127,12 @@ def apply(plan_path, dry):
             pm['migrations'].append(mig)
         mig['entries'].append({'old': m['old'], 'new': m['new']})
         save_json(pm_path, pm)
+    for m in todo:                                       # drop source folders the moves left empty (never a non-empty one)
+        d = os.path.dirname(L.j(m['old']))
+        while os.path.abspath(d) != os.path.abspath(L.ROOT) and os.path.isdir(d) and not os.listdir(d):
+            os.rmdir(d)
+            print('removed empty folder', os.path.relpath(d, L.ROOT))
+            d = os.path.dirname(d)
     for rp, text in plan.get('readmes', {}).items():
         p = L.j(rp)
         if not os.path.exists(p):
@@ -160,7 +172,7 @@ def plan_courses(out):
     if L.is_new():
         L.die('courses/ already exists; plan-courses is for the legacy layout only')
     date = dt.date.today().isoformat()
-    moves = []
+    moves, readmes = [], {}
     for s in L.courses():
         h = L.legacy_dir(s)
         w = f'work/{h}'
@@ -173,6 +185,12 @@ def plan_courses(out):
         for o, n in fixed.items():
             if os.path.exists(L.j(o)):
                 moves.append({'old': o, 'new': n})
+        info = dict(slug=s, sources=f'אקדמיה/{h}/מקורות אמת', **LEGACY_INFO.get(s, {'name': h, 'short': h, 'hashtag': '#' + h.replace(' ', ''),
+                                                                                      'field_tag': '', 'status': 'planned'}))
+        info = {k: info[k] for k in L.COURSE_KEYS}
+        readmes[f'courses/{s}/course.json'] = json.dumps(info, ensure_ascii=False, indent=1)
+        if not any(n.startswith('GUIDELINES') for n in os.listdir(L.j(w))):
+            readmes[f'courses/{s}/NOTES.md'] = f'# {info["name"]}: course notes\n\nNotation and course-specific conventions only (SKILL.md 0.5).'
         if os.path.exists(L.j(f'{w}/pipeline/RUNBOOK.md')):
             moves.append({'old': f'{w}/pipeline/RUNBOOK.md', 'new': f'archive/course-runbooks-{date}/{s}-RUNBOOK.md'})
         for n in sorted(os.listdir(L.j(w))):                  # the rest, whole folders, after the fixed files left them
@@ -183,7 +201,9 @@ def plan_courses(out):
                 continue
             moves.append({'old': o, 'new': f'courses/{s}/reference/{n}'})
         vroot = L.j('videos', h)
-        if os.path.isdir(vroot):
+        if os.path.isdir(vroot) and not os.listdir(vroot):
+            moves.append({'old': f'videos/{h}', 'new': f'archive/old-plan-unit-folders-{date}/{s}-empty'})
+        elif os.path.isdir(vroot):
             for u in sorted(os.listdir(vroot)):
                 up = os.path.join(vroot, u)
                 if not os.path.isdir(up):
@@ -215,7 +235,18 @@ def plan_courses(out):
                 moves.append({'old': f'{q}/queue.json', 'new': 'queue/queue.json'})
             else:
                 moves.append({'old': f'{q}/{n}', 'new': f'archive/queue-runbook-{date}/{n}'})
-    plan = {'name': 'phase2-courses', 'date': date, 'safe_while_locked': False, 'moves': moves}
+    if os.path.isdir(L.j('videos/review/stamp-component')):
+        moves.append({'old': 'videos/review/stamp-component', 'new': f'research/stamp-component-{date}'})
+    if os.path.isdir(L.j('videos/review')):
+        moves.append({'old': 'videos/review', 'new': f'archive/review-copies-{date}'})
+    for r in ('work/README.md', 'videos/README.md'):
+        if os.path.isfile(L.j(r)):
+            moves.append({'old': r, 'new': f'archive/readmes-before-{date}/{r.replace("/", "-")}'})
+    readmes['README.md'] = ('# Dakademia project folder\n\nWhere everything lives: daki-dakademia/LAYOUT.md in the skills repo (branch dev).\n'
+                            'courses/<slug>/ one folder per course (course.json, curriculum, palette, notes, state, videos)\n'
+                            'queue/ production queue · research/ notes/ archive/ dated folders · אקדמיה/ source PDFs only\n'
+                            'Old paths: PATHMAP.json (`python layout.py resolve <old path>`).')
+    plan = {'name': 'phase2-courses', 'date': date, 'safe_while_locked': False, 'moves': moves, 'readmes': readmes}
     text = json.dumps(plan, ensure_ascii=False, indent=1)
     if out:
         with open(out, 'w', encoding='utf-8') as f:

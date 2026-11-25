@@ -114,7 +114,6 @@ def main(a):
     course = a[a.index('--course') + 1] if '--course' in a else None
     video = a[a.index('--video') + 1] if '--video' in a else None
     out = a[a.index('--out') + 1] if '--out' in a else None
-    root = os.environ.get('DAKI_ROOT', '/mnt/project-files')
     parts, used = [], []
     if course and video:
         r = subprocess.run([sys.executable, os.path.join(HERE, 'state.py'), 'card', course, video], capture_output=True, text=True, encoding='utf-8')
@@ -126,11 +125,12 @@ def main(a):
         if f.startswith('COURSE/'):
             if not course:
                 continue
-            g = [x for x in os.listdir(os.path.join(root, 'work', course)) if x.startswith('GUIDELINES')]
-            if not g:
+            sys.path.insert(0, HERE)
+            import layout as L
+            p = L.paths(course)['notes']
+            if not os.path.isfile(p):
                 continue
-            p = os.path.join(root, 'work', course, g[0])
-            label = f'work/{course}/{g[0]}'
+            label = os.path.relpath(p, L.ROOT)
         else:
             p = os.path.join(SKILLS, f)
             label = f

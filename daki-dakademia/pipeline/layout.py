@@ -106,7 +106,7 @@ def paths(course):
                 'videos': os.path.join(c, 'videos'),
                 'experiments': os.path.join(c, 'videos', '_experiments'),
                 'reference': os.path.join(c, 'reference'),
-                'queue': j('queue', 'queue.json'),
+                'queue': queue_path(),
                 'sources': j(*(course_info(s) or {}).get('sources', 'אקדמיה').split('/'))}
     h = legacy_dir(s)
     w = j('work', h)
@@ -119,8 +119,20 @@ def paths(course):
             'videos': j('videos', h),
             'experiments': j('videos', h, '_ניסויים'),
             'reference': os.path.join(w, 'topics'),
-            'queue': j('work', 'queue', 'queue.json'),
+            'queue': queue_path(),
             'sources': j('אקדמיה', h, 'מקורות אמת')}
+
+
+def queue_path():
+    return j('queue', 'queue.json') if is_new() else j('work', 'queue', 'queue.json')
+
+
+def same_course(a, b):
+    """True when two course ids (slug or legacy name) mean the same course."""
+    try:
+        return slug(a) == slug(b)
+    except SystemExit:
+        return a == b
 
 
 # ------------------------------------------------------------------ names

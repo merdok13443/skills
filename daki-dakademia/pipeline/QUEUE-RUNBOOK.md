@@ -1,0 +1,21 @@
+# Topic selection and production queue runbook (selector + producer)
+
+`<course>` = the course slug (`discrete-math`; the legacy name `בדידה` also works during the migration). Moved here from the project folder in the folder restructure (2026-11-26).
+
+State: the shared `queue.json` (`queue/queue.json`, LAYOUT.md), read and written ONLY through `daki-dakademia/pipeline/state.py` (it re-reads right before every write; never open the file in a model). Statuses: pending -> approved (set by the topic stage itself) -> in_progress -> done | blocked. `proposed`/`rejected` exist only if the owner asks to see and decide a topic himself. Course production details: `pipeline/RUNBOOK.md` and `daki-dakademia/SKILL.md` in merdok13443/skills (dev, pull fresh; they win on any conflict).
+Owner's rules (2026-11-25): topic, example and message are chosen AUTONOMOUSLY by Fable (`claude-fable-5-2`), no approval card and no owner question; the owner reviews each finished video before public upload (a PC upload only on his own direct message). YouTube only, max 6 uploads per day, window 10:00-21:00 Asia/Jerusalem.
+
+## Topic selector (run twice a day, or whenever fewer than 6 videos are approved)
+1. Pull skills dev. `python state.py next-to-select <course> --ahead 6` lists the videos that need a topic now (trailer 0.0 and unit intros follow `INTRO-VIDEOS-DAKI.md`; lessons follow this runbook), each with its curriculum entry.
+2. For each lesson, run the Fable topic stage: `python pack.py topic --course <course> --video <id> --out <src>/pack-topic.md`, then an agent on model `claude-fable-5-2` follows `daki-dakademia/pipeline/prompts/topic_selector.md` (it reads `topic_decisions.md` in full and `python state.py chosen <course>`). It writes `topic.json` + `topic.md` and runs `python state.py select <course> <id> --message "<message>" --example "<example>" --topic <topic.json>` (status approved at once). Log its tokens (`stage_log.py --record`).
+3. NO `request_decision` card and no message to the owner for a topic. A selection that ends `blocked` (self-audit failed 3 rounds): `python state.py fail <course> <id> --stage topic --reason "<cause>" --blocked`, report once.
+4. When the owner, on his own, approves or rejects a topic or comments on an example (in any thread): append the case to `daki-dakademia/pipeline/prompts/topic_decisions.md` (PR to `dev`); a rejected topic is re-selected by the topic stage with that rejection in `topic_decisions.md`.
+
+## Producer (hourly, 10:00-21:00)
+1. `python state.py gate --publish-state <dakademia-videos>/publish-state.json`: exit 0 only inside 10:00-21:00 Asia/Jerusalem, with no fresh lock and fewer than 6 YouTube uploads today. Any other exit: stop silently.
+2. `python state.py lock <course> --queue`: takes the first `approved` video and both locks, and prints its card. Exit 4 (none approved): run the topic selector above, then try once more; still none: stop silently, no message.
+3. Run the full pipeline per `pipeline/RUNBOOK.md` using the selected message and example as given (they are in the card; `topic.json` is in the video's folder for the example-development stage). Voice: `python voice.py <src>` (ONE Gemini request, then alignment, pauses and the voice check). If GEMINI_API_KEY is set in this cloud session, run it right here; never print, log or write the key anywhere. If not, a Remote Control session on the owner's PC runs that one command. The YouTube upload is one command on the owner's PC (stays on) through a Remote Control session: `publish_video.py --url <URL>`. If the PC is unreachable: `python state.py wait <course> <id> voice|publish` and report once.
+4. Deliver mp4 to dakademia-videos (PR to dev), upload to YouTube only (Instagram and TikTok skipped), record it (`deliver.py record`), then `python state.py done <course> <id> --note "..."`. One video per run.
+
+## Failure rule (skills PR 25)
+If a stage fails, try to fix it without breaking any guideline. If it still fails: `python state.py fail <course> <id> --stage <stage> --reason "<cause>" --blocked` (blocked in both files, locks released), report clearly (video id, stage, reason), stop, and do NOT start another video in that run. The producer skips `blocked` videos only after the owner has been told; the next run does not retry a blocked video unless the owner says so.

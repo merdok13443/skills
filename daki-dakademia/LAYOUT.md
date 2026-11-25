@@ -42,7 +42,7 @@ The root is a closed list: anything else there is a `layout_check.py` error afte
 | `work/<course>/PALETTE.md` | `courses/<slug>/PALETTE.md` |
 | `work/<course>/GUIDELINES-*.md` | `courses/<slug>/NOTES.md` |
 | `work/<course>/pipeline/progress.json` | `courses/<slug>/state/progress.json` |
-| `work/<course>/pipeline/RUNBOOK.md` | general runbook in the skill; the course copy goes to archive/ |
+| `work/<course>/pipeline/RUNBOOK.md`, `work/queue/QUEUE-RUNBOOK.md` | `pipeline/RUNBOOK.md`, `pipeline/QUEUE-RUNBOOK.md` in this skill (general, `<course>` = slug); the old copies go to archive/ |
 | `work/<course>/topics/`, `video-sources/`, previews | `courses/<slug>/reference/` |
 | `work/queue/queue.json` | `queue/queue.json` |
 | `videos/<course>/<n name>/<N.M name>/` | `courses/<slug>/videos/uNN name/uNN-eNN name/` |

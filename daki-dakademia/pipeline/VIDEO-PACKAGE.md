@@ -3,11 +3,10 @@
 Every finished video keeps its COMPLETE source in the project folder, so it can be edited, re-rendered or turned into another language later without redoing the work: texts of every stage, narration (script, audio, word times), scene and the exact build, QA, publishing data and the final mp4. Rule owner: this file (layout and contents); stage 9 of `README.md` points here.
 
 ## Where and how it is named
-The folder's place and name follow `../LAYOUT.md` (after the migration: `courses/<slug>/videos/uNN <unit>/uNN-eNN <name>/`, experiments in `_experiments/`); `python layout.py folder <course> <N.M>` prints it. Until the migration (legacy layout):
-`/mnt/project-files/videos/<course>/<unit number> <unit name>/<N.M> <video name>/` (a path in the project folder, not in a git repo).
-- Unit and video names come from `work/<course>/topics/curriculum.json` (the `dir` / `out` paths in the course's `progress.json` are the authority). Leave out only characters Windows forbids (`: ? " < > | \ /`); keep `(∧)`, Hebrew and spaces. Examples: `0 טריילר/0.0 על הקורס/`, `1 לוגיקה פסוקית קשרים ולוחות אמת/1.3 וגם (∧)/`.
-- One folder per video, one unit folder per unit. Never a second folder for the same unit (a unit that is renamed in the curriculum: move the old folder's content in, do not keep both).
-- Experiments and rejected trials are not separate folders beside the video: they go to `versions/<tag>/` (below) or, if they were never a version of this video, to `videos/<course>/_ניסויים/`.
+Place and name: `../LAYOUT.md` (`courses/<slug>/videos/uNN <unit name>/uNN-eNN <video name>/`; `python layout.py folder <course> <N.M>` prints it). The `dir` / `out` paths in the course's `progress.json` (via `state.py card`) are the authority.
+- Unit and video names come from the course's `curriculum.json`. Leave out only characters Windows forbids (`: ? " < > | \ /`) and commas; keep `(∧)`, Hebrew and spaces.
+- One folder per video, one unit folder per unit. Never a second folder for the same unit (a unit that is renamed in the curriculum: move the old folder's content in with `migrate_layout.py`, do not keep both).
+- Experiments and rejected trials are not separate folders beside the video: they go to `versions/<tag>/` (below) or, if they were never a version of this video, to the course's `videos/_experiments/`.
 
 ## Layout (fixed names, same for every video)
 ```
