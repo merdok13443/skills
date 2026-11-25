@@ -46,6 +46,10 @@ def check(src):
         for ln in S.get('lines', []):
             lw = {norm(w) for w in ln['text'].split()}
             if mw and sum(w in lw or w[1:] in lw for w in mw) / len(mw) >= .6:
+                tl = T.get('lines', [])
+                for j, x in enumerate(tl[:-1]):
+                    if x['id'] == ln['id'] and tl[j + 1]['s'] - x['e'] < .6:
+                        warn.append(f"real pause after the message line is only {tl[j + 1]['s'] - x['e']:.2f}s (< 0.6): run inject_pauses.py after align_he.py")
                 if ln.get('pause', 0) < .6: warn.append(f"the line that states the message ({ln['id']}) has pause {ln.get('pause', 0)} (< 0.6): give it time to land")
                 break
         else: err.append('the message sentence is not stated in the narration (no line contains 60% of its words)')

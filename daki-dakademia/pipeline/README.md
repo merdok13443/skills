@@ -11,9 +11,10 @@ Gemini narration only, on the owner's PC (the API key lives there).
 4. audio        voice/script.json -> ONE Gemini request for the whole script, on the PC: python engine/tts_he.py <src>/voice --backend gemini
                 (default --mode whole; at most 3 requests per video incl. retries, the daily quota is small) -> voice/voice.wav + voice/timing.json
 4b. timing       python engine/align_he.py <src>/voice  (REQUIRED after a whole take: Whisper on the PC finds line and word times)
+                python inject_pauses.py <src>           (a one-take voice ignores pauses: cuts at the quietest spot of each gap and inserts the silence the script asked for)
                 python voice_rules.py <src>             voice-rule + request-budget check (make_video and qa run it too)
                 refine_timing.py is only for the old per-line takes (not for a whole take).
-5. fit          python fit_check.py <src>      real length of every line vs its target; rewrite/re-take only the lines that miss
+5. fit          python fit_check.py <src>      real length of every line vs its target; if the whole take misses, reword the script (a whole new take = one more request; the budget is 3 per video). Never re-take single lines
 6. visuals      Sonnet writes <src>/scene.json (data, anchors on the real words)   see SCENE_SPEC.md
 7. make         python make_video.py <src> [--sheet] [--draft]   build -> hyperframes check -> render -> mix -> QA (+ stage_log.jsonl)
 7b. motion       motion_check.py runs inside make_video BEFORE the render (seconds): nothing cropped by the frame edge, stamp never teleports, every stamp reaches its target

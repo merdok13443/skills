@@ -4,7 +4,7 @@
 Everything is timed by **anchors** that resolve against the real voice, so if the voice moves, the visuals move with it.
 
 ## Layout rules (checked by the build, `errors` stop the video)
-- Canvas 1080x1920. **Safe rectangle x 150-930, y 270-1500.** Kicker (series tag) sits at y 276-320 (automatic). Captions occupy y 1250-1500 (automatic, 780 wide). Free content area: **y 330-1230, width 780**. Cards <= 780 wide. Stamp origin: hover y >= 654, x 265-815 (the stamp head is ~324 px tall and ~230 wide). Decky: centre x within 150+378s .. 930-378s, y between 270+265s and 1500-215s (s = scale, .5 is a good size); keep Decky out of the caption band (y+215s <= 1250) and off the card.
+- Canvas 1080x1920. The kicker states the topic (and the series number); the topic name itself is also a large tag in the first scene (see `topic`). **Safe rectangle x 150-930, y 270-1500.** Kicker (series tag) sits at y 276-320 (automatic). Captions occupy y 1250-1500 (automatic, 780 wide). Free content area: **y 330-1230, width 780**. Cards <= 780 wide. Stamp origin: hover y >= 654, x 265-815 (the stamp head is ~324 px tall and ~230 wide). Decky: centre x within 150+378s .. 930-378s, y between 270+265s and 1500-215s (s = scale, .5 is a good size); keep Decky out of the caption band (y+215s <= 1250) and off the card.
 - Min 2 s on screen per scene. Payoff at 65-75 % of the length. Frame 0 = last frame (loop): repeat the first scene as the last scene (same elements, same Decky pose, same stamp pose, `seam_caption` = the first caption).
 
 ## Top level
@@ -16,6 +16,7 @@ Everything is timed by **anchors** that resolve against the real voice, so if th
   "bpm":96, "seed":11,                  // music
   "decky":{"x":690,"y":1040,"s":0.5,"expr":"smirk"},          // frame-0 pose
   "stamp":{"hov":{"x":540,"y":700,"r":8},"face":"n"},         // frame-0 pose of the T/F stamp (n = blank)
+  "topic":{"word":"פסוק","el":"tpk"},       // RULE (very important): the topic name is spoken by second 4 and shown large (>= 90 px) from frame 0; the build errors otherwise. el = a tag with vis:true in the first scene
   "seam_caption":"אמת או שקר?",         // last caption: completes the first line (loop)
   "captions":{"skip_lines":["punch"],"hide":[["l:punch","le:punch"]],"max_words":5,"max_chars":22},
   "sfx":[{"at":"w:cmd.2","type":"glitch","gain":0.8}],        // extra sound cues (types: pop tick whoosh swoosh riser hit ding blip thud glitch)
@@ -66,7 +67,7 @@ Text inside cards: use `<br>` for lines, `<bdi class="ltr mono">x &gt; 3</bdi>` 
 | jam | down:[x,y], hover:[x,y], kind:"n", mark | the stamp comes down on a non-proposition, stops short, jitters |
 | sFace / sTo / sLeave | kind / x,y,r / | low-level stamp control (the loop pose at the end) |
 | sfx | type, gain | extra sound cue |
-Order of equal times = file order. Decky expressions per moment: smirk hook, surprised on a surprising fact, thinking on an open question, aha at the payoff, wink at the end/loop.
+Order of equal times = file order. Decky expressions per moment (`rush` in the last seconds of the loop, as the Decky rules require): smirk hook, surprised on a surprising fact, thinking on an open question, aha at the payoff, wink at the end/loop.
 
 ## What the build prints (and the model should read instead of the log)
 `build_report.json` (errors/warnings: boxes outside the safe rectangle, stamp kind vs mark kind vs card truth, unknown anchors, payoff %, scenes < 2 s, Decky/stamp out of the safe area), `check_errors.json` (hyperframes overlap/contrast errors with selector and time), `qa_report.json` (final video checks).

@@ -46,7 +46,7 @@ for f in P['frames']:
         if d > 300: tele.append((f['t'], 'stamp', f'jump of {d:.0f}px in one frame'))
     prev = st
 err += group(tele, 'stamp teleports:')
-fr_at = lambda t: min(P['frames'], key=lambda f: abs(f['t'] - t))
+fr_at = lambda t: next((f for f in P['frames'] if f['t'] >= t - 1e-3), P['frames'][-1])   # first frame at or after the hit time
 for a in plan['acts']:
     if a['do'] in ('stamp', 'jam'):
         tx, ty = a['hit'] if a['do'] == 'stamp' else a['down']

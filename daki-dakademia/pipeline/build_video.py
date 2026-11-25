@@ -180,6 +180,15 @@ if payoff is not None:
     pct = payoff / D * 100
     if not 65 <= pct <= 75: warns.append(f'payoff at {pct:.1f}% of the video (target 65-75%)')
     sfx.append({'t': payoff, 'type': 'hit', 'gain': 1.3})
+topic = spec.get('topic')        # {"word": "פסוק", "el": "<id of a tag in the first scene>"}  rule: the topic name is SPOKEN by second 4 and shown LARGE (>= 90 px) from frame 0
+if topic:
+    nw = lambda x: re.sub(r'[^\w]', '', re.sub(r'[\u0591-\u05c7]', '', x))
+    hit = next((w for w in W if nw(w['w']) == topic['word'] or nw(w['w'])[1:] == topic['word']), None)
+    if not hit: errs.append(f"topic word {topic['word']!r} is never spoken")
+    elif hit['s'] > 4.0: errs.append(f"topic word {topic['word']!r} is spoken at {hit['s']:.1f}s (rule: by second 4)")
+    te = next((e for e in spec['scenes'][0]['els'] if e['id'] == topic.get('el')), None)
+    if not te: errs.append(f"topic element {topic.get('el')!r} not in the first scene")
+    elif not te.get('vis') or te.get('size', 0) < 90: errs.append(f"topic element {te['id']} must be visible from frame 0 with size >= 90 px (has vis={te.get('vis')}, size={te.get('size')})")
 mute = spec.get('mute')
 if mute: mute = [anchor(mute[0], 'mute'), anchor(mute[1], 'mute')]
 elif payoff is not None: mute = [round(payoff - 2.49, 3), payoff]
