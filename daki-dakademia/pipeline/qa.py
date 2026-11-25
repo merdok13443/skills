@@ -33,6 +33,7 @@ with tempfile.TemporaryDirectory() as td:
     chk('loop: first vs last frame (mean abs diff < 4/255)', d < 4, f'{d:.2f}/255')
 
 sz = os.path.join(HERE, '..', '..', 'explainer-shorts', 'engine', 'safezone_check.py')
+import shutil; shutil.rmtree(os.path.join(src, 'qa_safezone'), ignore_errors=True)      # no stale overlays from earlier runs
 r = run([sys.executable, sz, vid, '--step', '1', '--out', os.path.join(src, 'qa_safezone')])
 last = (r.stdout.strip().splitlines() or ['?'])[-1][:200]
 if r.returncode == 0:

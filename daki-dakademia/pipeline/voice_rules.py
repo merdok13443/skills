@@ -31,8 +31,8 @@ def check(src):
     words = len(T.get('words', [])); D = T.get('duration') or 0
     if words and D:
         wpm = words / D * 60
-        if wpm > 130: err.append(f'too fast: {wpm:.0f} words per minute including pauses (max 130, aim for 85-105); fewer words or more pauses')
-        elif wpm > 110: warn.append(f'fast: {wpm:.0f} words per minute (aim for 85-105)')
+        if wpm > 130: err.append(f'too fast: {wpm:.0f} words per minute including pauses (limit 130); fewer words or more pauses')
+        elif wpm > 120: warn.append(f'fast: {wpm:.0f} words per minute (limit 130): check that the message and every new step still get a pause')
         if not 55 <= words <= 85: warn.append(f'{words} words (aim for 62-78 so that each idea has time to land)')
     sm = os.path.join(src, 'script.md')
     msg = None

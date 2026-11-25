@@ -6,7 +6,7 @@ Gemini narration only, on the owner's PC (the API key lives there).
 ```
 1. content      Haiku:  facts + draft (sources pass)                                       draft-haiku.md
 1b. example     OPUS: researches and picks ONE central real everyday example + the ONE learning message   example.md   (prompts/example_researcher.md)
-2. script       Opus (high): COMPACT slow script (62-78 words, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
+2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
 3. review       Sonnet critique + Haiku accuracy check in ONE pass; loop back only on a real ERROR
 4. audio        voice/script.json -> ONE Gemini request for the whole script, on the PC: python engine/tts_he.py <src>/voice --backend gemini
                 (default --mode whole; at most 3 requests per video incl. retries, the daily quota is small) -> voice/voice.wav + voice/timing.json
