@@ -265,7 +265,7 @@ plan = {'D': D, 'decky': {'x': dk['x'], 'y': dk['y'], 's': dk['s'], 'expr': dk.g
         'scenes': plan_scenes, 'els': plan_els, 'caps': caps, 'acts': plan_acts}
 
 # ---------------------------------------------------------------- write html
-css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg'])
+css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg']).replace('--b:#2B6CB0', '--b:' + spec.get('true_color', '#2B6CB0'))
 kicker = spec['kicker']
 page = f'''<!doctype html>
 <html lang="he" dir="rtl" data-resolution="portrait">
@@ -301,6 +301,9 @@ open('index.html', 'w', encoding='utf-8').write(page)
 os.makedirs('assets', exist_ok=True)
 shutil.copytree(os.path.join(HERE, 'assets'), 'assets', dirs_exist_ok=True)
 shutil.copy(MASCOT, 'assets/daki.js'); shutil.copy(os.path.join(HERE, 'runtime', 'dk-runtime.js'), 'assets/dk-runtime.js')
+if spec.get('true_color'):     # opt-in per video (owner 2026-11-25: T in green); default stays the palette blue
+    _p = 'assets/dk-runtime.js'; _src = open(_p, encoding='utf-8').read().replace('#2B6CB0', spec['true_color'])
+    open(_p, 'w', encoding='utf-8').write(_src)
 for f, c in (('hyperframes.json', None), ('package.json', None)):
     if not os.path.exists(f):
         shutil.copy(os.path.join(HERE, 'runtime', f), f)
