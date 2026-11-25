@@ -17,8 +17,8 @@ A series with a fixed mascot and project rules adds a second skill next to this 
 - `TECHNICAL.md`: exact values plus code-level lessons
 - `engine/`: tts, align, render, mix, sheet (setup in `engine/README.md`)
 - `audio/`: procedural music + SFX
-- `HEBREW_NARRATION.md`: Hebrew voice (edge-tts, Piper), RTL notes
+- `HEBREW_NARRATION.md`: Hebrew voice (Gemini for Dakademia; edge-tts, Piper for other series), RTL notes
 - `examples/`: v3-v6 reference scenes
-- `critiques/`, `research/`: review notes and research rounds
+- `critiques/`, `research/`: history of review notes and research rounds (optional reading)
 
 The first video needs a one-time setup (Python, Node, ffmpeg, Kokoro model). See `engine/README.md`.

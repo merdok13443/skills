@@ -1,6 +1,6 @@
 # Explainer Shorts Engine
 
-A free, local pipeline for 9:16 explainer shorts that Claude Code can drive. You write a script and a scene. The pipeline produces voice, word-synced captions, animation, music, SFX and an mp4. There are no subscriptions and no API calls.
+A free, local pipeline for 9:16 explainer shorts that Claude Code can drive. You write a script and a scene. The pipeline produces voice, word-synced captions, animation, music, SFX and an mp4. There are no subscriptions and no API calls (except the optional Gemini narration backend, which Dakademia uses).
 
 ## Pipeline
 
@@ -14,7 +14,7 @@ A free, local pipeline for 9:16 explainer shorts that Claude Code can drive. You
 | 6. Preview stills | `node engine/render.js myvideo --still 0,3.5,10` | PNGs in `myvideo/stills/`. Then run `python engine/sheet.py myvideo/stills 8` for a contact sheet. |
 | 6b. Margins | `python engine/safezone_check.py myvideo/stills` | Fails when text, cards, stamps or the host enter the margins L150 R150 T270 B420. Run it on `final.mp4` too (every second, plus frame 0 and the last frame). |
 | 7. Render | `node engine/render.js myvideo --workers 4` | Headless Chromium seeks frame by frame and ffmpeg writes `video.mp4`. |
-| 8. Mix | `python engine/mix.py myvideo --key A --bpm 92 --music-gain 0.45` | Procedural music, SFX at the scene's cues, ducking and loudnorm at -14 LUFS, giving `final.mp4`. |
+| 8. Mix | `python engine/mix.py myvideo --key A --bpm 92 --music-gain 0.18` | Procedural music, SFX at the scene's cues, ducking and loudnorm at -14 LUFS, giving `final.mp4`. |
 
 ## Setup
 
@@ -32,7 +32,7 @@ python -m venv venv && venv/bin/pip install kokoro-onnx soundfile scipy pillow p
 
 ### Hebrew narration
 
-Kokoro has no Hebrew voice. For Hebrew, steps 2-3 become `python engine/tts_he.py myvideo`. That uses edge-tts by default (`pip install edge-tts`, free, no key) with the default voice `he-IL-HilaNeural` (male alternative: `he-IL-AvriNeural`), which returns exact word timings, so you can skip align. For offline use, run `--backend piper` with the `thewh1teagle/piper-he-noa` model, then `python engine/align_he.py myvideo` (`pip install faster-whisper`). For RTL captions add `npm i @fontsource/heebo` and copy `examples/he1/index.html`. Full notes and test results are in `../HEBREW_NARRATION.md`.
+Kokoro has no Hebrew voice. For Hebrew, steps 2-3 become `python engine/tts_he.py myvideo` (Dakademia: `--backend gemini` only, then `align_he.py`; see `../HEBREW_NARRATION.md`). For other series it uses edge-tts by default (`pip install edge-tts`, free, no key) with the default voice `he-IL-HilaNeural` (male alternative: `he-IL-AvriNeural`), which returns exact word timings, so you can skip align. For offline use, run `--backend piper` with the `thewh1teagle/piper-he-noa` model, then `python engine/align_he.py myvideo` (`pip install faster-whisper`). For RTL captions add `npm i @fontsource/heebo` and copy `examples/he1/index.html`. Full notes and test results are in `../HEBREW_NARRATION.md`.
 
 ## Scene API (window.SCENE = function(A){...})
 

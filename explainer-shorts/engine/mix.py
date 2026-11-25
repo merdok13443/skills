@@ -1,5 +1,5 @@
 """Synthesize SFX for cues.json + a procedural music bed, mix with voice.wav, mux with video.mp4 -> final.mp4
-usage: python mix.py <proj> [--music-gain 0.16] [--key A] [--bpm 100]
+usage: python mix.py <proj> [--music-gain 0.18] [--key A] [--bpm 100]
 Everything is generated in code: zero licensing issues, deterministic.
 """
 import json, sys, os, subprocess
@@ -139,7 +139,7 @@ for c in mutes:  # dramatic silence before a payoff: gate the music bed
 sf.write(os.path.join(proj, 'fx.wav'), fx.astype(np.float32), SR)
 sf.write(os.path.join(proj, 'music.wav'), music.astype(np.float32), SR)
 sf.write(os.path.join(proj, 'voice48.wav'), voice.astype(np.float32), SR)
-mg = arg('--music-gain', 0.5)
+mg = arg('--music-gain', 0.18)
 filt = (f"[2:a]volume={mg}[m];[1:a]asplit=2[v][vsc];[m][vsc]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=350[md];"
         f"[3:a]volume=0.55[f];[v][md][f]amix=inputs=3:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11[a]")
 out = os.path.join(proj, 'final.mp4')
