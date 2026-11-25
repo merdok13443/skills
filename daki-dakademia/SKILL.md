@@ -58,7 +58,7 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 | 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
 | 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
 | 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
-| 6 visuals (Sonnet) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
 | 7-8 make + QA | `pipeline/README.md`, `qa_report.json` |
 | 9 deliver + publish | `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`; `../shorts-uploader/README.md` only for setup or errors |
 

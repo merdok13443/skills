@@ -72,3 +72,8 @@ Order of equal times = file order. Decky expressions per moment (`rush` in the l
 
 ## What the build prints (and the model should read instead of the log)
 `build_report.json` (errors/warnings: boxes outside the safe rectangle, stamp kind vs mark kind vs card truth, unknown anchors, payoff %, scenes < 2 s, Decky/stamp out of the safe area), `check_errors.json` (hyperframes overlap/contrast errors with selector and time), `qa_report.json` (final video checks).
+
+## Practical lessons for authors (from the 0.0 trailer, general)
+- Generate scene.json with a Python generator (it checks every anchor against the script words, every pair of visible boxes with the ~12 px shadow and ~7% pop overshoot, and computes `seam_caption`); use only word anchors (`w:line~word`), absolute seconds only inside the first 1.2 s.
+- Keep halos, paths and drawn lines inside the same svg as the network (classes with opacity / dashoffset); a separate overlay becomes a collision. Do not scale elements that sit at the box edge: pulse <= 1.06, `popB` rather than `pop` 1.8, no `camPush` (it moves Decky and every card).
+- `flash` covers captions: put it only on the strike word and hide that caption with `captions.hide`. A stamp that is not used is hidden with two acts at 0 (`sLeave` d 0.01 and `set el st opacity 0`) and no other stamp act. `thud` gain <= 0.6 (true peak), 3-4 sound cues in total.
