@@ -21,6 +21,8 @@ Gemini narration only, on the owner's PC (the API key lives there).
 8. look         ONE contact sheet (stills/contact-sheet.jpg) + qa_report.json; fix scene.json (never index.html) and re-run
 9. deliver      only final.mp4 + script.json + scene.json + qa_report.json + stage_log.jsonl go to the video folder; mp4 to dakademia-videos
 ```
+**A stage fails** (no narration, QA fail that the rules do not allow to relax, missing tool): fix the cause inside the guidelines (fix the script, `scene.json` or the template; one more TTS take only within the budget of 3 requests). Never work around a rule (another voice or model, extra requests, a lowered check). If it still fails, stop that video, record `blocked` with the failed stage and cause in its README / progress.json, report it clearly, and wait for the owner. Rule owner: `../SKILL.md`, section 1.
+
 Files: `stage_log.py` (timing of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js is copied FRESH from `../mascot/daki.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
 Narration research (Gemini TTS has no duration control; pace via `style`, pauses via tags/punctuation; budget text per line with fit_check): see `../../explainer-shorts/HEBREW_NARRATION.md` and the project's `research/industrial-production-plan.md`.
 
