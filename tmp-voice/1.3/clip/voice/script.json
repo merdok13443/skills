@@ -1,0 +1,17 @@
+{
+ "lang": "he",
+ "backend": "gemini",
+ "model": "gemini-3.8-flash-tts",
+ "voice": "Puck",
+ "lead": 0.15,
+ "tail": 0.0,
+ "lines": [
+  {
+   "id": "hook1",
+   "text": "אז ווייז הומצאה בישראל,",
+   "say": "אז ווֶייז הוּמְצְאָה בישראל,",
+   "pause": 0.0,
+   "target": 2.0
+  }
+ ]
+}
