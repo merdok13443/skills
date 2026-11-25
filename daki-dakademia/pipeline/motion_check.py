@@ -48,8 +48,8 @@ for f in P['frames']:
 err += group(tele, 'stamp teleports:')
 fr_at = lambda t: next((f for f in P['frames'] if f['t'] >= t - 1e-3), P['frames'][-1])   # first frame at or after the hit time
 for a in plan['acts']:
-    if a['do'] in ('stamp', 'jam'):
-        tx, ty = a['hit'] if a['do'] == 'stamp' else a['down']
+    if a['do'] in ('stamp', 'jam', 'verdict', 'nojam'):
+        tx, ty = a['hit'] if a['do'] in ('stamp', 'verdict') else a['down']
         f = fr_at(a['t']); st = f['st']
         if abs(st['x'] - tx) > 25 or abs(st['y'] - ty) > 25 or st['o'] < .95:
             err.append(f"{a['do']} at {a['t']}s does not reach its target ({tx},{ty}): stamp is at ({st['x']:.0f},{st['y']:.0f}) opacity {st['o']}")
@@ -61,6 +61,10 @@ for f in P['frames'] + [{'t': 1e9, 'st': {'o': 1}}]:
     if not mid and run is not None:
         if f['t'] - run > .5: err.append(f"stamp half-faded for {f['t'] - run:.2f}s from {run:.2f}s")
         run = None
+# the top header (course · N.M · title) is one line inside the safe width, in every frame
+kb = [f for f in P['frames'] if f.get('kick') and (f['kick'][3] - f['kick'][1] > 64 or f['kick'][0] < 150 - TOL or f['kick'][2] > 930 + TOL)]
+if kb: err.append(f"top header wraps or leaves x150-930: rect {kb[0]['kick']} at {kb[0]['t']:.2f}s (shorten the episode title)")
+if not any(f.get('kick') and f.get('kicko', 0) > .9 for f in P['frames'][:1]): err.append('top header not visible at frame 0')
 json.dump({'frames': len(P['frames']), 'errors': err, 'warnings': warn}, open(os.path.join(src, 'motion_report.json'), 'w'), indent=1)
 for e in err: print('ERROR', e)
 print(f"motion check: {len(P['frames'])} frames, {len(err)} errors")

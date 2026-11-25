@@ -17,7 +17,7 @@ MAP = {
  'voice/script.json': '04-voice', 'voice/voice.wav': '04-voice', 'voice/timing.json': '04-voice',
  'voice/voice.preinject.wav': '04-voice', 'voice/timing.preinject.json': '04-voice', 'voice/timing.raw.json': '04-voice',
  'scene.json': '05-build', 'index.html': '05-build', 'plan.json': '05-build', 'cues.json': '05-build', 'manifest.json': '05-build', 'build_report.json': '05-build',
- 'hyperframes.json': '05-build/runtime', 'package.json': '05-build/runtime', 'assets/daki.js': '05-build/runtime', 'assets/dk-runtime.js': '05-build/runtime',
+ 'hyperframes.json': '05-build/runtime', 'package.json': '05-build/runtime', 'assets/daki.js': '05-build/runtime', 'assets/dk-runtime.js': '05-build/runtime', 'assets/stamp.js': '05-build/runtime',
  'qa_report.json': '06-qa', 'stage_log.jsonl': '06-qa', 'motion_report.json': '06-qa', 'check_errors.json': '06-qa', 'stills/contact-sheet.jpg': '06-qa',
 }
 REQUIRED = {  # per type; every item is a path inside the video folder

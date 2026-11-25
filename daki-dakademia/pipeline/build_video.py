@@ -17,6 +17,8 @@ import json, os, re, shutil, sys, html
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS = os.path.dirname(HERE)                                  # .../daki-dakademia -> parent has explainer-shorts
 MASCOT = os.path.join(HERE, '..', 'mascot', 'daki.js')
+STAMP_JS = os.path.join(HERE, '..', 'stamp', 'stamp.js')          # the shared T/F verdict stamp (stamp/STAMP.md)
+STAMP_D, STAMP_TOOL_H, STAMP_LAND_DY = 150, 278, .3               # slot diameter; tool height at that size; contact point below the slot centre (in D) (= stamp.js)
 SAFE = dict(x0=150, x1=930, y0=270, y1=1500)
 
 src = os.path.abspath(sys.argv[1]); os.chdir(src)
@@ -79,10 +81,19 @@ def build_el(e):
     size = e.get('size')
     if t == 'card':
         pl, pr = e.get('pad', [0, 0])
+        vslot = ''
+        if e.get('verdict'):                                     # the verdict slot of the shared stamp, inside the card
+            g = VERDICT[i]
+            if g['side'] == 'left': pl += g['d'] + 44
+            else: pr += g['d'] + 44
+            pos = f"position:absolute;left:{g['lx']:g}px;top:{g['ly']:g}px;width:{g['d']:g}px;height:{g['d']:g}px"
+            on = '1' if e.get('stamped') else '0'
+            vslot = (f'<div id="{i}__slot" class="vslot" data-d="{g["d"]}" data-q="{1 if e.get("q") else 0}" data-on="{on}" style="{pos}" data-layout-ignore></div>'
+                     f'<div id="{i}__imp" class="vimp" data-kind="{e["verdict"] if e["verdict"] in ("t", "f") else "t"}" data-d="{g["d"]}" data-on="{on if e["verdict"] in ("t", "f") else 0}" style="{pos}" data-layout-ignore></div>')
         inner = f'<span style="font-size:{size or 96}px;font-weight:{e.get("weight", 900)};line-height:1.1;padding-left:{pl}px;padding-right:{pr}px">{e["html"]}</span>'
         extra = ' sm' if e.get('small') else ''
         bg = f'background:{e["bg"]};' if e.get('bg') else ''
-        return f'<div id="{i}" class="{cls}{extra}" style="{st}{bg}">{inner}</div>'
+        return f'<div id="{i}" class="{cls}{extra}" style="{st}{bg}">{inner}{vslot}</div>'
     if t == 'tag':
         c = ' y' if e.get('bg') == 'y' else ''
         stl = ''
@@ -116,6 +127,13 @@ scenes_html, plan_scenes, plan_els, acts = [], [], [], []
 seen_ids = set()
 sfx = []
 TRUTH = {}                                                       # element id -> truth value declared on a card
+VERDICT = {}                                                     # card id -> verdict slot geometry (shared stamp)
+def verdict_geom(e):
+    x, y, w, h = e['box']; d = min(e.get('vd', STAMP_D), h - 36)
+    side = e.get('side', 'left')
+    lx = 22 if side == 'left' else w - 20 - 22 - d                 # inside the 10 px border (padding box)
+    ly = (h - 20 - d) / 2
+    return {'d': d, 'side': side, 'lx': lx, 'ly': ly, 'cx': round(x + 10 + lx + d / 2, 1), 'cy': round(y + 10 + ly + d / 2, 1), 'kind': e['verdict']}
 prev_end = 0.0
 for k, s in enumerate(spec['scenes']):
     t0 = anchor(s.get('from', 0 if k == 0 else prev_end), f"scene {s['id']}.from")
@@ -125,6 +143,11 @@ for k, s in enumerate(spec['scenes']):
     for e in s['els']:
         if e['id'] in seen_ids or re.fullmatch(r'cap\d+|cap\d+w\d+|st|dsvg|ssvg|cam|kicker|flash|bgink', e['id']): errs.append(f"duplicate or reserved element id {e['id']}")
         seen_ids.add(e['id'])
+        if e['type'] == 'card' and e.get('verdict'):
+            if e['verdict'] not in ('t', 'f', 'n'): errs.append(f"card {e['id']}: verdict must be t, f or n")
+            VERDICT[e['id']] = verdict_geom(e)
+            if e['box'][3] < 140: warns.append(f"card {e['id']}: {e['box'][3]} px is low for a verdict slot (>= 186 keeps the slot at 150 px)")
+            if e.get('truth') and e['truth'] != e['verdict']: errs.append(f"card {e['id']}: truth {e['truth']} disagrees with verdict {e['verdict']}")
         check_box(e); inner.append(build_el(e))
         if e.get('truth'): TRUTH[e['id']] = e['truth']
         plan_els.append({'id': e['id'], 'hidden': not e.get('vis', False), 'rot': e.get('rot')})
@@ -153,8 +176,24 @@ for sid, a in acts:
     if o['do'] == 'sfx':
         sfx.append({'t': o['t'], 'type': o['type'], 'gain': o.get('gain', .8)}); continue
     if o['do'] == 'camPush' and 'until' in o: o['d'] = round(o['until'] - o['t'], 3)
+    if o['do'] == 'verdict':                                     # the shared stamp lands in the card's slot
+        g = VERDICT.get(a.get('card'))
+        if not g: errs.append(f"verdict at {o['t']}s: card {a.get('card')!r} has no 'verdict' slot"); continue
+        c = a['card']
+        o.update({'x': g['cx'], 'y': g['cy'], 'd': g['d'], 'imp': f'#{c}__imp', 'slot': f'#{c}__slot', 'kind': g['kind'],
+                  'hit': [g['cx'], round(g['cy'] + g['d'] * STAMP_LAND_DY, 1)]})
+        if g['kind'] == 'n':
+            o['do'] = 'nojam'; o['down'] = [g['cx'], round(g['cy'] + g['d'] * STAMP_LAND_DY - 34 * g['d'] / STAMP_D, 1)]
+            sfx.append({'t': o['t'], 'type': 'glitch', 'gain': .8})
+        else: sfx.append({'t': o['t'], 'type': 'thud', 'gain': .7})
+        top = o['hit'][1] - STAMP_TOOL_H * g['d'] / STAMP_D
+        if top < 330: warns.append(f"verdict at {o['t']}s: the stamp tool reaches y {top:.0f} over the header (slot centre y >= {330 + STAMP_TOOL_H - STAMP_D * STAMP_LAND_DY:.0f} keeps it clear)")
+        plan_acts.append(o); continue
+    if o['do'] in ('stamp', 'jam', 'sFace', 'sTo', 'sLeave'):
+        warns.append(f"legacy stamp verb {o['do']!r} at {o['t']}s: use a card with 'verdict' and the act {{\"do\":\"verdict\",\"card\":...}} (SCENE_SPEC.md)")
+        if o['do'] in ('sFace', 'sTo', 'sLeave'): continue
     if o['do'] == 'stamp':
-        sfx.append({'t': o['t'], 'type': 'thud', 'gain': 1.0})
+        sfx.append({'t': o['t'], 'type': 'thud', 'gain': .7})
         mk = (o.get('mark') or '').lstrip('#')
         if mk:
             kinds = {'t': 't', 'f': 'f'}
@@ -167,13 +206,12 @@ for sid, a in acts:
             if card and TRUTH.get(card) and TRUTH[card] != o['kind']:
                 errs.append(f"stamp {o['kind'].upper()} at {o['t']}s but card {card} is declared {TRUTH[card].upper()}")
             elif not card: warns.append(f"stamp at {o['t']}s has no 'card' to check its truth value against")
-    if o['do'] in ('stamp', 'jam'):
-        hv = o['hover']
-        if not (265 <= hv[0] <= 815 and hv[1] - 324 >= 330):
-            warns.append(f"{o['do']} at {o['t']}s: hover pose {hv} puts the stamp head/body outside the safe area or over the kicker (needs x 265-815, y >= 654)")
     if o['do'] == 'jam': sfx.append({'t': o['t'], 'type': 'glitch', 'gain': .8})
     plan_acts.append(o)
 plan_acts.sort(key=lambda o: o['t'])                              # stable: spec order kept for equal times
+_vt = [o['t'] for o in plan_acts if o['do'] in ('verdict', 'nojam', 'stamp', 'jam')]
+for a_, b_ in zip(_vt, _vt[1:]):
+    if b_ - a_ < .85: errs.append(f"two stamp landings {b_ - a_:.2f}s apart ({a_}s, {b_}s): one stamp needs >= 0.85 s per landing")
 
 payoff = anchor(spec['payoff'], 'payoff') if 'payoff' in spec else None
 if payoff is not None:
@@ -261,12 +299,30 @@ for a in [dk] + [o for o in plan_acts if o['do'] == 'decky' and o.get('x') is no
         warns.append(f"Decky at ({x},{y}) scale {sc_} leaves the safe rectangle (needs x {150 + 378 * sc_:.0f}-{930 - 378 * sc_:.0f}, y >= {270 + 265 * sc_:.0f}, y <= {1500 - 215 * sc_:.0f})")
     if y + 215 * sc_ > 1250: warns.append(f"Decky at ({x},{y}) scale {sc_} reaches into the caption band (y>1250)")
 plan = {'D': D, 'decky': {'x': dk['x'], 'y': dk['y'], 's': dk['s'], 'expr': dk.get('expr', 'smirk')},
-        'stamp': {'hov': spec.get('stamp', {}).get('hov', {'x': 540, 'y': 560, 'r': 8}), 'off': {'x': 1420, 'y': 320, 'r': 22}, 'face': spec.get('stamp', {}).get('face', 'n')},
         'scenes': plan_scenes, 'els': plan_els, 'caps': caps, 'acts': plan_acts}
 
 # ---------------------------------------------------------------- write html
 css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg']).replace('--b:#2B6CB0', '--b:' + spec.get('true_color', '#2B6CB0'))
-kicker = spec['kicker']
+# ---------------------------------------------------------------- top header (owner rule: course · unit.episode · short episode title, in EVERY video)
+HDR_RE = re.compile(r'^\s*(\S.*?)\s+·\s+(\d+\.\d+)\s+·\s+(\S.*?)\s*$')
+hd = spec.get('header')
+if hd:
+    if spec.get('kicker'): warns.append("both 'header' and 'kicker' given: the header is built from 'header'; drop 'kicker'")
+    num = str(hd.get('num') or spec.get('video', ''))
+    kicker = (f'<span style="font-size:36px">{html.escape(hd.get("course", ""))} · <bdi class="mono" style="font-size:32px">{html.escape(num)}</bdi>'
+              f' · {html.escape(hd.get("title", ""))}</span>')
+else:
+    kicker = spec.get('kicker', '')
+htext = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', '', kicker))).strip()
+m_ = HDR_RE.match(htext)
+header = {'text': htext, 'ok': bool(m_)}
+if not m_:
+    errs.append(f"top header {htext!r} is not 'course · N.M · episode title': set \"header\": {{\"course\": \"בדידה\", \"title\": \"<short episode title>\"}} (SCENE_SPEC.md)")
+else:
+    header.update(course=m_.group(1), num=m_.group(2), title=m_.group(3))
+    if spec.get('video') and m_.group(2) != str(spec['video']): errs.append(f"top header number {m_.group(2)} differs from video {spec['video']}")
+    if len(m_.group(3)) > 24: errs.append(f"top header title {m_.group(3)!r} is {len(m_.group(3))} characters; keep it <= 24 so the header stays one line")
+    if m_.group(3).strip() == m_.group(1).strip(): errs.append('top header title repeats the course name: give the episode title')
 page = f'''<!doctype html>
 <html lang="he" dir="rtl" data-resolution="portrait">
 <head>
@@ -274,6 +330,7 @@ page = f'''<!doctype html>
 <meta name="viewport" content="width=1080, height=1920" />
 <script src="assets/gsap.min.js"></script>
 <script src="assets/daki.js"></script>
+<script src="assets/stamp.js"></script>
 <style>
 {css}</style>
 </head>
@@ -300,7 +357,7 @@ open('index.html', 'w', encoding='utf-8').write(page)
 # fresh shared assets + a FRESH daki.js every build (never copied from an earlier video)
 os.makedirs('assets', exist_ok=True)
 shutil.copytree(os.path.join(HERE, 'assets'), 'assets', dirs_exist_ok=True)
-shutil.copy(MASCOT, 'assets/daki.js'); shutil.copy(os.path.join(HERE, 'runtime', 'dk-runtime.js'), 'assets/dk-runtime.js')
+shutil.copy(MASCOT, 'assets/daki.js'); shutil.copy(STAMP_JS, 'assets/stamp.js'); shutil.copy(os.path.join(HERE, 'runtime', 'dk-runtime.js'), 'assets/dk-runtime.js')
 if spec.get('true_color'):     # opt-in per video (owner 2026-11-25: T in green); default stays the palette blue
     _p = 'assets/dk-runtime.js'; _src = open(_p, encoding='utf-8').read().replace('#2B6CB0', spec['true_color'])
     open(_p, 'w', encoding='utf-8').write(_src)
@@ -319,7 +376,7 @@ json.dump({'duration': D, 'music_mute': ({'t': mute[0], 'until': mute[1]} if mut
            'bpm': spec.get('bpm', 96), 'seed': spec.get('seed', 11)}, open('cues.json', 'w'), ensure_ascii=False, indent=1)
 json.dump(plan, open('plan.json', 'w', encoding='utf-8'), ensure_ascii=False)
 json.dump({'duration': D, 'payoff': payoff, 'payoff_pct': round(payoff / D * 100, 1) if payoff else None,
-           'scenes': [(s['id'], s['t0'], s['t1']) for s in plan_scenes], 'captions': len(caps)},
+           'scenes': [(s['id'], s['t0'], s['t1']) for s in plan_scenes], 'captions': len(caps), 'header': header},
           open('manifest.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 json.dump({'errors': errs, 'warnings': warns}, open('build_report.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print(f'built index.html D={D}s scenes={len(plan_scenes)} acts={len(plan_acts)} captions={len(caps)} payoff={payoff} ({plan_acts and ""}{round(payoff / D * 100, 1) if payoff else "-"}%)')

@@ -15,10 +15,12 @@ let chromium; try { ({ chromium } = require('playwright')); } catch (e) { ({ chr
     const cum = e => { let o = 1; for (let n = e; n && n.nodeType === 1; n = n.parentElement) { const cs = getComputedStyle(n); o *= parseFloat(cs.opacity); if (cs.display === 'none' || cs.visibility === 'hidden') return 0; } return o; };
     const rect = e => { const r = e.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)]; };
     const dk = document.querySelector('#dk, .decky, [id^=decky]');
+    const kk = document.querySelector('#kicker > span');
     for (let f = 0; f <= Math.floor(D * FPS); f++) {
       const t = f / FPS; tl.seek(t, false);
       const fr = { t: +t.toFixed(3), st: { o: +cum(st).toFixed(2), r: rect(st), x: gsap.getProperty(st, 'x'), y: gsap.getProperty(st, 'y') }, els: {} };
       if (dk) fr.dk = { o: +cum(dk).toFixed(2), r: rect(dk) };
+      if (kk) { fr.kick = rect(kk); fr.kicko = +cum(kk).toFixed(2); }
       for (const q of els) { const o = cum(q.el); if (o > .05) fr.els[q.id] = { o: +o.toFixed(2), r: rect(q.el), s: q.scene }; }
       res.frames.push(fr);
     }

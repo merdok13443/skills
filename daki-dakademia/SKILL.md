@@ -35,6 +35,8 @@ If two files disagree, follow the higher one and mention the conflict in your re
 
 **Look**
 - Decky in every video, from the current `<skills>/daki-dakademia/mascot/daki.js` copied fresh (identical to the skill's file), never from an earlier video or template, never redrawn or restyled. Host, not hero. Look and expressions: `mascot/DAKI.md`.
+- The T/F stamp is a shared component like Decky: `stamp/stamp.js`, copied fresh by the build (QA checks it is identical). Neutral blue tool with no letter, hidden when idle, lands in the card's dashed slot, imprint green T / red F. Never drawn per video. Spec: `stamp/STAMP.md`.
+- The top header "course · N.M · episode title" is in every video, built from `header` in scene.json; the build and the QA fail without it.
 - Background: the unit's shade from `work/<course>/PALETTE.md`, as a separate `--bg`. Never change `--paper` (it is also the caption text colour).
 - Everything readable stays inside x 150-930, y 270-1500 in every frame, frame 0 and the last frame included; `safezone_check.py` must pass.
 
@@ -59,7 +61,7 @@ Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
 | 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
 | 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (owner feedback patterns + checklist), the source text for the facts |
 | 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
-| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, `GUIDELINES-DAKI.md` (the owner feedback patterns, the pre-delivery discipline section and the checklist: most visual lessons live there), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, `stamp/STAMP.md` (when the video has verdicts), the unit row of `PALETTE.md`, `mascot/DAKI.md`, `GUIDELINES-DAKI.md` (the owner feedback patterns, the pre-delivery discipline section and the checklist: most visual lessons live there), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
 | 7-8 make + QA | `pipeline/README.md`, `qa_report.json` |
 | 9 deliver + publish | `pipeline/VIDEO-PACKAGE.md` (the package), `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`; `../shorts-uploader/README.md` only for setup or errors |
 
@@ -74,7 +76,7 @@ Right after QA passes: `PUBLISHING-DAKI.md` (mp4 to dakademia-videos via a PR to
 ## 5. Critique and changing the guidelines
 - **Standing rule (owner, 2026-11-25):** whenever the owner gives feedback and praises the result, turn the lessons into guidelines automatically, in the owner file of each rule (no dated add-ons), and apply them to the next videos without being asked.
 - A video's critique goes into that video's folder, not into the skill.
-- Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages `pipeline/README.md`; the per-video folder package `pipeline/VIDEO-PACKAGE.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours `work/<course>/PALETTE.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
+- Guidelines change only when the owner asks or approves. Edit the rule in its owner file, in place: no dated add-on sections, one language per file, in a PR to `dev`. Owner files: stages `pipeline/README.md`; the per-video folder package `pipeline/VIDEO-PACKAGE.md`; content rules and checklist `GUIDELINES-DAKI.md`; Decky `mascot/DAKI.md`; the T/F stamp `stamp/STAMP.md`; layout `pipeline/SCENE_SPEC.md`; voice `HEBREW_NARRATION.md`; colours `work/<course>/PALETTE.md`; publishing `PUBLISHING-DAKI.md`; post texts `METADATA-DAKI.md`.
 
 ## Communication
 The owner writes in Hebrew, so reply in Hebrew. The videos are in Hebrew.
