@@ -49,19 +49,19 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - Never commit secrets (tokens, `client_secret.json`, `.env`, state files).
 
 ## 2. Read map: what each stage reads
-Read only what your stage needs. Stage numbers follow `pipeline/README.md`.
+Read only what your stage needs. Stage numbers follow `pipeline/README.md`. Each stage agent gets this as ONE file: `python pipeline/pack.py <stage> --course <course> --video <id>` cuts exactly these sections out of the owner files (plus the video card), so the table below stays the authority; open an owner file only for a rule the pack does not hold.
 
 | Stage | Reads |
 |---|---|
-| Orchestrator (the thread) | this file, `pipeline/README.md`, the course's `progress.json` |
-| 1 content (Haiku) | the curriculum entry, the source PDFs, the course notation notes, section 1 "Content" above |
-| 1b example + message (Opus, high) | `pipeline/prompts/example_researcher.md` (trailer/intro videos: `INTRO-VIDEOS-DAKI.md` instead, Fable then Opus high) |
-| 2 script (Opus, high) | `pipeline/prompts/scriptwriter.md`, `example.md`, `GUIDELINES-DAKI.md` |
-| 3 review (Sonnet + Haiku) | `script.md`, `GUIDELINES-DAKI.md` (checklist), the source text for the facts |
-| 4 voice (owner's PC) | `HEBREW_NARRATION.md`, Gemini section only |
-| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | `pipeline/SCENE_SPEC.md`, the unit row of `PALETTE.md`, `mascot/DAKI.md`, and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
-| 7-8 make + QA | `pipeline/README.md`, `qa_report.json` |
-| 9 deliver + publish | `pipeline/VIDEO-PACKAGE.md` (the package), `PUBLISHING-DAKI.md`, `METADATA-DAKI.md`; `../shorts-uploader/README.md` only for setup or errors |
+| Orchestrator (the thread) | this file, `pipeline/README.md`; course state ONLY through `pipeline/state.py` (never open `progress.json`, `queue.json`, `curriculum.json` or `PALETTE.md`) |
+| 1 content (Haiku) | pack `content`: the video card (curriculum entry), section 1 "Content" above, the course notation notes; the source text through `pipeline/sources.py` |
+| 1b example + message (Opus, high) | pack `example`: `pipeline/prompts/example_researcher.md`, `GUIDELINES-DAKI.md` (trailer/intro videos: `INTRO-VIDEOS-DAKI.md` instead, Fable then Opus high) |
+| 2 script (Opus, high) | pack `script`: `pipeline/prompts/scriptwriter.md`, `GUIDELINES-DAKI.md`; plus `example.md` |
+| 3 review (Sonnet + Haiku) | pack `review`: section 1 "Content" above, `GUIDELINES-DAKI.md` (owner feedback patterns, checklist, teaching quality rules); plus `script.md` and the "קטעי מקור" of `draft-haiku.md` for the facts |
+| 4 voice (owner's PC) | none: `python pipeline/voice.py <src>` (rules: `HEBREW_NARRATION.md`, Gemini section) |
+| 6 visuals (Sonnet, high effort: the video build itself, never Opus; owner rule 2026-11-25) | pack `visuals`: `pipeline/SCENE_SPEC.md`, the unit `--bg` (video card), `mascot/DAKI.md` (character, files, use in a scene), and in `../explainer-shorts/GUIDELINES.md` the sections מעורבות, אזור בטוח, עיצוב, תנועה, טקסט |
+| 7-8 make + QA | `pipeline/README.md`, `qa_report.json`, the one contact sheet |
+| 9 deliver + publish | pack `deliver`: `METADATA-DAKI.md` (principle, keywords, YouTube, rules for all texts), `PUBLISHING-DAKI.md` section 4; the commands in `pipeline/README.md` stage 9; `../shorts-uploader/README.md` only for setup or errors |
 
 Not on any read path: `../explainer-shorts/critiques/`, `research/`, `examples/`, `TECHNICAL.md`, `engine/README.md` (the general English engine), old `work/<course>/video-sources/` templates.
 

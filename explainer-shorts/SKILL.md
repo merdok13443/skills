@@ -10,6 +10,7 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
 **Series layer:** this is the general skill and it stands on its own. If a series-specific skill is installed next to it in `~/.claude/skills/` (for example one that adds a fixed mascot and project rules), read its SKILL.md after this one and follow its additions. Where the two differ, the series skill wins for that series, and it lists which general rules do not apply (for Dakademia: `../daki-dakademia/SKILL.md`, which also has its own build pipeline and read map).
 
 ## 1. Read first (every time)
+(Dakademia videos: skip this list. The series read map in `../daki-dakademia/SKILL.md`, section 2, says which sections of these files each stage reads.)
 - `GUIDELINES.md`: the general rules and lessons, in Hebrew. These are the quality bar, so follow all of it.
 - `TECHNICAL.md`: concrete values (colours, fonts, sizes, timings, mix settings) and code-level lessons.
 - `engine/README.md`: setup and commands.
