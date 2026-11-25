@@ -1,78 +1,80 @@
 {
- "lang": "he",
- "backend": "gemini",
- "model": "gemini-3.8-flash-tts",
- "voice": "Puck",
- "lead": 0.15,
- "tail": 0.0,
- "lines": [
-  {
-   "id": "hook",
-   "text": "כמה צעדי חברות בינך לבין זר בפייסבוק?",
-   "say": "כמה צעדי חֲבֵרוּת בינך לבין זָר בפייסבוק?",
-   "pause": 0.3,
-   "target": 3.8
-  },
-  {
-   "id": "ans",
-   "text": "בממוצע, בערך ארבעה וחצי.",
-   "pause": 0.6,
-   "target": 2.6
-  },
-  {
-   "id": "msg",
-   "text": "בדידה היא כלי היסוד של מדעי המחשב: לחשוב מדויק, להוכיח, לספור ולמפות רשתות.",
-   "say": "בְּדִידָה היא כלי היסוד של מדעי המחשב: לחשוב מדויק, להוכיח, לספור וּלְמַפּוֹת רשתות.",
-   "pause": 0.8,
-   "target": 8.1
-  },
-  {
-   "id": "map",
-   "text": "ממפים: משתמש הוא נקודה, חברות היא קו.",
-   "say": "מְמַפִּים: משתמש הוא נקודה, חֲבֵרוּת היא קַו.",
-   "pause": 0.3,
-   "target": 3.5
-  },
-  {
-   "id": "def",
-   "text": "מגדירים בדיוק: צעד הוא קו אחד.",
-   "say": "מגדירים בדיוק: צעד הוא קַו אחד.",
-   "pause": 0.4,
-   "target": 3.0
-  },
-  {
-   "id": "count",
-   "text": "סופרים צעדים במסלול הקצר ביותר.",
-   "pause": 0.3,
-   "target": 3.2
-  },
-  {
-   "id": "lead",
-   "text": "ועל כל רשת של שניים ומעלה, מוכיחים בלי למדוד:",
-   "say": "ועל כל רשת של שניים וָמַעְלָה, מוכיחים בלי למדוד:",
-   "pause": 0.6,
-   "target": 4.6
-  },
-  {
-   "id": "pay",
-   "text": "תמיד יש שני משתמשים עם אותו מספר חברים.",
-   "say": "תמיד יש שני משתמשים עם אותו מספר חֲבֵרִים.",
-   "pause": 0.8,
-   "target": 4.5
-  },
-  {
-   "id": "recap",
-   "text": "זאת בדידה: לחשוב מדויק, להוכיח, לספור, למפות.",
-   "say": "זאת בְּדִידָה: לחשוב מדויק, להוכיח, לספור, לְמַפּוֹת.",
-   "pause": 0.3,
-   "target": 4.2
-  },
-  {
-   "id": "loop",
-   "text": "אז לפני שמתחילים, נחש:",
-   "say": "אז לפני שמתחילים, נַחֵשׁ:",
-   "pause": 0.0,
-   "target": 2.1
-  }
- ]
+    "lang":  "he",
+    "backend":  "gemini",
+    "model":  "gemini-3.8-flash-tts",
+    "voice":  "Puck",
+    "lead":  0.15,
+    "tail":  0.0,
+    "lines":  [
+                  {
+                      "id":  "hook",
+                      "text":  "כמה צעדי חברות בינך לבין זר בפייסבוק?",
+                      "say":  "כמה צעדי חֲבֵרוּת בינך לבין זָר בפייסבוק?",
+                      "pause":  0.3,
+                      "target":  3.8
+                  },
+                  {
+                      "id":  "ans",
+                      "text":  "בממוצע, בערך ארבעה וחצי.",
+                      "pause":  1,
+                      "target":  2.6,
+                      "say":  "בממוצע... בערך... אַרְבָּעָה וָחֵצִי."
+                  },
+                  {
+                      "id":  "msg",
+                      "text":  "מתמטיקה בדידה: לחשוב מדויק, להוכיח, לספור ולמפות רשתות.",
+                      "pause":  0.8,
+                      "target":  8.1,
+                      "say":  "מַתֵּמָטִיקָה בְּדִידָה: לחשוב מדויק, להוכיח, לספור וּלְמַפּוֹת רשתות."
+                  },
+                  {
+                      "id":  "map",
+                      "text":  "ממפים: משתמש הוא נקודה, חברות היא קו.",
+                      "say":  "מְמַפִּים: משתמש הוא נקודה, חֲבֵרוּת היא קַו.",
+                      "pause":  0.3,
+                      "target":  3.5
+                  },
+                  {
+                      "id":  "def",
+                      "text":  "מגדירים בדיוק: צעד הוא קו אחד.",
+                      "say":  "מגדירים בדיוק: צעד הוא קַו אחד.",
+                      "pause":  0.4,
+                      "target":  3.0
+                  },
+                  {
+                      "id":  "count",
+                      "text":  "סופרים צעדים במסלול הקצר ביותר.",
+                      "pause":  0.3,
+                      "target":  3.2
+                  },
+                  {
+                      "id":  "lead",
+                      "text":  "ועל כל רשת של שניים ומעלה, מוכיחים בלי למדוד:",
+                      "say":  "ועל כל רשת של שניים וָמַעְלָה, מוכיחים בלי למדוד:",
+                      "pause":  0.6,
+                      "target":  4.6
+                  },
+                  {
+                      "id":  "pay",
+                      "text":  "תמיד יש שני משתמשים עם אותו מספר חברים.",
+                      "say":  "תמיד יש שני משתמשים עם אותו מספר חֲבֵרִים.",
+                      "pause":  0.8,
+                      "target":  4.5
+                  },
+                  {
+                      "id":  "recap",
+                      "text":  "זאת מתמטיקה בדידה: לחשוב מדויק, להוכיח, לספור, למפות.",
+                      "pause":  0.3,
+                      "target":  4.2,
+                      "say":  "זֹאת מַתֵּמָטִיקָה בְּדִידָה: לחשוב מדויק, להוכיח, לספור, לְמַפּוֹת."
+                  },
+                  {
+                      "id":  "loop",
+                      "text":  "אז לפני שמתחילים, נחש:",
+                      "say":  "אז לפני שמתחילים, נַחֵשׁ:",
+                      "pause":  0.0,
+                      "target":  2.1
+                  }
+              ],
+    "style":  "Decky, a young native Israeli guy (a sabra), lively, quick, curious and a little cheeky, talking to a friend who just started university. Authentic everyday Israeli Hebrew: Tel Aviv casual rhythm and intonation, natural Israeli stress and melody, as if recorded on a voice note between friends, not a foreign speaker and not a textbook reader. Upbeat and energetic, smiling while speaking. The pace serves understanding: brisk and natural on simple, familiar lines; slower and very clear, with a short pause, on the key message and on any step that is new or tricky, so a first-year student follows every word. Short punchy sentences with expressive rises and falls. A touch of the confident, clear delivery of an Israeli prime-time TV newscaster, but warmer and more playful. A brief pause before the punchline and a spark of excitement on the aha moment. Never monotone, never robotic, never an announcer. IMPORTANT EMPHASIS RULE: when a line states a surprising or fascinating fact, slow down, linger on it, and say it slowly and with clear emphasis, with a tiny pause before the key number, as if sharing a secret. Specifically, the line \u0027on average, about four and a half\u0027 must be delivered very slowly, each word stressed, with a beat of silence before \u0027four and a half\u0027."
 }
