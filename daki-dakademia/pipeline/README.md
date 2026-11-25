@@ -1,7 +1,7 @@
 # Dakademia pipeline (audio first, data-driven visuals)
 
 Replaces the hand-written genNN.py / scenesNN.js per video. Runs on the cloud container (build, render, mix, QA) and, for the
-Gemini narration only, on the owner's PC (the API key lives there).
+Gemini narration in the cloud (workflow `Narration (Gemini voice)`, secret GEMINI_API_KEY) or on the owner's PC.
 
 **Scripts first (token budget, owner 2026-11-25).** Everything mechanical runs as a script; a model is used only where judgement
 makes the video (facts, example, script, review, visuals, the post question). Same stages, same models, same checks as before:
@@ -33,10 +33,13 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 Facts are checked against the "קטעי מקור" of draft-haiku.md; a source page is opened only for a claim not covered there.
                 A second or third pass reviews the changed lines plus the whole-script checks (word count, duration, payoff %, message, loop),
                 not every line again.
-4. audio        python voice.py <src>   on the machine with GEMINI_API_KEY (the PC; a Remote Control session runs only this one command):
-                pre-check of script.json (no request is wasted) -> ONE Gemini request (engine/tts_he.py, whole mode) -> engine/align_he.py
-                (Whisper word times, REQUIRED after a whole take) -> inject_pauses.py -> voice_rules.py. A re-run never spends another
-                request for the same script.json (voice/voice_stamp.json); --retake forces one, within the budget of 3 per video.
+4. audio        CLOUD (default): commit <src>'s voice/script.json to merdok13443/dakademia-videos `dev` as work/<id>/voice/script.json (plus script.md as work/<id>/script.md for the message check; a branch+PR, merged;
+                the video's other files stay in the project), then run the workflow `Narration (Gemini voice)` with video=<id> (dry_run first on a new setup;
+                `mcp__github__actions_run_trigger`, ref dev, or the GitHub mobile app). It runs python voice.py on that folder: pre-check of script.json
+                (no request is wasted) -> ONE Gemini request (engine/tts_he.py, whole mode) -> engine/align_he.py (Whisper word times, REQUIRED after a
+                whole take) -> inject_pauses.py -> voice_rules.py, and commits work/<id>/voice/ (voice.wav, timing.json, voice_stamp.json ...) back to dev;
+                pull dev into <src>/voice. A re-run never spends another request for the same script.json (voice_stamp.json); retake=true forces one,
+                within the budget of 3 per video. On the PC the same command is `python voice.py <src>` (`--check`: pre-check only).
                 refine_timing.py is only for the old per-line takes (not for a whole take).
 5. fit          python fit_check.py <src>      real length of every line vs its target; if the whole take misses, reword the script (a whole new take = one more request; the budget is 3 per video). Never re-take single lines
 6. visuals      SONNET at HIGH effort builds the video itself (owner rule 2026-11-25: the build, i.e. <src>/scene.json and make_video, always runs on Sonnet high; Opus writes the script, not the build; Opus building 0.0 was a one-off)   writes <src>/scene.json (data, anchors on the real words; `header` for the top header and `verdict` cards for the shared stamp are required)   see SCENE_SPEC.md
@@ -54,7 +57,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 b. python deliver.py push <src>/final.mp4 <uNN-eNN.json> --branch <thread branch>   then open the PR to dev and merge it
                 c. python deliver.py verify --name <slug>/uNN-eNN       -> the commit-pinned URL, checked (200 + size)
                 d. CLOUD upload (no PC), after the owner approves the finished video: run the GitHub Actions workflow `Upload to YouTube`
-                   of merdok13443/dakademia-videos with video=<slug>/uNN-eNN, privacy public (dry_run first on a new setup). From a session:
+                   of merdok13443/dakademia-videos with video=<slug>/uNN-eNN, privacy public, platforms youtube or youtube,instagram (dry_run first on a new setup). From a session:
                    mcp__github__actions_run_trigger (workflow upload-youtube.yml, ref dev). The owner can also tap it in the GitHub mobile app
                    (Actions > Upload to YouTube > Run workflow). It uploads with the same code as shorts-uploader (publish_cloud.py), writes
                    youtube=uploaded + URL into publish-state.json and <slug>/uNN-eNN.json on dev, and shows a RESULT line in its summary.

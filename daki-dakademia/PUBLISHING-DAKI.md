@@ -1,6 +1,6 @@
 # פרסום סרטון של דקדמיה (אחרי הרינדור)
 
-השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube רצה **בענן** ב-GitHub Actions של מאגר הסרטונים (סעיף "העלאה בענן" למטה), בלי המחשב של הבעלים, ואפשר להפעיל אותה גם מהטלפון. המחשב נדרש רק לקריינות (Gemini) ולהתקנה חד-פעמית. Instagram כשיחזור, על המחשב. אם ההעלאה בענן נכשלת, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
+השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube רצה **בענן** ב-GitHub Actions של מאגר הסרטונים (סעיף "העלאה בענן" למטה), בלי המחשב של הבעלים, ואפשר להפעיל אותה גם מהטלפון. המחשב נדרש רק לקריינות (Gemini) ולהתקנה חד-פעמית. Instagram כשיחזור, על המחשב. אם הקריינות או ההעלאה בענן נכשלות, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
 
 ## 1. העלאה למאגר הסרטונים
 
@@ -44,7 +44,7 @@ python pipeline/deliver.py verify --name <course-slug>/u01-e03
 
 ## 4. פרסום עם הסקיל shorts-uploader
 
-**חריגה זמנית (הבעלים, 2026-11-25, עד שיבטל): מפרסמים רק ב-YouTube. Instagram ו-TikTok מדלגים, ורושמים `skipped` ב-`published` וב-`publish-state.json`.** הסעיפים על Instagram ו-TikTok למטה נשארים לשימוש כשהבעלים יחזיר אותם.
+**חריגה זמנית (הבעלים, 2026-11-25, עד שיבטל): TikTok מדלגים ורושמים `skipped` ב-`published` וב-`publish-state.json`. YouTube ו-Instagram מפורסמים בענן (סעיף "העלאה בענן"); Instagram רק כשהבעלים מאשר את הפרסום שם, והחריגה "YouTube בלבד" הוסרה ל-Instagram באותו יום.** הסעיפים על Instagram ו-TikTok למטה נשארים לשימוש כשהבעלים יחזיר אותם.
 
 לא משתמשים ב-Buffer ולא באף כלי `mcp__Buffer__*`. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
@@ -76,13 +76,18 @@ python <skills>/daki-dakademia/pipeline/publish_video.py --url <הכתובת מ�
 **הפעלה:**
 - מהטלפון: אפליקציית GitHub > המאגר `dakademia-videos` > Actions > Upload to YouTube > Run workflow. שדות: `video` (למשל `discrete-math/u01-e03`), `privacy` (ברירת מחדל `public`), `dry_run`.
 - מסשן: `mcp__github__actions_run_trigger` על `upload-youtube.yml`, ref `dev`, עם אותם שדות, **רק אחרי שהבעלים אישר במפורש את הסרטון** (הודעה שלו בצ'אט, גם בצ'אט הפרויקט; הקואורדינטור מעביר אותה בציטוט). בלי אישור כזה לא מפעילים.
+- שדה `platforms`: `youtube` (ברירת מחדל), `instagram` או `youtube,instagram`. Instagram מפרסם Reel מכתובת ה-raw המוצמדת ל-commit, עם `instagram.caption` מה-json (בדיוק 5 האשטגים; נכתב ב-`metadata.py` עם `ig_body`). אם אין כיתוב ב-json, הריצה נעצרת ואומרת זאת. TikTok לא נעשה כאן.
 - הסרטון והטקסטים נלקחים מ-`dev` (`<name>.mp4` ו-`<name>.json`), לכן קודם ה-PR של הסרטון ממוזג.
 
 **מה הוא עושה:** בודק שם וקבצים, מדלג אם `publish-state.json` כבר מציין שהסרטון הועלה (אף פעם לא פעמיים), מתחבר עם הסוד, מעלה, רושם `youtube=uploaded` עם הכתובת ב-`publish-state.json` וב-`<name>.json` (וגם `skipped` לשתי הפלטפורמות האחרות), ועושה commit ישר ל-`dev` (לא ל-`main`). סיכום עם שורת `RESULT` מופיע בסיכום הריצה. `dry_run` בודק התחברות, קבצים וטקסטים ולא מעלה כלום.
 
 **הסוד (חד-פעמי):** סוד המאגר `YT_TOKEN_JSON` = כל התוכן של `token_youtube.json` מתיקיית ה-uploader במחשב (ב-Windows: `Get-Content <תיקיית uploader>\token_youtube.json -Raw | Set-Clipboard` ואז הדבקה בשדה הסוד ב-Settings > Secrets and variables > Actions > New repository secret). הקובץ כולל את ה-client id וה-secret ואת ה-refresh token. הסוד מוצפן, לא מודפס בלוגים (המאגר ציבורי, ולכן **אסור** להדפיס אותו או לשים אותו בקובץ), ולא נקרא לעולם על ידי סשן. אם ההתחברות נכשלת (`YouTube login failed`), ה-refresh token בוטל או פג: יוצרים `token_youtube.json` חדש על המחשב (ראו README של shorts-uploader, ו-OAuth צריך להיות במצב In production) ומעדכנים את הסוד.
 
-**שינויים:** ההעלאה בענן אינה מחליפה את ההנחיות האחרות: קצב (עד 6 ביום), טקסטים לפי `METADATA-DAKI.md`, חריגת YouTube בלבד. ההרשאה היא `youtube.upload` בלבד, לכן אי אפשר לערוך סרטון קיים (למשל פרטי לציבורי) מהענן.
+**Instagram (סוד שני, חד-פעמי):** סוד המאגר `IG_ACCESS_TOKEN` = תוכן `ig_token.txt` מתיקיית ה-uploader (ב-Windows: `Get-Content <תיקיית uploader>\ig_token.txt -Raw | Set-Clipboard`). ה-`IG_USER_ID` (`17841460444687086`, חשבון @dakademia.il) אינו סוד ונמצא ב-workflow. הטוקן של Instagram תקף כ-60 יום; כשהבדיקה נכשלת (`Instagram token check failed`), יוצרים טוקן חדש (README של shorts-uploader) ומעדכנים את הסוד. אי אפשר לערוך כיתוב אחרי פרסום. החריגה "YouTube בלבד" הוסרה ל-Instagram ב-2026-11-25 (הבעלים); TikTok נשאר דולג.
+
+**קריינות בענן:** ה-workflow `Narration (Gemini voice)` באותו מאגר מריץ את `pipeline/voice.py` (בקשת Gemini אחת, יישור Whisper, הזרקת הפסקות, בדיקת כללים) על `work/<id>/voice/script.json` שנמצא ב-`dev`, ומחזיר את הקבצים ל-`work/<id>/voice/` ב-`dev`. הסוד `GEMINI_API_KEY` = `$env:GEMINI_API_KEY | Set-Clipboard` על המחשב, ואז הדבקה. אותם כללי מפתח: רק שלושת המודלים, רק לקריינות, בקשה אחת לסרטון (מקסימום 3 כולל ניסיונות חוזרים; `voice_stamp.json` מונע בקשה כפולה).
+
+**שינויים:** ההעלאה בענן אינה מחליפה את ההנחיות האחרות: קצב (עד 6 ביום), טקסטים לפי `METADATA-DAKI.md`, TikTok דולג (חריגה). ההרשאה היא `youtube.upload` בלבד, לכן אי אפשר לערוך סרטון קיים (למשל פרטי לציבורי) מהענן.
 
 ## 5. תיעוד
 

@@ -110,4 +110,4 @@ python scripts/queue_status.py queue.json
 - שני חלונות קופצים צריך לסגור: "Turn on automatic content checks" (Cancel) ו-"New editing features" (Got it). שדה התיאור מגיע עם שם הקובץ, לבחור הכל ולמחוק לפני הקלדה. כפתור Post בתחתית הדף וצריך לגלול.
 
 ## העלאה מהענן (GitHub Actions)
-ההתחברות הראשונה חייבת להתבצע על מחשב עם דפדפן, אבל אחריה אפשר להעלות מהענן: `token_youtube.json` (כולל refresh token) נשמר כסוד מאגר ו-`daki-dakademia/pipeline/publish_cloud.py` מעלה איתו דרך אותו `youtube_upload.py`. ב-Dakademia זה ה-workflow `Upload to YouTube` במאגר `dakademia-videos`; פרטים ב-`daki-dakademia/PUBLISHING-DAKI.md`, "העלאה בענן". Instagram עדיין דורש את הטוקן המקומי.
+ההתחברות הראשונה חייבת להתבצע על מחשב עם דפדפן, אבל אחריה אפשר להעלות מהענן: `token_youtube.json` (כולל refresh token) נשמר כסוד מאגר ו-`daki-dakademia/pipeline/publish_cloud.py` מעלה איתו דרך אותו `youtube_upload.py`. ב-Dakademia זה ה-workflow `Upload to YouTube` במאגר `dakademia-videos`; פרטים ב-`daki-dakademia/PUBLISHING-DAKI.md`, "העלאה בענן". Instagram עובד באותה דרך: `IG_ACCESS_TOKEN` כסוד מאגר, ו-`publish_cloud.py --platforms instagram` מפרסם Reel מכתובת ה-raw המוצמדת.
