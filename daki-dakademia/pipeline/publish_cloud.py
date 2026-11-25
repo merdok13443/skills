@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Upload ONE delivered Dakademia video to YouTube and/or Instagram from GitHub Actions (cloud), no PC needed.
+"""Upload ONE delivered Dakademia video to YouTube, Instagram and/or TikTok (draft) from GitHub Actions (cloud), no PC needed.
 
 Runs inside the workflow `.github/workflows/upload-youtube.yml` of merdok13443/dakademia-videos. The workflow checks out
 the videos repo (dev) and this skills repo (dev) side by side and calls:
 
   python skills/daki-dakademia/pipeline/publish_cloud.py --videos-dir videos --name discrete-math/u01-e03
-         [--platforms youtube,instagram] [--video-url <commit-pinned raw URL of the mp4>]
+         [--platforms youtube,instagram,tiktok] [--video-url <commit-pinned raw URL of the mp4>]
+         [--tiktok-token-file videos/tiktok-token.enc]
          [--privacy public|unlisted|private] [--dry-run]
 
 Input   : <videos-dir>/<name>.mp4 and <videos-dir>/<name>.json (written by metadata.py + deliver.py push).
@@ -15,13 +16,19 @@ Secret  : env YT_TOKEN_JSON = the full content of token_youtube.json from the ow
           Instagram also needs env IG_ACCESS_TOKEN (secret) and IG_USER_ID, and --video-url (checked: 200 and the right size).
 Settings: exactly the fixed ones of PUBLISHING-DAKI.md: public (unless --privacy for a test), NOT made for kids, category 27
           (Education), language he, texts from the json. Instagram: a Reel from json instagram.caption (5 hashtags).
-          TikTok is never touched (`skipped`).
+          TikTok: NOT a public post. The mp4 goes to the owner's TikTok INBOX as a draft (Content Posting API, "Upload to inbox",
+          scope video.upload; tiktok_inbox.py). The owner taps the notification in the TikTok app, checks the caption (printed in
+          the run summary, ready to copy) and presses Publish. Needs secrets TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET and the
+          encrypted token file made once by the workflow `TikTok login`. Recorded as tiktok=pending with the publish_id and a
+          note; a video whose entry has a publish_id is never sent twice. When the owner has published it, run
+          publish_state.py set <video> tiktok uploaded --url <link>.
 Dedupe  : a platform whose status in <videos-dir>/publish-state.json is already `uploaded` is never uploaded again.
 Record  : each success sets <platform>=uploaded (+url/media id) in publish-state.json, regenerates PUBLISH-STATE.md, and fills
           published / published_at in <name>.json. A failed platform does not stop the other. The workflow commits to dev.
 --dry-run checks files, texts, settings and dedupe, refreshes the YouTube token and reads the Instagram publishing limit
           (real auth checks, uploads nothing, changes nothing).
-Last line: RESULT {"video": ..., "youtube": "<videoId>|dry-run|skipped|failed", "instagram": "<mediaId>|dry-run|skipped|failed", ...}
+Last line: RESULT {"video": ..., "youtube": "<videoId>|dry-run|skipped|failed", "instagram": "<mediaId>|dry-run|skipped|failed",
+                  "tiktok": "<publish_id>|dry-run|skipped|failed", ...}
 """
 import argparse
 import datetime
@@ -49,9 +56,27 @@ def out(res, code):
     summ = os.environ.get('GITHUB_STEP_SUMMARY')
     if summ:
         with open(summ, 'a', encoding='utf-8') as f:
-            f.write(f"### {res.get('video')}\n\n- YouTube: **{res.get('youtube')}**\n" +
-                    (f"- {res['url']}\n" if res.get('url') else '') + (f"- {res['note']}\n" if res.get('note') else ''))
+            f.write(f"### {res.get('video')}\n\n")
+            for plat, label in (('youtube', 'YouTube'), ('instagram', 'Instagram'), ('tiktok', 'TikTok')):
+                if res.get(plat):
+                    f.write(f"- {label}: **{res[plat]}**\n")
+            for k in ('url', 'instagram_url'):
+                if res.get(k):
+                    f.write(f"- {res[k]}\n")
+            if res.get('note'):
+                f.write(f"- {res['note']}\n")
+            if res.get('tiktok_caption'):
+                f.write("\n**TikTok caption to paste in the app** (the inbox draft has no caption):\n\n```\n"
+                        + res['tiktok_caption'] + "\n```\n")
     sys.exit(code)
+
+
+def _scrub_keys(text, *secrets):
+    text = str(text)
+    for s in secrets:
+        if s:
+            text = text.replace(s, '<secret>')
+    return text
 
 
 def fetch_check(url):
@@ -74,7 +99,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--videos-dir', required=True)
     ap.add_argument('--name', required=True, help='course-slug/uNN-eNN, e.g. discrete-math/u01-e03')
-    ap.add_argument('--platforms', default='youtube', help='comma list of youtube,instagram')
+    ap.add_argument('--platforms', default='youtube', help='comma list of youtube,instagram,tiktok')
+    ap.add_argument('--tiktok-token-file', default='', help='encrypted TikTok token file (default <videos-dir>/tiktok-token.enc)')
     ap.add_argument('--video-url', default='', help='commit-pinned raw URL of the mp4 (needed for instagram)')
     ap.add_argument('--privacy', default='public', choices=['public', 'unlisted', 'private'])
     ap.add_argument('--dry-run', action='store_true')
@@ -82,8 +108,8 @@ def main():
     if not NAME_RE.match(a.name):
         sys.exit(f'bad --name {a.name!r}: expected course-slug/uNN-eNN[-vN]')
     plats = [p.strip() for p in a.platforms.split(',') if p.strip()]
-    if not plats or any(p not in ('youtube', 'instagram') for p in plats):
-        sys.exit('--platforms must be youtube, instagram or youtube,instagram')
+    if not plats or any(p not in ('youtube', 'instagram', 'tiktok') for p in plats):
+        sys.exit('--platforms must be a comma list of youtube, instagram, tiktok')
     vdir = os.path.abspath(a.videos_dir)
     base = os.path.join(vdir, a.name)
     mp4, mj = base + '.mp4', base + '.json'
@@ -119,7 +145,11 @@ def main():
     todo = []
     for p in plats:
         prev = pl.get(p, {})
-        if prev.get('status') == 'uploaded':
+        if p == 'tiktok' and prev.get('publish_id') and prev.get('status') in ('pending', 'uploaded'):
+            res[p] = 'skipped'
+            notes.append(f'tiktok: a draft was already sent (publish_id {prev["publish_id"]}); not again. To send a new version, delete the publish_id from its entry in publish-state.json')
+            print(notes[-1])
+        elif prev.get('status') == 'uploaded':
             res[p] = 'skipped'
             notes.append(f'{p}: already uploaded ({prev.get("url") or prev.get("media_id") or "see publish-state.json"}); not again')
             print(notes[-1])
@@ -231,11 +261,56 @@ def main():
             print('Instagram FAILED:', notes[-1])
             failed = True
 
+    # ---------------- TikTok (draft in the owner's inbox)
+    if 'tiktok' in todo:
+        key = os.environ.get('TIKTOK_CLIENT_KEY', '').strip()
+        sec = os.environ.get('TIKTOK_CLIENT_SECRET', '').strip()
+        tfile = a.tiktok_token_file or os.path.join(vdir, 'tiktok-token.enc')
+        try:
+            if not (key and sec):
+                raise RuntimeError('secrets TIKTOK_CLIENT_KEY / TIKTOK_CLIENT_SECRET missing (repo Settings > Secrets and variables > Actions)')
+            if not os.path.exists(tfile):
+                raise RuntimeError('no tiktok-token.enc yet: run the workflow "TikTok login" once (PUBLISHING-DAKI.md, TikTok)')
+            import tiktok_inbox as T
+            try:
+                access, rotated = T.access_from_file(key, sec, tfile)
+            except Exception as e:
+                raise RuntimeError('TikTok login failed: ' + T._scrub(e, key, sec)[:250] + ' (run "TikTok login" again if the refresh token expired)')
+            print('TikTok: access token OK' + (' (refresh token rotated, tiktok-token.enc rewritten)' if rotated else ''))
+            tt_meta = meta.get('tiktok') or {}
+            cap = tt_meta.get('caption') or ''
+            if not cap:
+                cap = (meta.get('instagram') or {}).get('caption', '') or yt.get('title', '')
+                notes.append('tiktok: the json has no tiktok caption, the printed one is the Instagram/YouTube text; adjust before publishing')
+            res['tiktok_caption'] = cap
+            if a.dry_run:
+                ci = T.creator_info(access)
+                print('TikTok: creator_info error code:', (ci.get('error') or {}).get('code'),
+                      'user:', (ci.get('data') or {}).get('creator_username'))
+                res['tiktok'] = 'dry-run'
+            else:
+                try:
+                    pid = T.upload_to_inbox(access, mp4)
+                    stat_ = T.wait_status(access, pid)
+                except Exception as e:
+                    raise RuntimeError(T._scrub(e, key, sec)[:300] + ' | check the TikTok inbox before running again to avoid a double draft')
+                print('TikTok: draft in inbox, status', stat_)
+                pl['tiktok'] = {'status': 'pending', 'date': today, 'publish_id': pid,
+                                'note': 'draft in the TikTok inbox (sent by the cloud workflow); the owner taps the notification and publishes'}
+                meta.setdefault('published', {})['tiktok'] = 'draft:' + pid
+                res['tiktok'] = pid
+                changed = True
+        except Exception as e:
+            res['tiktok'] = 'failed'
+            notes.append('tiktok: ' + _scrub_keys(e, key, sec)[:300])
+            print('TikTok FAILED:', notes[-1])
+            failed = True
+
     # ---------------- record
     if changed:
         v['ready'] = True
         for other in ('instagram', 'tiktok'):
-            if other not in plats:
+            if other not in plats and other not in pl:
                 pl.setdefault(other, {'status': 'skipped', 'date': today, 'note': 'not published by the cloud workflow'})
         P.save(state_p, state)
         pub = meta.setdefault('published', {})
