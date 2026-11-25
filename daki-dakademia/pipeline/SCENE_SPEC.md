@@ -32,7 +32,7 @@ Captions are automatic from the words (phrases split at punctuation, <= 5 words,
 Prefer `w:line~word` anchors: they survive re-takes of the voice.
 
 ## Scenes
-`{"id":"S2","from":"l:def","to":"l:cmd","enter":"whip","exit":"whip","els":[...],"acts":[...]}`; `from` defaults to the previous scene's end, `to` defaults to `D`. First scene has no enter, the last no exit. Scenes switch with a whip (the `.sw` wrapper slides). Ids are unique over the whole video (not `cap0`, `st`, `cam`, `kicker`, `flash`, `bgink`, `dsvg`, `ssvg`).
+`{"id":"S2","from":"l:def","to":"l:cmd","enter":"whip","exit":"whip","els":[...],"acts":[...]}`; `from` defaults to the previous scene's end, `to` defaults to `D`. First scene has no enter, the last no exit. Scenes switch with a whip (the `.sw` wrapper slides the WHOLE scene) **only when the whole screen changes**. When the next scene keeps an element (the topic tag, the prompt card), join the two with a cut: `"exit":null` on the first and `"enter":null` on the second, and let only the new element enter; `scene_lint.py` errors on an unchanged element across a whip. Cards >= 44 px text, tags >= 40 px, content filling y 330-1230, at most 3 `popB`/`pulse` per scene, truth tables built whole at final size and filled in place (`GUIDELINES-DAKI.md`). Ids are unique over the whole video (not `cap0`, `st`, `cam`, `kicker`, `flash`, `bgink`, `dsvg`, `ssvg`).
 
 ## Elements (`els`): every element has `id`, `type`, `box:[x,y,w,h]`, optional `vis:true` (visible from the scene start; default hidden, shown by an act), `rot` (degrees)
 | type | fields | what |

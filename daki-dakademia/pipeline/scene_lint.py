@@ -8,6 +8,11 @@ ERROR  an anchor that does not resolve (same anchor rules as build_video.py)
 ERROR  loop: what is visible at frame 0 (first scene) differs from what is visible at the end (last scene):
        same element types, boxes and text; Decky's final pose equals the frame-0 pose (x, y, s, expression);
        seam_caption is set
+ERROR  continuity: two scenes joined by a whip (the default) show the same element (same box and text) in both:
+       the whole wrapper slides out and back, so the unchanged tag / prompt card jumps off and on (owner, 1.6 and 1.7,
+       2026-11-25). Join continuing scenes with a cut: "exit":null on the first, "enter":null on the second
+WARN   text smaller than 44 px in a card or 40 px in a tag; a scene whose content ends above y 800 (empty band
+       between content and Decky); more than 3 bounce acts (popB / pulse) in one scene
 Overlaps are left to the hyperframes check (it measures the rendered layout); the stamp to motion_check.py and the
 first/last frame comparison in qa.py.
 The build (build_video.py), motion_check.py, the hyperframes check and qa.py still run as before; this only finds the
@@ -143,6 +148,32 @@ def main(src):
             errs.append(f'loop: Decky ends as {pose}, frame 0 is {want}')
         if not spec.get('seam_caption'):
             errs.append('loop: seam_caption is missing (the last caption that completes the first line)')
+    # continuity across whips
+    def joined(a, b):
+        return a.get('exit', 'whip') and b.get('enter', 'whip')
+    for k in range(len(scenes) - 1):
+        a, b = scenes[k], scenes[k + 1]
+        if not joined(a, b):
+            continue
+        same = {(e['type'], tuple(e['box']), e.get('html')) for e in a.get('els', []) if e.get('vis')}
+        rep = [e['id'] for e in b.get('els', []) if e.get('vis') and (e['type'], tuple(e['box']), e.get('html')) in same]
+        if rep:
+            errs.append(f"continuity: {a['id']} -> {b['id']} is a whip but {rep} is unchanged in both: it slides out and back; "
+                        f"use a cut (\"exit\":null on {a['id']}, \"enter\":null on {b['id']})")
+    warns = []
+    for sc in scenes:
+        els = sc.get('els', [])
+        for e in els:
+            lim = {'card': 44, 'tag': 40}.get(e['type'])
+            if lim and e.get('size') and e['size'] < lim and not e.get('small'):
+                warns.append(f"{sc['id']} {e['id']}: text {e['size']} px is under {lim} (set \"small\" only for a deliberate caption-sized note)")
+        if els and max(e['box'][1] + e['box'][3] for e in els) < 800 and not any(e['type'] == 'kin' for e in els):
+            warns.append(f"{sc['id']}: content ends above y 800, so there is an empty band down to Decky: use bigger cards or a taller layout")
+        nb = sum(1 for a in sc.get('acts', []) if a.get('do') in ('popB', 'pulse'))
+        if nb > 3:
+            warns.append(f"{sc['id']}: {nb} bounce acts (popB/pulse); keep the motion calm, 3 at most per scene")
+    for x in warns:
+        print('WARN', x)
     for x in errs:
         print('ERROR', x)
     if not errs:
