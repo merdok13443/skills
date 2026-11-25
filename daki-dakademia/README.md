@@ -17,5 +17,5 @@ Copy both folders into `~/.claude/skills/` (Windows: `C:\Users\<you>\.claude\ski
 - `GUIDELINES-DAKI.md`: project conventions, the Daki section, extra checklist (Hebrew)
 - `TECHNICAL-DAKI.md`: Daki code API, time sweep, acceptance checks
 - `METADATA-DAKI.md`: titles, captions and hashtags per platform, with an example and a feedback loop (Hebrew)
-- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish via Buffer to YouTube, Instagram and TikTok (Hebrew)
+- `PUBLISHING-DAKI.md`: upload to `merdok13443/dakademia-videos` and publish with the shorts-uploader skill (official APIs, no Buffer) to YouTube and Instagram, TikTok manual (Hebrew)
 - `mascot/`: Daki as reusable SVG code (`daki.js`), spec (`DAKI.md`), profile pictures, character sheet, and `render.js` to regenerate them

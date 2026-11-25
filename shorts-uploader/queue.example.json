@@ -1,0 +1,18 @@
+{
+  "defaults": {
+    "youtube": {"privacy": "public", "made_for_kids": false, "category_id": "27", "language": "he"},
+    "instagram": {"share_to_feed": true}
+  },
+  "items": [
+    {
+      "id": "ep01",
+      "file": "videos/ep01.mp4",
+      "title": "למה החגורה נתקעת? #Shorts",
+      "description": "הסבר קצר לילדים. סדרת מסתורי היומיום.",
+      "tags": ["מדע", "ילדים", "חינוך"],
+      "caption": "למה החגורה נתקעת? 🧠 #מדע #ילדים",
+      "instagram_video_url": "https://YOUR-PUBLIC-HOST/ep01.mp4",
+      "publish_at": null
+    }
+  ]
+}
