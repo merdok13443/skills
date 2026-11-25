@@ -53,14 +53,19 @@ the scripts only replace a model reading big files or typing commands. Every scr
                    "learn" sentence; METADATA-DAKI.md); python metadata.py meta-input.json --course <slug> fills the fixed parts and checks them
                 b. python deliver.py push <src>/final.mp4 <uNN-eNN.json> --branch <thread branch>   then open the PR to dev and merge it
                 c. python deliver.py verify --name <slug>/uNN-eNN       -> the commit-pinned URL, checked (200 + size)
-                d. on the PC (one Remote Control command): python publish_video.py --url <that URL> --uploader-dir <uploader folder>
-                   (YouTube; Instagram and TikTok follow PUBLISHING-DAKI.md) -> RESULT line with the ids
-                e. python deliver.py record --name <slug>/uNN-eNN --url <URL> --youtube <id> --instagram skipped --tiktok skipped --branch <b> --package "<video folder>"
-                   then open the PR to dev and merge it; python state.py done <course> <id> --note "<length, anything notable>"
+                d. CLOUD upload (no PC), after the owner approves the finished video: run the GitHub Actions workflow `Upload to YouTube`
+                   of merdok13443/dakademia-videos with video=<slug>/uNN-eNN, privacy public (dry_run first on a new setup). From a session:
+                   mcp__github__actions_run_trigger (workflow upload-youtube.yml, ref dev). The owner can also tap it in the GitHub mobile app
+                   (Actions > Upload to YouTube > Run workflow). It uploads with the same code as shorts-uploader (publish_cloud.py), writes
+                   youtube=uploaded + URL into publish-state.json and <slug>/uNN-eNN.json on dev, and shows a RESULT line in its summary.
+                   Setup, secret and rules: PUBLISHING-DAKI.md, "Cloud upload". (The PC route publish_video.py stays for Instagram later.)
+                e. pull dev (the workflow already recorded the YouTube result), copy the json and the state record into the video package
+                   (07-publish), then python state.py done <course> <id> --note "<length, anything notable>". Other platforms or a manual
+                   fix: python deliver.py record --name <slug>/uNN-eNN --url <URL> --youtube <id> --instagram skipped --tiktok skipped --branch <b> --package "<video folder>"
 ```
 **A stage fails** (no narration, QA fail that the rules do not allow to relax, missing tool): fix the cause inside the guidelines (fix the script, `scene.json` or the template; one more TTS take only within the budget of 3 requests). Never work around a rule (another voice or model, extra requests, a lowered check). If it still fails, stop that video, `python state.py fail <course> <id> --stage <stage> --reason "<cause>" --blocked`, report it clearly, and wait for the owner. Rule owner: `../SKILL.md`, section 1.
 
-Files: `state.py` (course state and locks), `pack.py` (context pack per stage), `sources.py` (source pages), `voice.py` (stage 4 in one command), `scene_lint.py` (loop and anchors before a render), `metadata.py` + `deliver.py` + `publish_video.py` (stage 9), `archive_video.py` + `VIDEO-PACKAGE.md` (the per-video package), `stage_log.py` (time and tokens of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js and stamp.js are copied FRESH from `../mascot/daki.js` and `../stamp/stamp.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
+Files: `state.py` (course state and locks), `pack.py` (context pack per stage), `sources.py` (source pages), `voice.py` (stage 4 in one command), `scene_lint.py` (loop and anchors before a render), `metadata.py` + `deliver.py` + `publish_cloud.py` (cloud upload) + `publish_video.py` (PC route) (stage 9), `archive_video.py` + `VIDEO-PACKAGE.md` (the per-video package), `stage_log.py` (time and tokens of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js and stamp.js are copied FRESH from `../mascot/daki.js` and `../stamp/stamp.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
 Narration research (Gemini TTS has no duration control; pace via `style`, pauses via tags/punctuation; budget text per line with fit_check): see `../../explainer-shorts/HEBREW_NARRATION.md` and the project's `research/industrial-production-plan.md`.
 
 Intro videos (course trailer 0.0 and unit intro X.0, `type` trailer/intro in the curriculum JSON) follow the same stages but with a different author chain: Fable writes the first script and the visual presentation (stages 1b-2), Opus high designs the eye-catching effects and the hook and revises. Rules and rationale: `../INTRO-VIDEOS-DAKI.md`.

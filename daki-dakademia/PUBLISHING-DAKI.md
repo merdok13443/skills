@@ -1,6 +1,6 @@
 # פרסום סרטון של דקדמיה (אחרי הרינדור)
 
-השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube רצה על המחשב של הבעלים (Instagram כשיחזור); אם הוא לא זמין, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
+השלב הזה רץ אוטומטית מיד אחרי שהסרטון עבר את ה-QA של ה-pipeline. אין עצירה לאישור אנושי. ההעלאה ל-YouTube רצה **בענן** ב-GitHub Actions של מאגר הסרטונים (סעיף "העלאה בענן" למטה), בלי המחשב של הבעלים, ואפשר להפעיל אותה גם מהטלפון. המחשב נדרש רק לקריינות (Gemini) ולהתקנה חד-פעמית. Instagram כשיחזור, על המחשב. אם ההעלאה בענן נכשלת, רושמים `waiting: publish` ומדווחים (`SKILL.md`, סעיף 1). Git: ענף מ-`dev` ו-PR ל-`dev`, אף פעם לא ישירות ל-`main`.
 
 ## 1. העלאה למאגר הסרטונים
 
@@ -48,6 +48,8 @@ python pipeline/deliver.py verify --name <course-slug>/u01-e03
 
 לא משתמשים ב-Buffer ולא באף כלי `mcp__Buffer__*`. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
+**YouTube: ברירת המחדל היא ההעלאה בענן** (סעיף "העלאה בענן" למטה). המסלול על המחשב שלהלן נשאר ל-Instagram כשיחזור ולמקרה שהענן לא זמין.
+
 **פקודה אחת לסרטון, על המחשב של הבעלים** (מתוך תיקיית ה-uploader, עם ה-venv שלה; סשן Remote Control מריץ רק אותה):
 
 ```bash
@@ -66,6 +68,21 @@ python <skills>/daki-dakademia/pipeline/publish_video.py --url <הכתובת מ�
 - אם אין הרשאות לאינסטגרם (`IG_ACCESS_TOKEN`), או כל עוד החריגה הזמנית בתוקף, רושמים `instagram: skipped` וממשיכים.
 - TikTok: ידני, דרך TikTok Studio (אין סקריפט). זו היוצאת מהכלל "בלי אוטומציית דפדפן" של shorts-uploader: מעלים דרך חלון בחירת הקבצים ב-Studio בחשבון מחובר, לא בעוגיות ולא בכלי צד שלישי.
 - אם קריאה נכשלת, לא מנסים שוב יותר מפעם אחת. מדווחים מה נכשל ובאיזו פלטפורמה. סרטון שפורסם לא מוחקים ולא מפרסמים מחדש.
+
+## העלאה בענן (YouTube, ברירת המחדל מ-2026-11-25)
+
+הסיבה: פרטי הגישה ליוטיוב היו רק על המחשב של הבעלים, ולכן אי אפשר היה לאשר ולהעלות מהטלפון. עכשיו ההעלאה רצה ב-GitHub Actions במאגר `merdok13443/dakademia-videos`, וה-workflow `Upload to YouTube` (`.github/workflows/upload-youtube.yml`) מריץ את `pipeline/publish_cloud.py`, עם אותו קוד העלאה כמו `shorts-uploader/scripts/youtube_upload.py` ואותן הגדרות קבועות: ציבורי (בבדיקה אפשר `private`/`unlisted`), לא לילדים, קטגוריה 27, עברית.
+
+**הפעלה:**
+- מהטלפון: אפליקציית GitHub > המאגר `dakademia-videos` > Actions > Upload to YouTube > Run workflow. שדות: `video` (למשל `discrete-math/u01-e03`), `privacy` (ברירת מחדל `public`), `dry_run`.
+- מסשן: `mcp__github__actions_run_trigger` על `upload-youtube.yml`, ref `dev`, עם אותם שדות, **רק אחרי שהבעלים אישר במפורש את הסרטון** (הודעה שלו בצ'אט, גם בצ'אט הפרויקט; הקואורדינטור מעביר אותה בציטוט). בלי אישור כזה לא מפעילים.
+- הסרטון והטקסטים נלקחים מ-`dev` (`<name>.mp4` ו-`<name>.json`), לכן קודם ה-PR של הסרטון ממוזג.
+
+**מה הוא עושה:** בודק שם וקבצים, מדלג אם `publish-state.json` כבר מציין שהסרטון הועלה (אף פעם לא פעמיים), מתחבר עם הסוד, מעלה, רושם `youtube=uploaded` עם הכתובת ב-`publish-state.json` וב-`<name>.json` (וגם `skipped` לשתי הפלטפורמות האחרות), ועושה commit ישר ל-`dev` (לא ל-`main`). סיכום עם שורת `RESULT` מופיע בסיכום הריצה. `dry_run` בודק התחברות, קבצים וטקסטים ולא מעלה כלום.
+
+**הסוד (חד-פעמי):** סוד המאגר `YT_TOKEN_JSON` = כל התוכן של `token_youtube.json` מתיקיית ה-uploader במחשב (ב-Windows: `Get-Content <תיקיית uploader>\token_youtube.json -Raw | Set-Clipboard` ואז הדבקה בשדה הסוד ב-Settings > Secrets and variables > Actions > New repository secret). הקובץ כולל את ה-client id וה-secret ואת ה-refresh token. הסוד מוצפן, לא מודפס בלוגים (המאגר ציבורי, ולכן **אסור** להדפיס אותו או לשים אותו בקובץ), ולא נקרא לעולם על ידי סשן. אם ההתחברות נכשלת (`YouTube login failed`), ה-refresh token בוטל או פג: יוצרים `token_youtube.json` חדש על המחשב (ראו README של shorts-uploader, ו-OAuth צריך להיות במצב In production) ומעדכנים את הסוד.
+
+**שינויים:** ההעלאה בענן אינה מחליפה את ההנחיות האחרות: קצב (עד 6 ביום), טקסטים לפי `METADATA-DAKI.md`, חריגת YouTube בלבד. ההרשאה היא `youtube.upload` בלבד, לכן אי אפשר לערוך סרטון קיים (למשל פרטי לציבורי) מהענן.
 
 ## 5. תיעוד
 
