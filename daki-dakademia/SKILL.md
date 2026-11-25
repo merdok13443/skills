@@ -24,6 +24,7 @@ If two files disagree, follow the higher one and mention the conflict in your re
 - Do not rebuild finished videos for new rules. To fix a finished video, make a minimal edit to its saved source (`scene.json` / `script.json`) and re-render.
 
 **Content**
+- Optional fun fact: every few lessons, never forced, one verified surprising real-world fact that supports the example (`GUIDELINES-DAKI.md`, section on fun facts). It never adds a second message.
 - Audience: students with no background, starting the degree. Define every term at first use. ONE strong idea, ONE learning message, ONE real everyday example as the spine of the whole video. Standard notation only (e.g. propositional variables lowercase p, q, r, s).
 - Never mention any university, book, author, chapter, section or exercise number, anywhere (voice, screen, captions, file names, metadata, notes). No on-screen source tag. Examples are original: never the book's example, not even lightly adapted. Facts are still checked against the sources.
 - Every T/F stamp matches the truth of its sentence in every frame, frame 0 included. Every spoken word is correct.
