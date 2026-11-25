@@ -32,10 +32,11 @@ Use this skill whenever the user asks for a short teaching video (Short, Reel, T
    - Use a new composition every 3-5 s.
    - Make character faces 160-200 px wide, with `idle()`.
    - **Optional recurring host/mascot:** if the series has one (from its series skill), load it from its `mascot/` folder (see `TECHNICAL.md`, "Optional recurring host / mascot"). The host is a host, not the hero: it reacts beside the hero object, switches expression on key moments, never covers the hero or the captions, and is never redrawn or restyled.
-3. Check stills: `node engine/render.js <proj> --still t1,t2,...`, then `python engine/sheet.py <proj>/stills N`. Fix overlaps, clipped text and stray lines, then repeat.
+3. Check stills: `node engine/render.js <proj> --still t1,t2,...`, then `python engine/sheet.py <proj>/stills N`. Fix overlaps, clipped text and stray lines, then repeat. Also `python engine/safezone_check.py <proj>/stills`: nothing but background may enter the margins L150 R150 T270 B420 (x 150–930, y 270–1500), see GUIDELINES.md.
 4. Full render: `node engine/render.js <proj> --workers 4`.
 5. Mix: `python engine/mix.py <proj> --key X --bpm 92-100 --music-gain 0.18`.
 6. Loudness: `ffmpeg -af ebur128`, aiming for about -14 to -15 LUFS.
+7. Margins on the final video: `python engine/safezone_check.py final.mp4` must pass (frame 0 and the last frame included) before publishing.
 
 **Hebrew narration:** step 1 changes. Use `python engine/tts_he.py <proj>` (edge-tts, default voice he-IL-HilaNeural, male alternative he-IL-AvriNeural, with exact word timings), then `bash engine/mktiming.sh <proj>`. Skip `align.py`. Aim for about 60-70 Hebrew words at about 100 wpm. Copy `index.html` from `examples/he1` for RTL captions (Heebo font). See `HEBREW_NARRATION.md`.
 
