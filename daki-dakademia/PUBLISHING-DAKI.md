@@ -77,6 +77,8 @@ curl -sIL "<url>" | grep -iE "^HTTP|content-length"
 }
 ```
 
+מעתיקים את אותו `u01-e03.json` ל-`07-publish/metadata.json` בתיקיית הסרטון בפרויקט, ואת הרשומה של הסרטון מ-`publish-state.json` ל-`07-publish/state.json`, ומוסיפים את הקישורים ל-README שלה (`pipeline/VIDEO-PACKAGE.md`).
+
 ומדווחים למשתמש בשורה אחת: מה פורסם, איפה, ומה נדחה או נכשל.
 
 ## הגדרת קהל ב-YouTube (חובה)

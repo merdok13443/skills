@@ -19,11 +19,11 @@ Gemini narration only, on the owner's PC (the API key lives there).
 7. make         python make_video.py <src> [--sheet] [--draft]   build -> hyperframes check -> render -> mix -> QA (+ stage_log.jsonl)
 7b. motion       motion_check.py runs inside make_video BEFORE the render (seconds): nothing cropped by the frame edge, stamp never teleports, every stamp reaches its target
 8. look         ONE contact sheet (stills/contact-sheet.jpg) + qa_report.json; fix scene.json (never index.html) and re-run
-9. deliver      only final.mp4 + script.json + scene.json + qa_report.json + stage_log.jsonl go to the video folder; mp4 to dakademia-videos
+9. deliver      the COMPLETE package goes to the video's project folder (every stage's texts, narration + word times, scene.json, the generated build and daki.js used, QA, publish data, final mp4): `python archive_video.py pack <src> "<video folder>"` then `check` must say `package OK`; layout, versions, gaps: `VIDEO-PACKAGE.md`. Only the mp4 (+ post json) goes to dakademia-videos
 ```
 **A stage fails** (no narration, QA fail that the rules do not allow to relax, missing tool): fix the cause inside the guidelines (fix the script, `scene.json` or the template; one more TTS take only within the budget of 3 requests). Never work around a rule (another voice or model, extra requests, a lowered check). If it still fails, stop that video, record `blocked` with the failed stage and cause in its README / progress.json, report it clearly, and wait for the owner. Rule owner: `../SKILL.md`, section 1.
 
-Files: `stage_log.py` (timing of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js is copied FRESH from `../mascot/daki.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
+Files: `archive_video.py` + `VIDEO-PACKAGE.md` (stage 9: the per-video package), `stage_log.py` (timing of every stage), `build_video.py`, `runtime/` (dk-runtime.js, base.css), `assets/` (fonts, gsap, grain; daki.js is copied FRESH from `../mascot/daki.js` on every build), `mix.py`, `qa.py`, `fit_check.py`, `make_video.py`.
 Narration research (Gemini TTS has no duration control; pace via `style`, pauses via tags/punctuation; budget text per line with fit_check): see `../../explainer-shorts/HEBREW_NARRATION.md` and the project's `research/industrial-production-plan.md`.
 
 Intro videos (course trailer 0.0 and unit intro X.0, `type` trailer/intro in the curriculum JSON) follow the same stages but with a different author chain: Fable writes the first script and the visual presentation (stages 1b-2), Opus high designs the eye-catching effects and the hook and revises. Rules and rationale: `../INTRO-VIDEOS-DAKI.md`.

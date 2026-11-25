@@ -41,11 +41,11 @@
 
   /* ---------- stamp (the T/F rubber stamp) ---------- */
   const STAMP = `<g class="sbob"><g class="sq">
-  <g class="sT"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2B6CB0"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">T</text></g>
-  <g class="sF"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#E0452B"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">F</text></g>
-  <g class="sN"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#8C8273"/></g>
+  <g class="sT"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">T</text></g>
+  <g class="sF"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/><text x="0" y="-24" text-anchor="middle" font-family="JBMono" font-weight="700" font-size="44" fill="#FFFDF6">F</text></g>
+  <g class="sN"><rect x="-115" y="-74" width="230" height="74" rx="16" fill="#1C1A17"/><rect x="-98" y="-60" width="196" height="46" rx="8" fill="#2F5D8C"/></g>
   <rect x="-30" y="-128" width="60" height="58" fill="#D6C6AA" stroke="#1C1A17" stroke-width="8"/>
-  <rect x="-54" y="-232" width="108" height="112" rx="42" fill="#E0452B" stroke="#1C1A17" stroke-width="9"/>
+  <rect x="-54" y="-232" width="108" height="112" rx="42" fill="#2F5D8C" stroke="#1C1A17" stroke-width="9"/>
   <path d="M-34 -204 Q-38 -180 -30 -160" stroke="#fff" stroke-width="9" fill="none" opacity=".6" stroke-linecap="round"/>
   <circle cx="0" cy="-262" r="62" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
   <circle cx="-54" cy="-286" r="26" fill="#FFFDF6" stroke="#1C1A17" stroke-width="9"/>
@@ -136,8 +136,9 @@
     sLeave: a => sOut(a.t, a.d || .35),
     stamp: a => {               // slam the stamp at time t onto `hit`, with an imprint (mark) appearing exactly at t
       const hov = a.hover, t = a.t;
+      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);   // the face is set while the stamp is still hidden: no colour change in view
       sApproach(t, { x: hov[0], y: hov[1], r: 9 });
-      faceAt(Math.max(sFree - .3, 0), a.kind);
+      faceAt(tFace, a.kind);
       sTo(t - .15, .15, { x: a.hit[0], y: a.hit[1], r: 0 }, 'power4.in'); squash(t);
       if (a.mark) {
         tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.5 }, { scale: 1, duration: .22, ease: 'power4.out' }, t); wave(a.mark, t);
@@ -148,8 +149,9 @@
     },
     jam: a => {                 // the stamp comes down on something that has no truth value, stops short and jitters
       const t = a.t;
+      const tFace = Math.max(Math.max(t - 1.1, sFree + .02) - .02, 0);
       sApproach(t, { x: a.hover[0], y: a.hover[1], r: a.hr != null ? a.hr : -9 });
-      faceAt(Math.max(sFree - .3, 0), a.kind || 'n');
+      faceAt(tFace, a.kind || 'n');
       sTo(t - .15, .15, { x: a.down[0], y: a.down[1], r: 0 }, 'power4.in'); squash(t); jitter(t + .02, 5, 8);
       if (a.mark) { tl.set(a.mark, { opacity: 1 }, t); tl.fromTo(a.mark, { scale: 1.4 }, { scale: 1, duration: .25, ease: 'power4.out' }, t); }
       if (a.leave !== false) sOut(t + (a.leave || 1.0));
