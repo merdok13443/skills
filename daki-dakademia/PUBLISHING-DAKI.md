@@ -46,6 +46,8 @@ python pipeline/deliver.py verify --name <course-slug>/u01-e03
 
 **חריגה זמנית (הבעלים, 2026-11-25, עד שיבטל): TikTok מדלגים ורושמים `skipped` ב-`published` וב-`publish-state.json`. YouTube ו-Instagram מפורסמים בענן (סעיף "העלאה בענן"); Instagram רק כשהבעלים מאשר את הפרסום שם, והחריגה "YouTube בלבד" הוסרה ל-Instagram באותו יום.** הסעיפים על Instagram ו-TikTok למטה נשארים לשימוש כשהבעלים יחזיר אותם.
 
+**סרטון סיכום יחידה (`N.99`):** לפני כל פרסום `deliver.py verify-sheet` חייב להחזיר 200 לכתובת דף הסיכום (שהקישור אליו בתיאור); בלי זה לא מפרסמים אותו (`SUMMARY-VIDEOS-DAKI.md`).
+
 לא משתמשים ב-Buffer ולא באף כלי `mcp__Buffer__*`. הפרסום נעשה דרך ה-API הרשמי עם הסקיל `shorts-uploader` (מאגר `merdok13443/skills`), מתוך קובץ `queue.json`. ההתקנה החד-פעמית (Google Cloud ל-YouTube, אפליקציית Meta ל-Instagram) מתוארת ב-README של הסקיל.
 
 **YouTube: ברירת המחדל היא ההעלאה בענן** (סעיף "העלאה בענן" למטה). המסלול על המחשב שלהלן נשאר ל-Instagram כשיחזור ולמקרה שהענן לא זמין.

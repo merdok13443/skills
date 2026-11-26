@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Delivery to merdok13443/dakademia-videos without a model typing git commands (PUBLISHING-DAKI.md sections 1, 2, 5).
 
-  push   <final.mp4> <meta.json> --branch B [--repo-dir D]
+  push   <final.mp4> <meta.json> --branch B [--repo-dir D] [--sheet <sheet.html>]
          clone dev (once), branch B from dev, copy the mp4 as <course>/u<NN>-e<MM>.mp4 (a published file is never replaced:
          an identical file is reused, a different one gets the next -vN), write <course>/u<NN>-e<MM>.json (from metadata.py),
          `publish_state.py add` (title, pending), commit and push (4 tries with backoff). Then open the PR to dev and merge it.
+         --sheet (unit summary videos, SUMMARY-VIDEOS-DAKI.md): also copies the companion sheet to sheets/<course>/u<NN>.html. Unlike an
+         mp4, the sheet is replaced in place: its public URL never changes, a fix updates every link already published.
+  verify-sheet --course <slug> --unit <N> [--repo-dir D]
+         after the merge: HEAD request of the sheet's public GitHub Pages URL (up to 8 tries 30 s apart, Pages needs a minute to deploy):
+         status 200 -> prints the URL; otherwise exit 1 (the owner must set Pages to deploy from dev / root, see SUMMARY-VIDEOS-DAKI.md).
   verify --name <course>/u<NN>-e<MM>[-vN] [--repo-dir D]
          after the merge: fetch dev, take the dev head sha, build the commit-pinned raw URL and check it with a HEAD request:
          final status 200 and content-length equal to the local file, up to 3 tries 30 s apart. Prints the URL (exit 1 if it fails).
@@ -104,6 +109,11 @@ def cmd_push(a):
     name = pick_name(d, course, base, mp4)
     os.makedirs(os.path.join(d, course), exist_ok=True)
     shutil.copyfile(mp4, os.path.join(d, course, name + '.mp4'))
+    sheet = opt(a, '--sheet')
+    if sheet:
+        sp = os.path.join(d, 'sheets', course, f"u{meta['unit']:02d}.html")
+        os.makedirs(os.path.dirname(sp), exist_ok=True)
+        shutil.copyfile(os.path.abspath(sheet), sp)
     meta['file'] = name + '.mp4'
     json.dump(meta, open(os.path.join(d, course, name + '.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
     title = meta['youtube']['title'].replace(' #shorts', '')
@@ -183,11 +193,30 @@ def cmd_record(a):
     print(json.dumps({'name': name, 'published': pub, 'branch': branch, 'next': f'open a PR {branch} -> dev in {REPO} and merge it'}, ensure_ascii=False))
 
 
+def cmd_verify_sheet(a):
+    sys.path.insert(0, HERE)
+    import layout as L
+    course = opt(a, '--course') or sys.exit('--course <slug> is required')
+    unit = opt(a, '--unit') or sys.exit('--unit <N> is required')
+    url = L.sheet_url(course, f'{int(unit)}.99')
+    for i in range(8):
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, method='HEAD'), timeout=60) as r:
+                if r.status == 200:
+                    print(json.dumps({'url': url, 'status': 200})); return
+                print(f'try {i + 1}: status {r.status}')
+        except Exception as e:
+            print(f'try {i + 1}: {e}')
+        if i < 7:
+            time.sleep(30)
+    sys.exit(f'{url} is not served: merge the PR first, and the Pages source of dakademia-videos must be dev / (root)')
+
+
 def main(a):
     if not a or a[0] in ('-h', '--help'):
         print(__doc__); return
     c = a.pop(0)
-    {'push': cmd_push, 'verify': cmd_verify, 'record': cmd_record}.get(c, lambda _: sys.exit(f'unknown command {c}'))(a)
+    {'push': cmd_push, 'verify': cmd_verify, 'verify-sheet': cmd_verify_sheet, 'record': cmd_record}.get(c, lambda _: sys.exit(f'unknown command {c}'))(a)
 
 
 if __name__ == '__main__':

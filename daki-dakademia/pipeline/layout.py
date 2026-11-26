@@ -11,6 +11,7 @@ Root = $DAKI_ROOT or /mnt/project-files. No model, no network.
 Commands:
   paths    <course>                 the course's files as JSON (course = slug, or the legacy Hebrew name during the move)
   code     <N.M>                    video code, e.g. 1.3 -> u01-e03 (0.0 -> u00-e00, 1.0 -> u01-e00)
+  sheet    <course> <N.M>           the unit summary sheet: path in dakademia-videos and its public URL (SUMMARY-VIDEOS-DAKI.md)
   folder   <course> <N.M>           the video folder (relative to root) built from curriculum.json
   resolve  <old path>               where an old path lives now, from PATHMAP.json (exact match, then longest prefix)
   new-course <slug> --name N --short S --sources "אקדמיה/<name>/מקורות אמת" [--hashtag H] [--field F]
@@ -147,6 +148,19 @@ def code(vid):
     return f'u{int(m.group(1)):02d}-e{int(m.group(2)):02d}'
 
 
+SHEET_BASE = 'https://merdok13443.github.io/dakademia-videos/sheets'
+
+
+def sheet_path(course, vid):
+    """Path of a unit's summary sheet inside dakademia-videos: sheets/<slug>/uNN.html (one per unit, the summary video's companion)."""
+    return f"sheets/{slug(course)}/{code(vid).split('-')[0]}.html"
+
+
+def sheet_url(course, vid):
+    """The public, stable URL of that sheet (GitHub Pages of dakademia-videos); goes into the summary video's description."""
+    return f"{SHEET_BASE}/{slug(course)}/{code(vid).split('-')[0]}.html"
+
+
 def clean(name):
     name = nfc(str(name))
     name = ''.join(' ' if ch in FORBIDDEN else ch for ch in name)
@@ -257,6 +271,8 @@ if __name__ == '__main__':
         print(code(pos[1]))
     elif cmd == 'folder':
         print(video_dir(pos[1], pos[2]))
+    elif cmd == 'sheet':
+        print(json.dumps({'path': sheet_path(pos[1], pos[2]), 'url': sheet_url(pos[1], pos[2])}, ensure_ascii=False, indent=1))
     elif cmd == 'resolve':
         print(resolve(pos[1]))
     elif cmd == 'new-course':

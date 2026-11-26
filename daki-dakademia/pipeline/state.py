@@ -41,6 +41,8 @@ Commands (course = the slug, e.g. discrete-math; the legacy folder name, e.g. ב
   propose <course> <id> --message M --example E [--card C]   only when the owner asks to see/approve one: store a proposal (status proposed)
   decide  <course> <id> approve|reject     only for such an owner card: record the answer
   check   <course>                         validate the files and list videos whose queue and progress statuses disagree
+  sync    <course>                         add curriculum videos that are missing from progress.json and queue.json (pending, placed
+                                           at the end of their unit): used when the curriculum gains videos such as the unit summaries
   init    <slug>                           new course: build state/progress.json from curriculum.json (dir/out from layout.py)
   migrate-paths <course> [--dry-run]       after a layout migration: rewrite dir/out of every progress entry (PATHMAP.json, then
                                            layout.py for folders that do not exist yet), course ids in progress and queue -> slug
@@ -198,17 +200,30 @@ def cmd_show(course):
     counts = {}
     for v in prog['videos']:
         counts[v.get('status')] = counts.get(v.get('status'), 0) + 1
-    nxt = pick(prog['videos'])
+    nxt = pick(prog['videos'], course, prog)
     q = load(P['queue'], required=False)
     print(json.dumps({'counts': counts, 'lock': prog.get('lock'), 'lock_fresh': fresh(prog.get('lock')),
                       'queue_lock': q.get('lock') if q else None, 'next': nxt['id'] if nxt else None}, ensure_ascii=False))
 
 
-def pick(videos):
+def unit_open(course, unit_no, prog):
+    """Core (non-optional) lessons of the unit that are not done yet, from the curriculum. Used to keep a summary video last."""
+    c = load(paths(course)['curriculum'], required=False) or {}
+    ids = [str(v['id']) for u in c.get('units', []) if int(u.get('number', -1)) == int(unit_no)
+           for v in u.get('videos', []) if v.get('type', 'lesson') != 'summary' and not v.get('optional')]
+    done = {str(v['id']) for v in prog['videos'] if v.get('status') == 'done'}
+    return [i for i in ids if i not in done]
+
+
+def pick(videos, course=None, prog=None):
+    """First in_progress, else first pending video. A pending unit summary is skipped until every core lesson of its unit is done."""
     for st in ('in_progress', 'pending'):
         for v in videos:
-            if v.get('status') == st:
-                return v
+            if v.get('status') != st:
+                continue
+            if st == 'pending' and v.get('type') == 'summary' and course and unit_open(course, v.get('unit'), prog or {'videos': videos}):
+                continue
+            return v
     return None
 
 
@@ -230,12 +245,18 @@ def cmd_lock(course, vid=None, queue_mode=False):
         print(f"progress lock is fresh ({prog['lock'].get('video')}, {prog['lock'].get('started_utc')}): previous run still active, skipping")
         sys.exit(3)
     if vid is None:
-        v = pick(prog['videos'])
+        v = pick(prog['videos'], course, prog)
         if v is None:
             print('course done: no pending or in_progress video')
             sys.exit(4)
         vid = v['id']
     t = iso()
+    pe0 = entry(prog['videos'], vid)
+    if pe0 and pe0.get('type') == 'summary':
+        left = unit_open(course, pe0.get('unit'), prog)
+        if left:
+            print(f"WARNING: summary {vid} requested before the unit is finished; core lessons not done yet: {', '.join(left)}. "
+                  "Recap only what is delivered (SUMMARY-VIDEOS-DAKI.md).", file=sys.stderr)
 
     def f(d):
         e = entry(d['videos'], vid)
@@ -423,7 +444,13 @@ def cmd_next_to_propose(course, ahead):
     vs = [v for v in q['videos'] if L.same_course(v.get('course', course), course)]
     have = sum(1 for v in vs if v.get('status') in ('proposed', 'approved'))
     need = max(0, ahead - have)
-    ids = [v['id'] for v in vs if v.get('status') in ('pending', 'rejected')][:need]
+    prog = load(paths(course)['progress'])
+    ptype = {str(v['id']): v for v in prog['videos']}
+
+    def ready(i):                       # a unit summary waits until its unit's core lessons are done
+        pv = ptype.get(str(i))
+        return not (pv and pv.get('type') == 'summary' and unit_open(course, pv.get('unit'), prog))
+    ids = [v['id'] for v in vs if v.get('status') in ('pending', 'rejected') and ready(v['id'])][:need]
     out = []
     for i in ids:
         c = card(course, i)
@@ -531,6 +558,48 @@ def cmd_init(course):
     save(P['progress'], {'course': s, 'lock': None, 'log': [{'video': 'all', 'utc': iso(), 'msg': 'init from curriculum.json'}],
                          'folder_rule': 'LAYOUT.md + VIDEO-PACKAGE.md', 'videos': vids})
     print(f'{len(vids)} videos -> {P["progress"]}')
+
+
+def cmd_sync(course):
+    """Append curriculum videos that progress.json / queue.json do not have yet, after the last entry of their unit."""
+    s = L.slug(course)
+    P = paths(s)
+    c = load(P['curriculum'])
+    items = ([c['trailer']] if c.get('trailer') else []) + [v for u in c.get('units', []) for v in u.get('videos', [])]
+    added = []
+
+    def place(videos, new, unit):
+        idx = [i for i, v in enumerate(videos) if (v.get('unit') if 'unit' in v else int(str(v['id']).split('.')[0])) == unit]
+        videos.insert((idx[-1] + 1) if idx else len(videos), new)
+
+    def f(d):
+        have = {str(v['id']) for v in d['videos']}
+        for v in items:
+            vid = str(v['id'])
+            if vid in have:
+                continue
+            unit = int(vid.split('.')[0])
+            dd = L.video_dir(s, vid)
+            place(d['videos'], {'id': vid, 'unit': unit, 'type': v.get('type', 'lesson'), 'title': v.get('title'),
+                                'out': f'{dd}/{os.path.basename(dd)}.mp4', 'status': 'pending', 'attempts': 0, 'dir': dd}, unit)
+            added.append(vid)
+    update(P['progress'], f)
+    if os.path.exists(P['queue']):
+        def g(d):
+            have = {str(v['id']) for v in d['videos'] if L.same_course(v.get('course', s), s)}
+            if not have:                # the course is not in the queue yet: nothing to keep in step
+                return
+            for v in items:
+                vid = str(v['id'])
+                if vid in have:
+                    continue
+                unit = int(vid.split('.')[0])
+                idx = [i for i, q in enumerate(d['videos']) if L.same_course(q.get('course', s), s) and int(str(q['id']).split('.')[0]) == unit]
+                d['videos'].insert((idx[-1] + 1) if idx else len(d['videos']),
+                                   {'course': s, 'id': vid, 'title': v.get('title'), 'status': 'pending', 'message': None, 'example': None,
+                                    'card_id': None, 'proposed_at': None, 'approved_at': None, 'rejections': 0})
+        update(P['queue'], g)
+    print(f'sync: added {len(added)}: {", ".join(added) if added else "-"}')
 
 
 def cmd_migrate_paths(course, dry):
@@ -646,6 +715,8 @@ def main(argv):
         cmd_check(a[0])
     elif c == 'init':
         cmd_init(a[0])
+    elif c == 'sync':
+        cmd_sync(a[0])
     elif c == 'migrate-paths':
         dry = flag(a, '--dry-run')
         cmd_migrate_paths(a[0], dry)

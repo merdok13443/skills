@@ -304,12 +304,14 @@ plan = {'D': D, 'decky': {'x': dk['x'], 'y': dk['y'], 's': dk['s'], 'expr': dk.g
 # ---------------------------------------------------------------- write html
 css = open(os.path.join(HERE, 'runtime', 'base.css'), encoding='utf-8').read().replace('%%BG%%', spec['bg']).replace('--b:#2B6CB0', '--b:' + spec.get('true_color', '#2B6CB0'))
 # ---------------------------------------------------------------- top header (owner rule: course · unit.episode · short episode title, in EVERY video)
-HDR_RE = re.compile(r'^\s*(\S.*?)\s+·\s+(\d+\.\d+)\s+·\s+(\S.*?)\s*$')
+HDR_RE = re.compile(r'^\s*(\S.*?)\s+·\s+(\d+\.\d+|★)\s+·\s+(\S.*?)\s*$')   # a unit summary shows ★ instead of the number (SUMMARY-VIDEOS-DAKI.md)
 hd = spec.get('header')
 if hd:
     if spec.get('kicker'): warns.append("both 'header' and 'kicker' given: the header is built from 'header'; drop 'kicker'")
-    num = str(hd.get('num') or spec.get('video', ''))
-    kicker = (f'<span style="font-size:36px">{html.escape(hd.get("course", ""))} · <bdi class="mono" style="font-size:32px">{html.escape(num)}</bdi>'
+    num = str(hd.get('num') or ('★' if spec.get('type') == 'summary' else spec.get('video', '')))
+    numhtml = (f'<bdi style="font-size:44px;color:#B8860B;line-height:1">{html.escape(num)}</bdi>' if num == '★'          # summary star: gold, a touch larger
+               else f'<bdi class="mono" style="font-size:32px">{html.escape(num)}</bdi>')
+    kicker = (f'<span style="font-size:36px">{html.escape(hd.get("course", ""))} · {numhtml}'
               f' · {html.escape(hd.get("title", ""))}</span>')
 else:
     kicker = spec.get('kicker', '')
@@ -320,7 +322,10 @@ if not m_:
     errs.append(f"top header {htext!r} is not 'course · N.M · episode title': set \"header\": {{\"course\": \"בדידה\", \"title\": \"<short episode title>\"}} (SCENE_SPEC.md)")
 else:
     header.update(course=m_.group(1), num=m_.group(2), title=m_.group(3))
-    if spec.get('video') and m_.group(2) != str(spec['video']): errs.append(f"top header number {m_.group(2)} differs from video {spec['video']}")
+    if m_.group(2) == '★':
+        if spec.get('type') != 'summary': errs.append("the header star ★ is only for a unit summary (scene.json type 'summary')")
+    elif spec.get('type') == 'summary': errs.append("a unit summary shows ★ in the header instead of the number: \"header\": {\"num\": \"★\", ...}")
+    elif spec.get('video') and m_.group(2) != str(spec['video']): errs.append(f"top header number {m_.group(2)} differs from video {spec['video']}")
     if len(m_.group(3)) > 24: errs.append(f"top header title {m_.group(3)!r} is {len(m_.group(3))} characters; keep it <= 24 so the header stays one line")
     if m_.group(3).strip() == m_.group(1).strip(): errs.append('top header title repeats the course name: give the episode title')
 page = f'''<!doctype html>

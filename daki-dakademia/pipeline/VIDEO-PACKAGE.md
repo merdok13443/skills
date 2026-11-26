@@ -12,7 +12,7 @@ Place and name: `../LAYOUT.md` (`courses/<slug>/videos/uNN <unit name>/uNN-eNN <
 ```
 <N.M name>/
   README.md              human index (Hebrew): the message, the example, versions with the owner's verdict, publish links, gaps
-  PACKAGE.json           machine index: name, type (lesson|intro|trailer), final file, declared gaps, versions
+  PACKAGE.json           machine index: name, type (lesson|intro|trailer|summary), final file, declared gaps, versions
   <N.M name>.mp4         the current final, byte-identical to the file in dakademia-videos
   01-content/            draft-haiku.md             stage 1: facts and draft from the sources, ending with "קטעי מקור" (quotes + [book p.N])
   02-example/            example.md                 stage 1b: the approved example + the ONE message
@@ -28,13 +28,14 @@ Place and name: `../LAYOUT.md` (`courses/<slug>/videos/uNN <unit name>/uNN-eNN <
   06-qa/                 qa_report.json, stage_log.jsonl, motion_report.json, check_errors.json, contact-sheet.jpg
   07-publish/            metadata.json              the post texts and platform ids (copy of dakademia-videos uNN-eNN.json)
                          state.json                 this video's entry of publish-state.json (copy)
+  08-sheet/              sheet.html                 unit summary videos only: the companion summary sheet as published (SUMMARY-VIDEOS-DAKI.md)
   versions/<tag>/        an earlier delivered or owner-reviewed version, with the same layout (only what existed)
 ```
 Not stored (they are deterministic or shared): music and sound effects (procedural: `cues.json` holds the seed, tempo and cue times, generators are in `explainer-shorts/audio/` at the commit in `PIPELINE.json`), fonts / gsap / grain (`pipeline/assets/` at that commit), the rendered frames (render again), Gemini API keys (never anywhere).
 
 ## When and how
 1. Every stage saves its output into the package folder AS SOON as it exists (a dead run leaves usable work). Build in a scratch dir if the mount is slow.
-2. After QA passes (stage 8) and before the mp4 goes to dakademia-videos: `python archive_video.py pack <working-dir> "<video folder>" --type lesson|intro|trailer`, then `python archive_video.py check "<video folder>"` must say `package OK`. Write the README (message, example, versions, links). Pack only copies; it never calls a model or TTS.
+2. After QA passes (stage 8) and before the mp4 goes to dakademia-videos: `python archive_video.py pack <working-dir> "<video folder>" --type lesson|intro|trailer|summary`, then `python archive_video.py check "<video folder>"` must say `package OK`. Write the README (message, example, versions, links). Pack only copies; it never calls a model or TTS.
 3. After the upload: copy the dakademia-videos `uNN-eNN.json` to `07-publish/metadata.json` and the video's entry of `publish-state.json` to `07-publish/state.json`, and add the links to the README.
 4. A new version of an already delivered video (owner asked for a change): first `python archive_video.py supersede "<video folder>" v1` (moves the current package into `versions/v1/`), then work and pack again. Never overwrite a delivered version, and say in the README which version the owner liked.
 5. To adapt a video (small edit, another language): `python archive_video.py unpack "<video folder>" <scratch>` restores the working dir; edit `scene.json` or `voice/script.json`; unchanged text keeps its `voice/`; changed or translated text needs a new narration within the budget of 3 Gemini requests (`SKILL.md`, section 1). To get exactly the old look, check out the skills commit from `PIPELINE.json` first (the mascot and the runtime change over time).
@@ -43,4 +44,4 @@ Not stored (they are deterministic or shared): music and sound effects (procedur
 Never invent or regenerate a missing piece (especially narration: no new TTS for an archive). Declare it in `PACKAGE.json` as `{"item": "<path>", "reason": "..."}` and in the README; `check` accepts only declared gaps. Reconstruction is allowed when it is deterministic and verified against the delivered mp4: rebuilding `index.html` from `scene.json` + `timing.json` with the skills commit of that day, re-running `inject_pauses.py` on the committed raw take. Write how it was verified (e.g. "frames at 4 times differ from the mp4 by about 1.3/255, the compression noise") in `PIPELINE.json` `note`.
 
 ## Required for `check`
-All videos: the final mp4, `04-voice/{script.json,voice.wav,timing.json}`, `05-build/{scene.json,index.html,cues.json,PIPELINE.json,runtime/daki.js,runtime/dk-runtime.js}`, `06-qa/{qa_report.json,stage_log.jsonl}`, `README.md`. Lessons also `01-content/draft-haiku.md`, `02-example/example.md`, `03-script/{script.md,review.md}`. Intro and trailer videos also `03-script/{script.md,fable-notes.md,display.md}`. `07-publish/` once the video is published.
+All videos: the final mp4, `04-voice/{script.json,voice.wav,timing.json}`, `05-build/{scene.json,index.html,cues.json,PIPELINE.json,runtime/daki.js,runtime/dk-runtime.js}`, `06-qa/{qa_report.json,stage_log.jsonl}`, `README.md`. Unit summaries also `01-content/draft-haiku.md`, `03-script/{script.md,review.md}` and `08-sheet/sheet.html`. Lessons also `01-content/draft-haiku.md`, `02-example/example.md`, `03-script/{script.md,review.md}`. Intro and trailer videos also `03-script/{script.md,fable-notes.md,display.md}`. `07-publish/` once the video is published.

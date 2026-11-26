@@ -3,7 +3,7 @@
 owner files at run time, in one file. A stage agent reads its pack instead of opening every file whole.
 
 usage: python pack.py <stage> [--course בדידה --video 1.3] [--out <file>]
-stages: content, topic, example, script, review, visuals, deliver, list
+stages: content, topic, example, script, summary, review, visuals, deliver, list
 
 - Rules are never copied or rewritten: sections are cut from the owner files as they are now, by their headings, so a
   rule changed in its owner file is in the next pack automatically. A heading that is not found stops the script
@@ -50,6 +50,11 @@ PACKS = {
         ('daki-dakademia/pipeline/prompts/scriptwriter.md', None),
         ('explainer-shorts/HEBREW_NARRATION.md', ['### Unified narration format']),
         ('daki-dakademia/GUIDELINES-DAKI.md', None),
+    ],
+    'summary': [         # unit summary videos (N.99): instead of the topic, example and script packs; review/visuals/deliver packs are used as for a lesson
+        ('daki-dakademia/SUMMARY-VIDEOS-DAKI.md', None),
+        ('explainer-shorts/HEBREW_NARRATION.md', ['### Unified narration format']),
+        ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', "## צ'קליסט לסרטוני דקדמיה"]),
     ],
     'review': [
         ('daki-dakademia/SKILL.md', ('between', '**Content**', '**Look**')),
