@@ -309,7 +309,7 @@ hd = spec.get('header')
 if hd:
     if spec.get('kicker'): warns.append("both 'header' and 'kicker' given: the header is built from 'header'; drop 'kicker'")
     num = str(hd.get('num') or ('★' if spec.get('type') == 'summary' else spec.get('video', '')))
-    numhtml = (f'<bdi style="font-size:44px;color:#B8860B;line-height:1">{html.escape(num)}</bdi>' if num == '★'          # summary star: gold, a touch larger
+    numhtml = (f'<bdi style="font-size:44px;color:#8A6200;line-height:1">{html.escape(num)}</bdi>' if num == '★'          # summary star: dark gold (contrast >=3:1 on every unit bg), a touch larger
                else f'<bdi class="mono" style="font-size:32px">{html.escape(num)}</bdi>')
     kicker = (f'<span style="font-size:36px">{html.escape(hd.get("course", ""))} · {numhtml}'
               f' · {html.escape(hd.get("title", ""))}</span>')

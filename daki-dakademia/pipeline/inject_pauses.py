@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Give a one-take narration the pauses the script asked for.  usage: python inject_pauses.py <source-dir> [--min-gap 0.3]
+"""Give a one-take narration the pauses the script asked for.  usage: python inject_pauses.py <source-dir> [--min-gap 0.3] [--tail 1.0]
 A single Gemini take (one request) cannot be told how long to rest, so the pause after the message line is often only 0.2 s.
 After align_he.py (real line times) this tool measures the gap before every line; where a line's "pause" in voice/script.json is longer
 than the real gap, it cuts at the quietest 20 ms inside the gap and inserts silence for the difference, then shifts all later times.
@@ -9,6 +9,7 @@ import json, os, shutil, sys
 import numpy as np, soundfile as sf
 src = os.path.abspath(sys.argv[1]); vd = os.path.join(src, 'voice')
 MIN_GAP = float(sys.argv[sys.argv.index('--min-gap') + 1]) if '--min-gap' in sys.argv else 0.3
+TAIL = float(sys.argv[sys.argv.index('--tail') + 1]) if '--tail' in sys.argv else 0.0   # silence after the last word: room for the seam caption (loop) and, in a summary, a payoff at <= 75 %
 T = json.load(open(os.path.join(vd, 'timing.json'), encoding='utf-8')); S = json.load(open(os.path.join(vd, 'script.json'), encoding='utf-8'))
 if T.get('needs_align'): sys.exit('run align_he.py first (line times are estimates)')
 if T.get('pauses_injected') is not None: sys.exit('pauses already injected')
@@ -35,11 +36,11 @@ out, prev, off = [], 0, 0.0
 cuts = [(int(c * sr), d, lid, c) for c, d, lid in plan]
 for ci, d, lid, c in cuts:
     out += [a[prev:ci], np.zeros(int(d * sr), dtype=np.float32)]; prev = ci
-out.append(a[prev:]); b = np.concatenate(out)
+out.append(a[prev:]); out.append(np.zeros(int(TAIL * sr), dtype=np.float32)); b = np.concatenate(out)
 def shift(t): return round(t + sum(d for c, d, _ in plan if t >= c), 3)
 for w in T['words']: w['s'], w['e'] = shift(w['s']), shift(w['e'] if w['e'] > w['s'] else w['s'])
 for l in L: l['s'], l['e'] = shift(l['s']), shift(l['e'])
-T['duration'] = round(len(b) / sr, 3); T['pauses_injected'] = [{'after': lid, 'at': round(c, 3), 'added': round(d, 3)} for c, d, lid in plan]
+T['duration'] = round(len(b) / sr, 3); T['tail_added'] = TAIL; T['pauses_injected'] = [{'after': lid, 'at': round(c, 3), 'added': round(d, 3)} for c, d, lid in plan]
 sf.write(os.path.join(vd, 'voice.wav'), b, sr)
 json.dump(T, open(os.path.join(vd, 'timing.json'), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
 print(f"injected {sum(d for _, d, _ in plan):.2f}s of silence in {len(plan)} gaps: " + ', '.join(f"{lid}+{d:.2f}" for _, d, lid in plan) + f"; duration {T['duration']}s")
