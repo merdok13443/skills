@@ -23,6 +23,10 @@ Settings: exactly the fixed ones of PUBLISHING-DAKI.md: public (unless --privacy
           note; a video whose entry has a publish_id is never sent twice. When the owner has published it, run
           publish_state.py set <video> tiktok uploaded --url <link>.
 Dedupe  : a platform whose status in <videos-dir>/publish-state.json is already `uploaded` is never uploaded again.
+Order   : HARD GUARD (owner 2026-11-26): an episode is refused unless every EARLIER episode of the same course that exists on dev
+          (an mp4 in <videos-dir>/<course>/, any version -vN counts for its episode) is already `uploaded` on each requested
+          YouTube/Instagram platform in publish-state.json (archived videos have no mp4 there, so they do not count). Intro 0.0 comes first, then
+          unit/episode order. TikTok is manual and not checked. Override only with --allow-out-of-order (the owner said so).
 Record  : each success sets <platform>=uploaded (+url/media id) in publish-state.json, regenerates PUBLISH-STATE.md, and fills
           published / published_at in <name>.json. A failed platform does not stop the other. The workflow commits to dev.
 --dry-run checks files, texts, settings and dedupe, refreshes the YouTube token and reads the Instagram publishing limit
@@ -95,6 +99,35 @@ def fetch_check(url):
     return size
 
 
+EP_RE = re.compile(r'^u([0-9]{2})-e([0-9]{2})(?:-v[0-9]+)?$')
+
+
+def order_gaps(vdir, name, plats, state):
+    """Earlier episodes of the same course (mp4 on dev) not yet uploaded on a requested platform."""
+    course, _, leaf = name.partition('/')
+    me = EP_RE.match(leaf)
+    key = (int(me.group(1)), int(me.group(2)))
+    eps = {}
+    cdir = os.path.join(vdir, course)
+    for f in sorted(os.listdir(cdir)) if os.path.isdir(cdir) else []:
+        m = EP_RE.match(f[:-4]) if f.endswith('.mp4') else None
+        if not m:
+            continue
+        k = (int(m.group(1)), int(m.group(2)))
+        entry = state.get('videos', {}).get(f'{course}/{f[:-4]}', {})
+        eps.setdefault(k, []).append(entry)
+    gaps = []
+    need = [p for p in plats if p in ('youtube', 'instagram')]
+    for k in sorted(eps):
+        if k >= key:
+            break
+        missing = [p for p in need
+                   if not any((e.get('platforms', {}).get(p) or {}).get('status') == 'uploaded' for e in eps[k])]
+        if missing:
+            gaps.append(f'{course}/u{k[0]:02d}-e{k[1]:02d} (not uploaded on: {", ".join(missing)})')
+    return gaps
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--videos-dir', required=True)
@@ -104,6 +137,7 @@ def main():
     ap.add_argument('--video-url', default='', help='commit-pinned raw URL of the mp4 (needed for instagram)')
     ap.add_argument('--privacy', default='public', choices=['public', 'unlisted', 'private'])
     ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--allow-out-of-order', action='store_true', help='skip the upload-order guard (only on the owner\'s explicit word)')
     a = ap.parse_args()
     if not NAME_RE.match(a.name):
         sys.exit(f'bad --name {a.name!r}: expected course-slug/uNN-eNN[-vN]')
@@ -139,6 +173,12 @@ def main():
     state_p = os.path.join(vdir, 'publish-state.json')
     import publish_state as P
     state = P.load(state_p)
+    if not a.allow_out_of_order:
+        gaps = order_gaps(vdir, a.name, plats, state)
+        if gaps:
+            res['note'] = ('REFUSED: upload order. Episodes must go up in curriculum order; these earlier episodes are not published yet: '
+                           + '; '.join(gaps) + '. Upload them first (in order), or pass allow_out_of_order only on the owner\'s explicit word.')
+            print(res['note']); out(res, 1)
     v = state.setdefault('videos', {}).setdefault(a.name, {'platforms': {}})
     pl = v.setdefault('platforms', {})
     today = datetime.date.today().isoformat()
