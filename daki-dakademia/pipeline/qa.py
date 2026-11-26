@@ -66,7 +66,7 @@ ve, vw = voice_rules.check(src)
 chk('voice rules + TTS request budget (<= 3 per video)', not ve, '; '.join(ve))
 for w in vw: chk('voice rules warning', False, w, warn=True)
 mf = json.load(open(os.path.join(src, 'manifest.json')))
-if mf.get('payoff_pct') is not None: chk('payoff 65-75 %', 65 <= mf['payoff_pct'] <= 75, f"{mf['payoff_pct']}%")
+if mf.get('payoff_pct') is not None: chk('payoff 65-75 % (target, warning only: owner 2026-11-26)', 65 <= mf['payoff_pct'] <= 75, f"{mf['payoff_pct']}%", warn=True)
 chk('stamp: stamp.js identical to the shared component (daki-dakademia/stamp/stamp.js)', os.path.exists(os.path.join(src, 'assets/stamp.js')) and filecmp.cmp(os.path.join(src, 'assets/stamp.js'), os.path.join(HERE, '..', 'stamp', 'stamp.js'), shallow=False))
 # top header: 'course · N.M · episode title' (owner rule, it kept going missing). The build parses it; here we also look at frame 0.
 hd = mf.get('header') or {}
