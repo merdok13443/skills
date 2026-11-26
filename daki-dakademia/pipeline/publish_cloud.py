@@ -27,6 +27,12 @@ Order   : HARD GUARD (owner 2026-11-26): an episode is refused unless every EARL
           (an mp4 in <videos-dir>/<course>/, any version -vN counts for its episode) is already `uploaded` on each requested
           YouTube/Instagram platform in publish-state.json (archived videos have no mp4 there, so they do not count). Intro 0.0 comes first, then
           unit/episode order. TikTok is manual and not checked. Override only with --allow-out-of-order (the owner said so).
+Release : (owner 2026-11-26) a video may go up WITHOUT the owner's approval only when the json holds `script_score` with pass=true and
+          total >= 95 (written by deliver.py push --src, only for exactly the script that was built; the QA of the build passed before
+          delivery). Otherwise the upload is refused unless --owner-approved (the owner approved this video in chat).
+Pace    : at most ONE video per hour and only in active hours 10:00-21:00 Israel time: a real run is refused outside them, or when another
+          video was uploaded (YouTube or Instagram, `at` in publish-state.json) less than 60 minutes ago. Override only with
+          --allow-outside-hours (the owner said so). A dry run reports instead of refusing.
 Record  : each success sets <platform>=uploaded (+url/media id) in publish-state.json, regenerates PUBLISH-STATE.md, and fills
           published / published_at in <name>.json. A failed platform does not stop the other. The workflow commits to dev.
 --dry-run checks files, texts, settings and dedupe, refreshes the YouTube token and reads the Instagram publishing limit
@@ -36,6 +42,7 @@ Last line: RESULT {"video": ..., "youtube": "<videoId>|dry-run|skipped|failed", 
 """
 import argparse
 import datetime
+import zoneinfo
 import json
 import os
 import re
@@ -106,6 +113,46 @@ def fetch_check(url):
     return size
 
 
+IL = zoneinfo.ZoneInfo('Asia/Jerusalem')
+ACTIVE_HOURS = (10, 21)      # 10:00 inclusive to 21:00 exclusive, Israel time (owner 2026-11-26)
+MIN_GAP = datetime.timedelta(minutes=60)
+SCORE_MIN = 95.0
+
+
+def pace_problem(state, name, now):
+    """Why a real upload may not start now (outside active hours, or another video went up less than an hour ago), or ''."""
+    h = now.astimezone(IL)
+    if not (ACTIVE_HOURS[0] <= h.hour < ACTIVE_HOURS[1]):
+        return f'outside active hours: it is {h:%H:%M} in Israel, uploads run {ACTIVE_HOURS[0]:02d}:00-{ACTIVE_HOURS[1]:02d}:00'
+    last = None
+    for vid, v in state.get('videos', {}).items():
+        if vid == name:
+            continue
+        for p in ('youtube', 'instagram'):
+            e = (v.get('platforms') or {}).get(p) or {}
+            if e.get('status') == 'uploaded' and e.get('at'):
+                try:
+                    t = datetime.datetime.strptime(e['at'], '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=datetime.timezone.utc)
+                except ValueError:
+                    continue
+                if last is None or t > last[0]:
+                    last = (t, vid)
+    if last and now - last[0] < MIN_GAP:
+        mins = int((now - last[0]).total_seconds() // 60)
+        return f'pace: {last[1]} went up {mins} min ago; at least 60 minutes between uploads (next at {(last[0] + MIN_GAP).astimezone(IL):%H:%M} Israel time)'
+    return ''
+
+
+def release_problem(meta):
+    """Why this video may not be released without the owner (no script score for the built script, or below 95), or ''."""
+    s = meta.get('script_score')
+    if not s:
+        return 'no script score recorded for the script this video was built from (deliver.py push --src), so it needs the owner\'s approval'
+    if not s.get('pass') or float(s.get('total', 0)) < SCORE_MIN:
+        return f"the script scored {s.get('total')} (needs {SCORE_MIN:g} or more and no failed threshold), so it needs the owner's approval"
+    return ''
+
+
 EP_RE = re.compile(r'^u([0-9]{2})-e([0-9]{2})(?:-v[0-9]+)?$')
 
 
@@ -144,6 +191,8 @@ def main():
     ap.add_argument('--video-url', default='', help='commit-pinned raw URL of the mp4 (needed for instagram)')
     ap.add_argument('--privacy', default='public', choices=['public', 'unlisted', 'private'])
     ap.add_argument('--dry-run', action='store_true')
+    ap.add_argument('--owner-approved', action='store_true', help='the owner approved this video in chat (skips the script-score release check)')
+    ap.add_argument('--allow-outside-hours', action='store_true', help='skip the active-hours and one-per-hour pace guard (only on the owner\'s explicit word)')
     ap.add_argument('--allow-out-of-order', action='store_true', help='skip the upload-order guard (only on the owner\'s explicit word)')
     a = ap.parse_args()
     if not NAME_RE.match(a.name):
@@ -185,6 +234,18 @@ def main():
         if gaps:
             res['note'] = ('REFUSED: upload order. Episodes must go up in curriculum order; these earlier episodes are not published yet: '
                            + '; '.join(gaps) + '. Upload them first (in order), or pass allow_out_of_order only on the owner\'s explicit word.')
+            print(res['note']); out(res, 1)
+    now = datetime.datetime.now(datetime.timezone.utc)
+    gate = []
+    if not a.owner_approved and release_problem(meta):
+        gate.append(release_problem(meta))
+    if not a.allow_outside_hours and pace_problem(state, a.name, now):
+        gate.append(pace_problem(state, a.name, now))
+    if gate:
+        if a.dry_run:
+            notes.append('a real run would be REFUSED: ' + ' | '.join(gate))
+        else:
+            res['note'] = 'REFUSED: ' + ' | '.join(gate)
             print(res['note']); out(res, 1)
     v = state.setdefault('videos', {}).setdefault(a.name, {'platforms': {}})
     pl = v.setdefault('platforms', {})
@@ -244,7 +305,7 @@ def main():
                                            else ' | check YouTube Studio for a half-finished upload before running again'))
                     url = f'https://youtube.com/shorts/{vid}'
                     print('YouTube: done', url)
-                    pl['youtube'] = {'status': 'uploaded', 'date': today, 'url': url,
+                    pl['youtube'] = {'status': 'uploaded', 'date': today, 'at': now.strftime('%Y-%m-%dT%H:%M:%SZ'), 'url': url,
                                      'note': 'uploaded by the cloud workflow' + ('' if a.privacy == 'public' else f' ({a.privacy} test)')}
                     meta.setdefault('published', {})['youtube'] = vid
                     res['youtube'], res['url'] = vid, url
@@ -293,7 +354,7 @@ def main():
                 except Exception:
                     pass
                 print('Instagram: done', m, link)
-                e = {'status': 'uploaded', 'date': today, 'media_id': m, 'note': 'published by the cloud workflow'}
+                e = {'status': 'uploaded', 'date': today, 'at': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'media_id': m, 'note': 'published by the cloud workflow'}
                 if link:
                     e['url'] = link
                 pl['instagram'] = e

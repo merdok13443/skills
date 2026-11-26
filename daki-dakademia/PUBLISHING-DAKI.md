@@ -66,7 +66,7 @@ python <skills>/daki-dakademia/pipeline/publish_video.py --url <הכתובת מ�
 - `defaults.youtube`: `privacy: "public"`, `made_for_kids: false`, `category_id: "27"` (Education), `language: "he"`.
 - YouTube: `python scripts/youtube_upload.py queue.json --dry-run`, ואז בלי `--dry-run`. ההתחברות הראשונה פותחת דפדפן, ולכן רצה על מחשב עם דפדפן (לא בענן). ההרשאה `youtube.upload` מעלה אבל לא עורכת סרטון קיים.
 - Instagram: `python scripts/instagram_publish.py queue.json --dry-run`, ואז בלי. דורש חשבון Professional, `IG_USER_ID` ו-`IG_ACCESS_TOKEN`.
-- קצב לדקדמיה: YouTube עד 6 ביום (`--daily-max 6`, ברירת המחדל של הסקריפט), עד שהבעלים מעלה אותו. מעלים בהדרגה.
+- קצב לדקדמיה: סרטון אחד בשעה בלבד, בשעות הפעילות 10:00 עד 21:00 שעון ישראל (הבעלים, 2026-11-26; סעיף "שחרור בלי הבעלים"). `--daily-max` של `youtube_upload.py` אינו הגבלה של דקדמיה.
 - אם אין הרשאות לאינסטגרם (`IG_ACCESS_TOKEN`), או כל עוד החריגה הזמנית בתוקף, רושמים `instagram: skipped` וממשיכים.
 - TikTok: ידני, דרך TikTok Studio (אין סקריפט). זו היוצאת מהכלל "בלי אוטומציית דפדפן" של shorts-uploader: מעלים דרך חלון בחירת הקבצים ב-Studio בחשבון מחובר, לא בעוגיות ולא בכלי צד שלישי.
 - אם קריאה נכשלת, לא מנסים שוב יותר מפעם אחת. מדווחים מה נכשל ובאיזו פלטפורמה. סרטון שפורסם לא מוחקים ולא מפרסמים מחדש.
@@ -77,9 +77,16 @@ python <skills>/daki-dakademia/pipeline/publish_video.py --url <הכתובת מ�
 
 **הפעלה:**
 - מהטלפון: אפליקציית GitHub > המאגר `dakademia-videos` > Actions > Upload to YouTube > Run workflow. שדות: `video` (למשל `discrete-math/u01-e03`), `privacy` (ברירת מחדל `public`), `dry_run`.
-- מסשן: `mcp__github__actions_run_trigger` על `upload-youtube.yml`, ref `dev`, עם אותם שדות, **רק אחרי שהבעלים אישר במפורש את הסרטון** (הודעה שלו בצ'אט, גם בצ'אט הפרויקט; הקואורדינטור מעביר אותה בציטוט). בלי אישור כזה לא מפעילים.
+- מסשן: `mcp__github__actions_run_trigger` על `upload-youtube.yml`, ref `dev`, עם אותם שדות. **סרטון שציון התסריט שלו 95 ומעלה (ובלי תנאי סף שנכשל) והבנייה שלו עברה QA משוחרר בלי הבעלים, לפי סעיף "שחרור בלי הבעלים" למטה.** כל סרטון אחר: רק אחרי שהבעלים אישר במפורש את הסרטון (הודעה שלו בצ'אט, גם בצ'אט הפרויקט; הקואורדינטור מעביר אותה בציטוט), ואז מסמנים `owner_approved`. בלי אישור כזה לא מפעילים.
 - שדה `platforms`: `youtube` (ברירת מחדל), `instagram` או `youtube,instagram`. Instagram מפרסם Reel מכתובת ה-raw המוצמדת ל-commit, עם `instagram.caption` מה-json (בדיוק 5 האשטגים; נכתב ב-`metadata.py` עם `ig_body`). אם אין כיתוב ב-json, הריצה נעצרת ואומרת זאת. TikTok לא נעשה כאן.
 - הסרטון והטקסטים נלקחים מ-`dev` (`<name>.mp4` ו-`<name>.json`), לכן קודם ה-PR של הסרטון ממוזג.
+
+**שחרור בלי הבעלים (הבעלים, 2026-11-26):** מעכשיו סרטון שציון התסריט שלו לפי `SCRIPT-RUBRIC.md` הוא **95 ומעלה, בלי תנאי סף שנכשל, ושהסרטון שנבנה מאותו תסריט עבר QA**, רשאי לעלות ל-YouTube ול-Instagram בלי שהבעלים אישר אותו. ארבעה תנאים, והסקריפט אוכף אותם:
+1. **הציון שייך לתסריט שנבנה.** `deliver.py push --src <src>` רושם ב-`<name>.json` את `script_score` רק כשבקובץ הציונים (`courses/<slug>/state/script-scores.json`) יש ציון שה-`script_sha` שלו שווה ל-sha256 של `voice/script.json` שנבנה ממנו הסרטון. תסריט שתוקן אחרי הבנייה, או שלא נבדק, לא נותן ציון, והסרטון דורש אישור בעלים. (תסריטים מתוקנים ב-`03-script/revised/` צריכים קריינות ובנייה מחדש לפני שהציון שלהם חל.)
+2. **`publish_cloud.py` מסרב** בלי `script_score` עם `pass` ו-`total` 95 ומעלה, אלא אם הועבר `--owner-approved` (שדה `owner_approved` ב-workflow, רק כשהבעלים אישר את הסרטון בצ'אט).
+3. **סרטון אחד בשעה, ורק בשעות הפעילות 10:00 עד 21:00 שעון ישראל.** הסקריפט מסרב מחוץ לשעות, או כשסרטון אחר (YouTube או Instagram) עלה לפני פחות מ-60 דקות (`at` ב-`publish-state.json`). עקיפה רק ב-`--allow-outside-hours` (שדה `allow_outside_hours`) ובמילה מפורשת של הבעלים. ריצת `dry_run` רק מדווחת.
+4. **סדר הקורס נשמר** (השמירה על הסדר, סעיף "סדר" ב-`publish_cloud.py`), ו-TikTok נשאר ידני.
+סשן שמשחרר סרטון כך מדווח לבעלים אחרי ההעלאה (לא לפניה), ומריץ קודם `dry_run`. כשהציון מתחת ל-95, התסריט חוזר לכותב (`pipeline/README.md` שלב 3) ולא מחכה לאישור.
 
 **מה הוא עושה:** בודק שם וקבצים, מדלג אם `publish-state.json` כבר מציין שהסרטון הועלה (אף פעם לא פעמיים), מתחבר עם הסוד, מעלה, רושם `youtube=uploaded` עם הכתובת ב-`publish-state.json` וב-`<name>.json` (וגם `skipped` לשתי הפלטפורמות האחרות), ועושה commit ישר ל-`dev` (לא ל-`main`). סיכום עם שורת `RESULT` מופיע בסיכום הריצה. `dry_run` בודק התחברות, קבצים וטקסטים ולא מעלה כלום.
 
