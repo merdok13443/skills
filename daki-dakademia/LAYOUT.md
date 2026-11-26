@@ -2,7 +2,7 @@
 
 The only place that says where files live, above the level of one video folder. What goes INSIDE a video folder is `pipeline/VIDEO-PACKAGE.md`. No other file writes explicit project paths: it points here. Code gets every path from `pipeline/layout.py`; nothing else hardcodes `/mnt/project-files`, `work/`, `videos/` or a course name.
 
-Approved by the owner 2026-11-25 (report: `notes/folder-restructure-2026-11-26/report.md` in the project folder). **Migration status:** phase 0 (tools + cleanup). Until phase 2 runs, the course files still sit in the legacy places (table "Legacy" below) and `layout.py` serves both layouts: it switches to the new one as soon as `<root>/courses/` exists. Phase 2 (the big move) runs only when no video run holds a lock.
+Approved by the owner 2026-11-25 (report: `notes/folder-restructure-2026-11-26/report.md` in the project folder). **Migration status:** phase 2 done 2026-11-26 (both courses under `courses/<slug>/`, log `archive/migration-log-2026-11-26-phase2-courses.jsonl`). Still open: `uploader-stage/` and `publish/` go to archive/, and the dakademia-videos narration exchange becomes `work/<slug>/uNN-eNN/`, once the cloud-upload work is finished; then `layout_check.py` becomes strict in `archive_video.py pack` and `state.py done` (phase 3). The legacy table below is kept for reading old notes; `layout.py` still reads the legacy layout only if `courses/` is missing.
 
 ## 1. The three places
 | Place | Holds | Never holds |
