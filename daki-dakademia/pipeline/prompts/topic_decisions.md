@@ -59,6 +59,8 @@ Update rule (standing): whenever the owner approves or rejects a topic, example 
 
 **1.13 Truth table of a compound sentence.** The 29th of February in 2100 (a rule with and/or/not). REJECTED: too far from the student's life (inferred from the replacement requested). An exam entry rule "(student card or ID) and not late". PENDING.
 
+**1.10 Formalization (הצרנה).** Library sign "אין להכניס אוכל ושתייה" (with "and"). CHANGED BY THE OWNER (2026-11-26): use "אין להכניס אוכל או שתייה" (with "or"): a far more logical, relevant and easy-to-understand real-life wording. Pattern: prefer the wording people really see on a sign over a constructed one; the pizza-only case stays the deciding case (word-by-word ¬p∨¬q allows it, the meaning ¬p∧¬q forbids it).
+
 ## B. Patterns that worked (approved) and why
 
 1. **A familiar subject, one sentence.** Dead Sea, Waze, daylight saving, the viral 8÷2(2+2) argument, the WhatsApp blue tick, Facebook's 3.57. Nothing to set up; the sentence itself is the example.
