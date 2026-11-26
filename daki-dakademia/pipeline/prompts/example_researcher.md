@@ -18,6 +18,7 @@ Example tests (owner-approved after 1.1, winner: the Dead Sea pair "lowest place
 6. Checkable against a reliable source; cite it in example.md.
 7. Short natural Hebrew: each on-screen sentence readable in about 2 s.
 8. A bridge to math notation with the same structure (numbers instead of facts).
+9. Simplicity first (owner, 2026-11-26; GUIDELINES-DAKI 'פשטות קודם', read the three worked examples): the scene uses only things the student already knows and adds ONE new thing; the surprise is the concept's own boundary, not a neighbouring topic (a Ferris wheel for sine was rejected: three new ideas and a wave that belongs to another lesson; a ladder against a wall was approved). If a simpler correct example or definition exists, use it.
 Quick check: can you say it in one sentence? Is the first guess wrong and clear after one sentence of explanation? Is the surprise the message?
 Rejected for 1.1 (don't repeat the pattern): a WhatsApp group (taught the obvious), a restaurant bill / quiz grades / ID age (clunky), "he is 19" (confusing).
 Do a short real investigation (WebSearch/WebFetch): how the idea is usually introduced in intro courses and by good explainers (English and Hebrew), which everyday examples students report as clicking, the common confusions. Explain in our own words: copy no text or example verbatim; never mention a university, book, author, chapter or exercise.
