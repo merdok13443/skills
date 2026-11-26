@@ -52,7 +52,7 @@ Legacy course folder names: `בדידה` = `discrete-math`, `בסיסי נתונ
 ## 3. Naming
 - **Structural names** (folders the system defines): English, lowercase, hyphens. **Content names** (units, videos): Hebrew, from `curriculum.json`.
 - **Course slug:** `^[a-z0-9]+(-[a-z0-9]+)*$`, fixed forever, the same in all three places (`courses/<slug>/`, `dakademia-videos/<slug>/`, `publish-state.json` keys, `curriculum.json courseId`). Never a university, book or author name.
-- **Unit folder:** `uNN <unit name>` (`u00 טריילר` for the trailer). **Video folder:** `uNN-eNN <video name>`, the same code as the mp4 in dakademia-videos (`1.3` -> `u01-e03`, intro `1.0` -> `u01-e00`, trailer `0.0` -> `u00-e00`). The number `N.M` stays the id in state, header and titles; `layout.py code` converts.
+- **Unit folder:** `uNN <unit name>` (`u00 טריילר` for the trailer). **Video folder:** `uNN-eNN <video name>`, the same code as the mp4 in dakademia-videos (`1.3` -> `u01-e03`, intro `1.0` -> `u01-e00`, unit summary `1.99` -> `u01-e99` (fixed last slot of the unit, `SUMMARY-VIDEOS-DAKI.md`), trailer `0.0` -> `u00-e00`). The number `N.M` stays the id in state, header and titles; `layout.py code` converts.
 - **Characters:** drop `: ? " < > | \ /` and commas (`layout.clean`); keep Hebrew, spaces, `(∧)`. Unicode NFC.
 - **Versions:** only `versions/vN/` inside the video folder; in dakademia-videos `uNN-eNN-vN.mp4`. Never a version folder anywhere else (no `work/1.1-v4`).
 - **Dated folders:** `<topic>-<YYYY-MM-DD>` in notes/, research/, archive/.
@@ -73,6 +73,7 @@ Legacy course folder names: `בדידה` = `discrete-math`, `בסיסי נתונ
 archive/<slug>/                    superseded deliveries
 work/<slug>/uNN-eNN/voice/         cloud narration exchange (script.json in, take out). Never build files.
 test/                              pipeline test files
+sheets/<slug>/uNN.html            the public summary sheet of a unit (SUMMARY-VIDEOS-DAKI.md); replaced in place, its GitHub Pages URL never changes
 publish-state.json, PUBLISH-STATE.md, README.md, .github/workflows/
 ```
 **Storage limit (owner, 2026-11-25):** mp4s stay in git while the repository pack is under 800MB. Beyond that, new mp4s go to GitHub Releases (one release per unit or course; json and publish-state stay in git), after testing that Instagram accepts the release URL.

@@ -12,6 +12,8 @@ The model writes only what needs judgement, in a small JSON file (meta-input.jso
    "tiktok_ask": "an easy question for comments (optional while TikTok is off)",
    "tags": ["extra YouTube tags", "..."],                  optional, e.g. the curriculum tags
    "payoff": "the payoff sentence of the script"}          optional: its key words must not appear in any text
+  A unit summary (video "N.99", SUMMARY-VIDEOS-DAKI.md): "title" is "סיכום <unit name>", the title line becomes
+  "<course> ★ | <title> #shorts", and the public sheet URL (layout.py sheet) is added to every text; "payoff" is not needed.
 
 usage: python metadata.py meta-input.json --course discrete-math [--out <dir>] [--date 2026-11-25]
   -> prints the texts and the checks, writes <out>/u<NN>-e<MM>.json in the shape of PUBLISHING-DAKI.md section 5
@@ -67,23 +69,30 @@ def build(m, course, today):
     topic = hashtag(m['keyword'])
     field = c['field']
     yt_tags = [BRAND, c['tag'], topic] + ([field] if field else []) + BROAD + ['#shorts']
-    title = f"{c['short']} {m['video']} | {m['title']} #shorts"
+    summary = ep == 99
+    num = '★' if summary else m['video']
+    sheet = None
+    if summary:
+        import layout as L
+        sheet = L.sheet_url(course, m['video'])
+    title = f"{c['short']} {num} | {m['title']} #shorts"
     q = m['question'].strip()
-    desc = f"{q} {m['after'].strip()}\n\n{m['learn'].strip()}\n\n" + ' '.join(yt_tags)
+    desc = f"{q} {m['after'].strip()}\n\n{m['learn'].strip()}\n\n" + (f"דף סיכום עם כל הנוסחאות והטבלאות של היחידה: {sheet}\n\n" if sheet else '') + ' '.join(yt_tags)
     ig_tags = [BRAND, c['tag'], topic, '#סטודנטים', '#מבחנים' if exam_season(today) else (field or '#למידה')]
     ig = None
     if m.get('ig_body'):
-        ig = f"{q}\n\n{m['ig_body'].strip()}\n\n📌 שמרו לפני המבחן · שלחו למי שלומד איתכם {c['short']}\n\n" + ' '.join(ig_tags)
+        ig = f"{q}\n\n{m['ig_body'].strip()}\n\n" + (f"דף סיכום: {sheet}\n\n" if sheet else '') + f"📌 שמרו לפני המבחן · שלחו למי שלומד איתכם {c['short']}\n\n" + ' '.join(ig_tags)
     tt = None
     if m.get('tiktok_ask'):
         tt_tags = [BRAND, c['tag'], topic, '#סטודנטים'] + ([field] if field else []) + ['#לימודים', '#תואר', '#מבחנים']
-        tt = {'title': f"{c['short']} {m['video']} | {m['title']}",
+        tt = {'title': f"{c['short']} {num} | {m['title']}",
               'caption': f"{m['keyword']} ב{c['short']}. {q}\n{m['tiktok_ask'].strip()}\n\n" + ' '.join(tt_tags)}
     tags = [c['short'], m['keyword'], c['full']] + [t for t in m.get('tags', []) if t not in (c['short'], m['keyword'], c['full'])]
     return {
         'course': course, 'unit': unit, 'episode': ep, 'file': f'u{unit:02d}-e{ep:02d}.mp4', 'url': None,
         'keyword': m['keyword'], 'question': q, 'question_source': m.get('question_source'),
         'youtube': {'title': title, 'description': desc, 'tags': tags[:12]},
+        'sheet_url': sheet,
         'instagram': {'caption': ig} if ig else None,
         'tiktok': tt,
         'published_at': None,
@@ -122,7 +131,7 @@ def checks(meta, m):
             errs.append(f'{name}: a short question at the end of a sentence ("...איך?")')
         if re.search(r'\s[—–]\s|:\s*$|\s-\s', b, re.M):
             errs.append(f'{name}: dramatic colon or dash')
-        if re.search(r'[\U0001F300-\U0001FAFF☀-➿]', b):
+        if re.search(r'[\U0001F300-\U0001FAFF☀-➿]', b.replace('★', '')):
             errs.append(f'{name}: emoji (only 📌 before the Instagram call to action)')
         if re.search(r'\b[A-Z]{2,}\b', b.replace('T', '').replace('F', '')):
             errs.append(f'{name}: capital letters in English')

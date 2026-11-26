@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Keep a video's complete source package in the project folder (rule: VIDEO-PACKAGE.md). No model, no network, no TTS.
-  python archive_video.py pack <src> <video-folder> [--name "<N.M name>"] [--type lesson|intro|trailer] [--skills-commit SHA] [--note TEXT]
+  python archive_video.py pack <src> <video-folder> [--name "<N.M name>"] [--type lesson|intro|trailer|summary] [--skills-commit SHA] [--note TEXT]
         copy everything a finished build produced (src = the pipeline working dir) into the package layout; writes PIPELINE.json, PACKAGE.json, README.md (only if missing)
   python archive_video.py supersede <video-folder> <tag>     move the current package into versions/<tag>/ (run BEFORE packing a new version of a delivered video)
   python archive_video.py unpack <video-folder> <scratch>    recreate a pipeline working dir (scene.json, voice/, texts) to adapt or rebuild the video (new language, small edit)
@@ -8,7 +8,7 @@
 Narration is never regenerated here: voice.wav/timing.json are copied exactly as the build used them."""
 import hashlib, json, os, re, shutil, subprocess, sys, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
-STAGES = ['01-content', '02-example', '03-script', '04-voice', '05-build', '06-qa', '07-publish']
+STAGES = ['01-content', '02-example', '03-script', '04-voice', '05-build', '06-qa', '07-publish', '08-sheet']
 # working-dir file -> package location
 MAP = {
  'draft-haiku.md': '01-content', 'content.md': '01-content',
@@ -18,12 +18,13 @@ MAP = {
  'voice/voice.preinject.wav': '04-voice', 'voice/timing.preinject.json': '04-voice', 'voice/timing.raw.json': '04-voice',
  'scene.json': '05-build', 'index.html': '05-build', 'plan.json': '05-build', 'cues.json': '05-build', 'manifest.json': '05-build', 'build_report.json': '05-build',
  'hyperframes.json': '05-build/runtime', 'package.json': '05-build/runtime', 'assets/daki.js': '05-build/runtime', 'assets/dk-runtime.js': '05-build/runtime', 'assets/stamp.js': '05-build/runtime',
- 'qa_report.json': '06-qa', 'stage_log.jsonl': '06-qa', 'motion_report.json': '06-qa', 'check_errors.json': '06-qa', 'stills/contact-sheet.jpg': '06-qa',
+ 'sheet.html': '08-sheet', 'qa_report.json': '06-qa', 'stage_log.jsonl': '06-qa', 'motion_report.json': '06-qa', 'check_errors.json': '06-qa', 'stills/contact-sheet.jpg': '06-qa',
 }
 REQUIRED = {  # per type; every item is a path inside the video folder
  'lesson': ['01-content/draft-haiku.md', '02-example/example.md', '03-script/script.md', '03-script/review.md'],
  'intro': ['03-script/script.md', '03-script/fable-notes.md', '03-script/display.md'],
  'trailer': ['03-script/script.md', '03-script/fable-notes.md', '03-script/display.md'],
+ 'summary': ['01-content/draft-haiku.md', '03-script/script.md', '03-script/review.md', '08-sheet/sheet.html'],   # no example stage; the companion sheet is part of the package
 }
 COMMON = ['04-voice/script.json', '04-voice/voice.wav', '04-voice/timing.json', '05-build/scene.json', '05-build/PIPELINE.json', '05-build/index.html',
           '05-build/cues.json', '05-build/runtime/daki.js', '05-build/runtime/dk-runtime.js', '06-qa/qa_report.json', '06-qa/stage_log.jsonl']

@@ -18,7 +18,7 @@ Everything is timed by **anchors** that resolve against the real voice, so if th
   "mute":["l:pay","w:punch.0"],         // optional: explicit music mute window
   "bpm":96, "seed":11,                  // music
   "decky":{"x":690,"y":1040,"s":0.5,"expr":"smirk"},          // frame-0 pose
-  "type":"lesson",   // optional: "trailer" | "intro" lowers the QA minimum length to 20 s (INTRO-VIDEOS-DAKI.md)
+  "type":"lesson",   // optional: "trailer" | "intro" lowers the QA minimum length to 20 s (INTRO-VIDEOS-DAKI.md); "summary" = unit summary: the header shows ★ instead of the number (SUMMARY-VIDEOS-DAKI.md)
   "topic":{"word":"פסוק","el":"tpk"},       // RULE (very important): the topic name is shown large (>= 90 px) from frame 0 (the build errors otherwise) and spoken early, ideally by second 4 (a warning since 2026-11-25). el = a tag with vis:true in the first scene
   "seam_caption":"אמת או שקר?",         // last caption: completes the first line (loop)
   "captions":{"skip_lines":["punch"],"hide":[["l:punch","le:punch"]],"max_words":5,"max_chars":22},
