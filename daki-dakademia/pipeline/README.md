@@ -29,7 +29,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
 1b-2. example   OPUS (high): develops Fable's choice into example.md (re-checks facts and tests, beats, notation examples, the visual hook). It does not
                 pick another example; a failed fact or test goes back to the topic stage as topic-objection.md (at most 3 rounds, then `blocked`).   example.md   (prompts/example_researcher.md)
                 Intro and trailer videos keep their own chain (`../INTRO-VIDEOS-DAKI.md`).
-2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
+2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message stated near the start with a pause to land, a clear closing recap of the same message (rubric 1ט), loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
 3. review       SONNET scores the script with `../SCRIPT-RUBRIC.md` (+ the Haiku accuracy check in the same pass); an independent reviewer with no stake in the script
                 passing: honest, evidence for every deduction, no new criteria (prompts/script_reviewer.md). Pack: python pack.py review ...
                 a. python rubric_score.py <src> --template > <src>/rubric-score.json; the reviewer fills it (9 pass/fail thresholds + 34 criteria in 8 components)
