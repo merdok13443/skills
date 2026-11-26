@@ -210,7 +210,12 @@ def record_score(a, src, data, res, comps, crit, thr):
         import layout as L
         import rubric_collect as rc
         path = L.j('courses', course, 'state', 'script-scores.json')
-        e = rc.upsert(path, course, vid, data, res, comps, crit, thr)
+        sha = None
+        sp = os.path.join(src, 'voice', 'script.json')
+        if os.path.isfile(sp):
+            import hashlib
+            sha = hashlib.sha256(open(sp, 'rb').read()).hexdigest()
+        e = rc.upsert(path, course, vid, data, res, comps, crit, thr, script_sha=sha)
         print(f"score {e['total']} of {vid} saved in {path}")
         # regenerate the course-map page right now, from the real state (the scoring script itself does it, nobody has to remember)
         page = L.j('queue', 'course-map.html')

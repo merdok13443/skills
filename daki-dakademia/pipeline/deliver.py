@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Delivery to merdok13443/dakademia-videos without a model typing git commands (PUBLISHING-DAKI.md sections 1, 2, 5).
 
-  push   <final.mp4> <meta.json> --branch B [--repo-dir D] [--sheet <sheet.html>]
+  push   <final.mp4> <meta.json> --branch B [--repo-dir D] [--sheet <sheet.html>] [--src <src>]
          clone dev (once), branch B from dev, copy the mp4 as <course>/u<NN>-e<MM>.mp4 (a published file is never replaced:
          an identical file is reused, a different one gets the next -vN), write <course>/u<NN>-e<MM>.json (from metadata.py),
          `publish_state.py add` (title, pending), commit and push (4 tries with backoff). Then open the PR to dev and merge it.
+         --src <src>: the video's working folder; when the score file holds a rubric score for exactly its voice/script.json (sha256), the json gets
+         `script_score` and publish_cloud.py may upload it without the owner (95 or more, PUBLISHING-DAKI.md); otherwise the owner must approve the upload.
          --sheet (unit summary videos, SUMMARY-VIDEOS-DAKI.md): also copies the companion sheet to sheets/<course>/u<NN>.html. Unlike an
          mp4, the sheet is replaced in place: its public URL never changes, a fix updates every link already published.
   verify-sheet --course <slug> --unit <N> [--repo-dir D]
@@ -95,6 +97,23 @@ def pick_name(d, course, base, mp4):
         cand = f'{base}-v{n}'
 
 
+def script_score(course, unit, ep, src):
+    """The rubric score of the script this video was BUILT from, or None. It counts only when the score file holds a score whose
+    script_sha equals the sha256 of <src>/voice/script.json: a script revised after the build (or never scored) gives None,
+    so a video is never released on the strength of a score that belongs to another script."""
+    try:
+        import hashlib, layout as L
+        sp = os.path.join(src, 'voice', 'script.json')
+        sha = hashlib.sha256(open(sp, 'rb').read()).hexdigest()
+        sc = json.load(open(L.j('courses', course, 'state', 'script-scores.json'), encoding='utf-8'))
+        e = next(x for x in sc['episodes'] if x['id'] == f'{unit}.{ep}')
+        if e.get('script_sha') != sha:
+            return None
+        return {'total': e['total'], 'pass': bool(e['pass']), 'type': e.get('type'), 'rubric': sc.get('rubric', {}).get('skills_commit', '')}
+    except Exception:
+        return None
+
+
 def cmd_push(a):
     mp4, meta_p = os.path.abspath(a[0]), os.path.abspath(a[1])
     branch = opt(a, '--branch') or sys.exit('--branch is required (the thread branch)')
@@ -115,6 +134,13 @@ def cmd_push(a):
         os.makedirs(os.path.dirname(sp), exist_ok=True)
         shutil.copyfile(os.path.abspath(sheet), sp)
     meta['file'] = name + '.mp4'
+    sc = script_score(course, meta['unit'], meta['episode'], opt(a, '--src'))
+    if sc:
+        meta['script_score'] = sc
+        print(f"script score {sc['total']} ({'pass' if sc['pass'] else 'below 95 or a threshold failed'}) recorded in the json")
+    else:
+        print('NO script score recorded in the json (pass --src <src> of the built video, scored with rubric_score.py for exactly this voice/script.json): '
+              'publish_cloud.py will then need the owner\'s approval to upload it')
     json.dump(meta, open(os.path.join(d, course, name + '.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
     title = meta['youtube']['title'].replace(' #shorts', '')
     subprocess.run([sys.executable, PUBSTATE, '--state', os.path.join(d, 'publish-state.json'), 'add', f'{course}/{name}', '--title', title], check=True)

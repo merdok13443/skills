@@ -57,7 +57,7 @@ def episode_entry(i, data, res, comps, crit, thr, upload=None):
     }
 
 
-def upsert(scores_path, course, i, data, res, comps, crit, thr):
+def upsert(scores_path, course, i, data, res, comps, crit, thr, script_sha=None):
     """Add or replace ONE episode in the course's scores file (the file is created when missing). Called by rubric_score.py after every
     scored round, so the course map always shows the score of the current script. Writes through a temp file and a rename."""
     try:
@@ -67,6 +67,8 @@ def upsert(scores_path, course, i, data, res, comps, crit, thr):
                'weights': {str(n): {'title': t, 'weight': w} for n, (t, w) in comps.items()}}, 'unscored': [], 'episodes': []}
     old = next((e for e in cur['episodes'] if e['id'] == i), None)
     entry = episode_entry(i, data, res, comps, crit, thr, (old or {}).get('upload'))
+    if script_sha:
+        entry['script_sha'] = script_sha        # sha256 of the voice/script.json that was scored: deliver.py only trusts the score for exactly this script
     cur['episodes'] = sorted([e for e in cur['episodes'] if e['id'] != i] + [entry], key=lambda e: idkey(e['id']))
     cur['unscored'] = [u for u in cur.get('unscored', []) if u['id'] != i]
     cur['generated_utc'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')

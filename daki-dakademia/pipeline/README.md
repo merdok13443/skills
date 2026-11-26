@@ -24,7 +24,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 message so the viewer learns it. Reads the owner's curated record of past decisions (prompts/topic_decisions.md: ~15 cases, patterns
                 that worked and failed) and `state.py chosen` (never repeats). Writes topic.json + topic.md, then
                 `python state.py select <course> <id> --message M --example E --topic <topic.json>` (status approved at once).   (prompts/topic_selector.md)
-                The owner reviews the FINISHED video before it is uploaded (unchanged); that is the only owner check. When the owner approves or
+                The owner reviews the FINISHED video before it is uploaded, EXCEPT a video whose script scored 95+ (no failed threshold) and whose build passed QA: it is released without him (owner 2026-11-26, PUBLISHING-DAKI.md "שחרור בלי הבעלים"), at most one per hour, 10:00-21:00 Israel time; the owner is told after the upload. When the owner approves or
                 rejects anything, the case is appended to topic_decisions.md (standing rule).
 1b-2. example   OPUS (high): develops Fable's choice into example.md (re-checks facts and tests, beats, notation examples, the visual hook). It does not
                 pick another example; a failed fact or test goes back to the topic stage as topic-objection.md (at most 3 rounds, then `blocked`).   example.md   (prompts/example_researcher.md)
@@ -32,7 +32,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
 2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
 3. review       SONNET scores the script with `../SCRIPT-RUBRIC.md` (+ the Haiku accuracy check in the same pass); an independent reviewer with no stake in the script
                 passing: honest, evidence for every deduction, no new criteria (prompts/script_reviewer.md). Pack: python pack.py review ...
-                a. python rubric_score.py <src> --template > <src>/rubric-score.json; the reviewer fills it (9 pass/fail thresholds + 33 criteria in 8 components)
+                a. python rubric_score.py <src> --template > <src>/rubric-score.json; the reviewer fills it (9 pass/fail thresholds + 34 criteria in 8 components)
                 b. python rubric_score.py <src>: adds up, checks the file is complete, writes <src>/rubric-report.md and decides (exit code):
                    0 PASS (>= 95 and no failed threshold) -> stage 4;  1 REVISE -> rubric-report.md goes to stage 2 (Opus high, the revision paragraph of scriptwriter.md),
                    the revised script is scored AGAIN in full;  3 CAP / 4 BLOCKED after the 3rd return (the cap of 3 stays): the best version without a failed threshold continues
@@ -62,9 +62,9 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 say `package OK` (layout, versions, gaps: `VIDEO-PACKAGE.md`). Only the mp4 (+ post json) goes to dakademia-videos:
                 a. post texts: the model writes meta-input.json (keyword, the real student question + source, one sentence after it, one
                    "learn" sentence; METADATA-DAKI.md); python metadata.py meta-input.json --course <slug> fills the fixed parts and checks them
-                b. python deliver.py push <src>/final.mp4 <uNN-eNN.json> --branch <thread branch>   then open the PR to dev and merge it
+                b. python deliver.py push <src>/final.mp4 <uNN-eNN.json> --branch <thread branch> --src <src>   (--src records the rubric score of exactly this voice/script.json in the json; without it the upload needs the owner)  then open the PR to dev and merge it
                 c. python deliver.py verify --name <slug>/uNN-eNN       -> the commit-pinned URL, checked (200 + size)
-                d. CLOUD upload (no PC), after the owner approves the finished video: run the GitHub Actions workflow `Upload to YouTube`
+                d. CLOUD upload (no PC), after the owner approves the finished video, or without him when the json holds script_score >= 95 (publish_cloud.py checks it, the hour pace and 10:00-21:00 Israel time; --owner-approved marks his approval): run the GitHub Actions workflow `Upload to YouTube`
                    of merdok13443/dakademia-videos with video=<slug>/uNN-eNN, privacy public, platforms youtube or youtube,instagram (dry_run first on a new setup). From a session:
                    mcp__github__actions_run_trigger (workflow upload-youtube.yml, ref dev). The owner can also tap it in the GitHub mobile app
                    (Actions > Upload to YouTube > Run workflow). It uploads with the same code as shorts-uploader (publish_cloud.py), writes
