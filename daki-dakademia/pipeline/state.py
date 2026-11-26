@@ -318,6 +318,7 @@ def cmd_done(course, vid, note):
     update(P['progress'], f)
     release_queue(course, vid, 'done')
     print(f'{vid}: done, locks released')
+    print('COURSE-MAP: the video is delivered; regenerate and republish the course map if not done yet (python course_map.py --check says whether it is stale)')
 
 
 def cmd_fail(course, vid, stage, reason, blocked):

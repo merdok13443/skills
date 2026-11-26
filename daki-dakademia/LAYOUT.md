@@ -28,6 +28,7 @@ Approved by the owner 2026-11-25 (report: `notes/folder-restructure-2026-11-26/r
       _experiments/         trials that were never a version of a video
     reference/              background material, read only, on no read path (old topic lists, previews, pre-pipeline sources)
   queue/queue.json          the production queue shared by all courses (only state.py writes)
+  queue/course-map-published.json   hash of the course map last published (only course_map.py --mark-published writes; PUBLISHING-DAKI.md section 6)
   research/<topic>-<YYYY-MM-DD>/   general research. Never a loose file at research/ root, never binding rules.
   notes/<topic>-<YYYY-MM-DD>/      proposals and reports awaiting a decision; after it, the rule goes to the skills and the folder to archive/
   archive/<what>-<YYYY-MM-DD>/     everything out of use, with a README; the pipeline never reads from it

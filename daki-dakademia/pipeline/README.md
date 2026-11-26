@@ -40,6 +40,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
                 The rubric files stay in the package (03-script/: rubric-score.json, rubric-report.md, rubric-history.jsonl; review.md keeps every round's findings).
                 Facts are checked against the "קטעי מקור" of draft-haiku.md; a source page is opened only for a claim not covered there.
                 Log the review's real tokens like any stage (stage_log.py --record review ...).
+                rubric_score.py also saves every round's score into courses/<slug>/state/script-scores.json for the course map and prints a COURSE-MAP line: republish the map.
 4. audio        CLOUD (default): commit <src>'s voice/script.json to merdok13443/dakademia-videos `dev` as work/<id>/voice/script.json (plus script.md as work/<id>/script.md, REQUIRED: voice_rules checks its 'המסר:' line; a branch+PR, merged;
                 the video's other files stay in the project), then run the workflow `Narration (Gemini voice)` with video=<id> (dry_run first on a new setup;
                 `mcp__github__actions_run_trigger`, ref dev, or the GitHub mobile app). It runs python voice.py on that folder: pre-check of script.json
@@ -69,8 +70,9 @@ the scripts only replace a model reading big files or typing commands. Every scr
                    (Actions > Upload to YouTube > Run workflow). It uploads with the same code as shorts-uploader (publish_cloud.py), writes
                    youtube=uploaded + URL into publish-state.json and <slug>/uNN-eNN.json on dev, and shows a RESULT line in its summary.
                    Setup, secret and rules: PUBLISHING-DAKI.md, "Cloud upload". (The PC route publish_video.py stays for Instagram later.)
-                f. course map: after 9b (delivered to dev) and after every upload/record, regenerate and republish the course-map artifact:
-                   python course_map.py --out <scratch>/course-map.html, then the Artifact tool, publish with url=<map URL in PUBLISHING-DAKI.md section 6>. Required step; a session that cannot do it says so in its report.
+                f. course map: after 9b (delivered to dev), after every upload/record to any network and after every score, regenerate and republish the course-map artifact:
+                   python course_map.py --out F, the Artifact tool (publish with url=<map URL in PUBLISHING-DAKI.md section 6>), python course_map.py --mark-published F.
+                   publish_cloud.py, state.py done and rubric_score.py print a COURSE-MAP line when it is due; `python course_map.py --check` (exit 1 = stale) catches a phone-triggered upload. Required; a session that cannot do it says so in its report.
                 e. pull dev (the workflow already recorded the YouTube result), copy the json and the state record into the video package
                    (07-publish), then python state.py done <course> <id> --note "<length, anything notable>". Other platforms or a manual
                    fix: python deliver.py record --name <slug>/uNN-eNN --url <URL> --youtube <id> --instagram skipped --tiktok skipped --branch <b> --package "<video folder>"

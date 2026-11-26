@@ -37,6 +37,46 @@ def idkey(i):
     return tuple(int(x) for x in i.split('.'))
 
 
+def episode_entry(i, data, res, comps, crit, thr, upload=None):
+    """One episode's record in the scores file (shared by this script and rubric_score.py --course/--id)."""
+    t = ep_type(i)
+    passed = res['total'] >= rs.PASS_MIN and not res['failed']
+    lost = []
+    for loss, k in res['lost']:
+        e = data['scores'][k]
+        lost.append({'criterion': k, 'name': crit[k][2], 'lost': round(loss, 2), 'evidence': e.get('evidence', ''), 'fix': e.get('fix', '')})
+    return {
+        'id': i, 'type': t, 'total': res['total'], 'raw': res['raw'], 'pass': passed,
+        'verdict': ('PASS' if passed else 'REVISE') + ('' if t == 'lesson' else ' (comments only)'),
+        'components': {str(n): {'title': comps[n][0], 'points': res['per'][n][0], 'out_of': res['per'][n][1], 'weight': comps[n][1]} for n in comps},
+        'failed_thresholds': [{'id': k, 'text': thr[k], 'evidence': data['thresholds'][k]['evidence']} for k in res['failed']],
+        'main_deduction': lost[0] if lost else None, 'deductions': lost,
+        'notes': str(data.get('notes', '')).strip(),
+        'legacy': str(data.get('notes', '')).lstrip().upper().startswith('LEGACY'),
+        'upload': upload,
+    }
+
+
+def upsert(scores_path, course, i, data, res, comps, crit, thr):
+    """Add or replace ONE episode in the course's scores file (the file is created when missing). Called by rubric_score.py after every
+    scored round, so the course map always shows the score of the current script. Writes through a temp file and a rename."""
+    try:
+        cur = json.load(open(scores_path, encoding='utf-8'))
+    except Exception:
+        cur = {'course': course, 'rubric': {'file': 'daki-dakademia/SCRIPT-RUBRIC.md', 'pass_min': rs.PASS_MIN, 'cap_when_threshold_fails': rs.CAP_FAILED,
+               'weights': {str(n): {'title': t, 'weight': w} for n, (t, w) in comps.items()}}, 'unscored': [], 'episodes': []}
+    old = next((e for e in cur['episodes'] if e['id'] == i), None)
+    entry = episode_entry(i, data, res, comps, crit, thr, (old or {}).get('upload'))
+    cur['episodes'] = sorted([e for e in cur['episodes'] if e['id'] != i] + [entry], key=lambda e: idkey(e['id']))
+    cur['unscored'] = [u for u in cur.get('unscored', []) if u['id'] != i]
+    cur['generated_utc'] = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    tmp = scores_path + '.tmp'
+    os.makedirs(os.path.dirname(scores_path), exist_ok=True)
+    json.dump(cur, open(tmp, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    os.replace(tmp, scores_path)
+    return entry
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('root'); ap.add_argument('--course', required=True); ap.add_argument('--out', required=True)
@@ -59,22 +99,7 @@ def main():
             res = rs.score(data, comps, crit, thr)
         except SystemExit as e:
             print(f'{i}: {e}', file=sys.stderr); sys.exit(2)
-        t = ep_type(i)
-        passed = res['total'] >= rs.PASS_MIN and not res['failed']
-        lost = []
-        for loss, k in res['lost']:
-            e = data['scores'][k]
-            lost.append({'criterion': k, 'name': crit[k][2], 'lost': round(loss, 2), 'evidence': e.get('evidence', ''), 'fix': e.get('fix', '')})
-        eps.append({
-            'id': i, 'type': t, 'total': res['total'], 'raw': res['raw'], 'pass': passed,
-            'verdict': ('PASS' if passed else 'REVISE') + ('' if t == 'lesson' else ' (comments only)'),
-            'components': {str(n): {'title': comps[n][0], 'points': res['per'][n][0], 'out_of': res['per'][n][1], 'weight': comps[n][1]} for n in comps},
-            'failed_thresholds': [{'id': k, 'text': thr[k], 'evidence': data['thresholds'][k]['evidence']} for k in res['failed']],
-            'main_deduction': lost[0] if lost else None, 'deductions': lost,
-            'notes': str(data.get('notes', '')).strip(),
-            'legacy': str(data.get('notes', '')).lstrip().upper().startswith('LEGACY'),
-            'upload': status.get(i),
-        })
+        eps.append(episode_entry(i, data, res, comps, crit, thr, status.get(i)))
     try:
         sha = subprocess.run(['git', '-C', HERE, 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip()
     except Exception:

@@ -56,7 +56,12 @@ NAME_RE = re.compile(r'^[a-z0-9-]+/u[0-9]{2}-e[0-9]{2}(-v[0-9]+)?$')
 
 
 def out(res, code):
-    print('RESULT ' + json.dumps(res, ensure_ascii=False))
+    # an upload to ANY network changes the course map (status + links): tell the session that reads this output to republish it
+    uploaded = [p for p in ('youtube', 'instagram', 'tiktok') if res.get(p) and str(res[p]) not in ('dry-run', 'skipped', 'failed')]
+    if uploaded:
+        print(f"COURSE-MAP: {', '.join(uploaded)} recorded for {res.get('video')}; regenerate and republish the course map "
+              '(python course_map.py --out F, Artifact publish to the map URL, course_map.py --mark-published F; PUBLISHING-DAKI.md section 6)')
+    print('RESULT ' + json.dumps(res, ensure_ascii=False))   # the last line, as the docstring promises
     summ = os.environ.get('GITHUB_STEP_SUMMARY')
     if summ:
         with open(summ, 'a', encoding='utf-8') as f:
@@ -64,6 +69,8 @@ def out(res, code):
             for plat, label in (('youtube', 'YouTube'), ('instagram', 'Instagram'), ('tiktok', 'TikTok')):
                 if res.get(plat):
                     f.write(f"- {label}: **{res[plat]}**\n")
+            if uploaded:
+                f.write('- **Course map: republish needed** (PUBLISHING-DAKI.md section 6)\n')
             for k in ('url', 'instagram_url'):
                 if res.get(k):
                     f.write(f"- {res[k]}\n")
