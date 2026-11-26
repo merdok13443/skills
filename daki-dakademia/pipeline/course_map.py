@@ -16,11 +16,11 @@ Review link = https://raw.githubusercontent.com/merdok13443/dakademia-videos/<sh
 
 Usage:
   python course_map.py [--course discrete-math --course databases] [--videos-repo PATH] [--out FILE] [--template FILE] [--json]
-    --videos-repo  a clone of dakademia-videos (it is fetched; ref origin/dev is used). Default: a fresh clone in a temp dir.
+    --videos-repo  a clone of dakademia-videos (it is fetched; ref origin/dev is used). Default: a cached blobless clone in the temp dir.
     --check        exit 0 if the page that would be generated equals the last published one (<root>/queue/course-map-published.json), 1 if the map is stale
                    (an upload, a delivery or a score changed since). A producer session runs it at the start and after every upload/score.
     --mark-published FILE   after the Artifact publish of FILE: remember its hash as the published state (needed for --check)
-    --out          the page to publish (default: $TMPDIR/course-map.html). Then republish it with the Artifact tool, same URL
+    --out          the page to publish (default: <root>/queue/course-map.html). Then republish it with the Artifact tool, same URL
                    (SKILL.md, step "course map"). The script cannot publish: only the Artifact tool can.
 """
 import argparse
@@ -198,6 +198,11 @@ def build_course(slug, repo, state, files, works, sheets):
                       'h': HUES.get(slug, sum(map(ord, slug)) % 360), 'pass': pass_min}
 
 
+def default_out():
+    """Where scripts that must refresh the map (rubric_score.py) leave the regenerated page."""
+    return L.j('queue', 'course-map.html')
+
+
 def marker_path():
     return L.j('queue', 'course-map-published.json')
 
@@ -233,8 +238,10 @@ def main():
     courses = a.course or [s for s in ('discrete-math', 'databases') if os.path.isfile(L.j('courses', s, 'curriculum.json'))]
     path = a.videos_repo
     if not path:
-        path = tempfile.mkdtemp(prefix='dakademia-videos-')
-        sh('git', 'clone', '-q', f'https://github.com/{REPO}.git', path)
+        # a cached blobless clone (history and trees only, no mp4 downloads): the first run clones, later runs only fetch
+        path = os.path.join(tempfile.gettempdir(), 'dakademia-videos-map-cache')
+        if not os.path.isdir(os.path.join(path, '.git')):
+            sh('git', 'clone', '-q', '--filter=blob:none', '--no-checkout', f'https://github.com/{REPO}.git', path)
     repo = Repo(path)
     state = load_json_text(repo.show('publish-state.json')).get('videos', {})
     files = repo.files(*[f'{c}/' for c in courses])
@@ -269,7 +276,7 @@ def main():
     with open(a.template, encoding='utf-8') as f:
         html = f.read()
     html = (html.replace('__DATA__', js(DATA)).replace('__TRAILER__', js(TRAILER)).replace('__COURSES__', js(COURSES)).replace('__META__', js(meta)))
-    out = a.out or os.path.join(tempfile.gettempdir(), 'course-map.html')
+    out = a.out or default_out()
     with open(out, 'w', encoding='utf-8') as f:
         f.write(html)
     with open(out + '.hash', 'w', encoding='utf-8') as f:

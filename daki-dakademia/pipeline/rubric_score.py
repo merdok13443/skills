@@ -12,7 +12,7 @@ usage:
 <src> is the video's working folder (script.md, voice/script.json, ...).
 Every real (not --dry, not --file) scoring also upserts the score into courses/<slug>/state/script-scores.json, which the course map shows
 (the course and video id come from the folder path courses/<slug>/videos/.../uNN-eMM ..., or --course <slug> --id N.M); the run then prints
-a COURSE-MAP line: republish the map (PUBLISHING-DAKI.md section 6).
+a regenerated course-map page (queue/course-map.html, by course_map.py) and a COURSE-MAP line: only the Artifact publish is left (PUBLISHING-DAKI.md section 6).
 
 Score file: {"thresholds": {"ת1": {"pass": true, "evidence": "..."}, ...},
              "scores": {"1א": {"level": "full|half|zero|na", "evidence": "...", "fix": "..."}, ...}, "notes": "..."}
@@ -26,7 +26,7 @@ gets rubric-report.md, fixes, and the reviewer scores again. At most 3 returns t
 the 4th scoring the best version continues if it has no failed threshold (exit 3), else the video is blocked (exit 4).
 A failed threshold caps the reported total at 59. Exit 2 = bad input.
 Each scoring is kept in <src>/rubric-history.jsonl, with a snapshot of script.md + voice/script.json in <src>/rubric-rounds/round-N/."""
-import json, os, re, shutil, sys
+import json, os, re, shutil, subprocess, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -211,7 +211,16 @@ def record_score(a, src, data, res, comps, crit, thr):
         import rubric_collect as rc
         path = L.j('courses', course, 'state', 'script-scores.json')
         e = rc.upsert(path, course, vid, data, res, comps, crit, thr)
-        print(f"COURSE-MAP: score {e['total']} of {vid} saved in {path}; republish the course map (python course_map.py, PUBLISHING-DAKI.md section 6)")
+        print(f"score {e['total']} of {vid} saved in {path}")
+        # regenerate the course-map page right now, from the real state (the scoring script itself does it, nobody has to remember)
+        page = L.j('queue', 'course-map.html')
+        r = subprocess.run([sys.executable, os.path.join(HERE, 'course_map.py'), '--out', page],
+                           capture_output=True, text=True, encoding='utf-8', timeout=180)
+        if r.returncode:
+            print(f'COURSE-MAP: the page could not be regenerated ({r.stderr.strip()[-300:]}); run python course_map.py --out F by hand')
+        else:
+            print(f"COURSE-MAP: page regenerated at {page}. Only the Artifact publish is left (url from PUBLISHING-DAKI.md section 6, file_path={page}), "
+                  f"then python course_map.py --mark-published {page}")
     except Exception as ex:  # the score itself is already decided; a bookkeeping problem must not change the exit code
         print(f'rubric_score: could not save the score for the course map: {ex}')
 

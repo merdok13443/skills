@@ -128,7 +128,7 @@ python pipeline/deliver.py record --name <course-slug>/u01-e03 --url <URL> --you
 הארטיפקט "מפת הקורסים" (https://claude.ai/artifact/PBDSL8tPXbaPPdJwuchXnY) מציג את כל התוכנית (יחידות, סרטונים, סרטוני הסיכום N.99 והטריילר) ולצד כל סרטון שנבנה: סטטוס (הועלה / ממתין לבדיקה / בהפקה), קישור לבדיקה לגרסה האחרונה (קישור raw מוצמד ל-commit במאגר הסרטונים), קישורי YouTube, Instagram ו-TikTok כשיש, **וציון התסריט** (לפי `SCRIPT-RUBRIC.md`, עם פירוט הרכיבים והניכוי הגדול; בשיעורים מול רף 95, בפתיח, סיכום וטריילר "להערות בלבד"). הבעלים משתמש בו במקום לקבל רשימות קישורים וציונים בצ'אט, ולכן הוא חייב להיות עדכני.
 
 **איך המידע נכנס (הכול בסקריפטים, בלי הקלדה ביד):**
-- ציון: `rubric_score.py` (שלב 3) מוסיף אחרי כל דירוג את הציון ל-`courses/<slug>/state/script-scores.json` (הקורס והמזהה נלקחים מנתיב התיקייה, או `--course <slug> --id N.M`). `rubric_collect.py` בונה את כל הקובץ מחדש מתיקיות הסרטונים. העתק `course_map/scores/<slug>.json` ב-skills הוא תמונת מצב בלבד, והדף קורא קודם את קובץ ה-state.
+- ציון: `rubric_score.py` (שלב 3) מוסיף אחרי כל דירוג את הציון ל-`courses/<slug>/state/script-scores.json` (הקורס והמזהה נלקחים מנתיב התיקייה, או `--course <slug> --id N.M`) **ומפיק בעצמו מחדש את דף המפה** ל-`queue/course-map.html` (דרך `course_map.py`, בלי שאף אחד יזכור). נשאר רק פרסום הדף בכלי ה-Artifact (והרישום `--mark-published`). `rubric_collect.py` בונה את כל הקובץ מחדש מתיקיות הסרטונים. העתק `course_map/scores/<slug>.json` ב-skills הוא תמונת מצב בלבד, והדף קורא קודם את קובץ ה-state.
 - העלאה: `publish_cloud.py` (ובכל ריצה של ה-workflow `Upload to YouTube`) רושם את הפלטפורמה ב-`publish-state.json` ומדפיס `COURSE-MAP: ... republish` (גם בסיכום הריצה) כשעלה סרטון לאחת הרשתות.
 - מסירה: `state.py done` מדפיס את אותה תזכורת.
 
