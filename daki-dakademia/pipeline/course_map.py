@@ -10,16 +10,22 @@ Sources (nothing is read from memory or from chat):
 Per episode the script picks the LATEST version = the mp4 whose last commit on dev is the newest (so a re-delivered u01-e01.mp4 beats an
 older u01-e01-v2.mp4). Status: up (YouTube or Instagram uploaded for that version), upold (an older version is uploaded, the latest is
 not), rev (mp4 on dev, not uploaded = awaiting owner review), prod (voice/progress in flight, no mp4), plan (nothing yet).
+Script score (SCRIPT-RUBRIC.md): courses/<slug>/state/script-scores.json (written by rubric_score.py after every scoring; the snapshot
+../course_map/scores/<slug>.json is the fallback). Lessons show the total against the 95 bar; trailer, intros and summaries show it for comments only.
 Review link = https://raw.githubusercontent.com/merdok13443/dakademia-videos/<sha of the file's last commit>/<path> (commit-pinned).
 
 Usage:
   python course_map.py [--course discrete-math --course databases] [--videos-repo PATH] [--out FILE] [--template FILE] [--json]
-    --videos-repo  a clone of dakademia-videos (it is fetched; ref origin/dev is used). Default: a fresh clone in a temp dir.
-    --out          the page to publish (default: $TMPDIR/course-map.html). Then republish it with the Artifact tool, same URL
+    --videos-repo  a clone of dakademia-videos (it is fetched; ref origin/dev is used). Default: a cached blobless clone in the temp dir.
+    --check        exit 0 if the page that would be generated equals the last published one (<root>/queue/course-map-published.json), 1 if the map is stale
+                   (an upload, a delivery or a score changed since). A producer session runs it at the start and after every upload/score.
+    --mark-published FILE   after the Artifact publish of FILE: remember its hash as the published state (needed for --check)
+    --out          the page to publish (default: <root>/queue/course-map.html). Then republish it with the Artifact tool, same URL
                    (SKILL.md, step "course map"). The script cannot publish: only the Artifact tool can.
 """
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -92,12 +98,31 @@ def label_for(rec_p):
     return PLATFORM_LABEL.get(st, st)
 
 
+def load_scores(slug):
+    for p in (L.j('courses', slug, 'state', 'script-scores.json'), os.path.join(HERE, '..', 'course_map', 'scores', f'{slug}.json')):
+        d = load_json(p)
+        if d:
+            return {e['id']: e for e in d.get('episodes', [])}, d.get('rubric', {}).get('pass_min', 95)
+    return {}, 95
+
+
+def score_view(e):
+    if not e:
+        return None
+    md = e.get('main_deduction')
+    return {'total': e['total'], 'pass': bool(e['pass']), 'lesson': e['type'] == 'lesson', 'legacy': bool(e.get('legacy')),
+            'comps': [[c['title'], c['points'], c['out_of']] for _, c in sorted(e['components'].items(), key=lambda kv: int(kv[0]))],
+            'main': (f"{md['criterion']} {md['name']}: −{md['lost']}" if md else ''),
+            'failed': [f['text'] for f in e.get('failed_thresholds', [])]}
+
+
 def build_course(slug, repo, state, files, works, sheets):
     cur = load_json(L.j('courses', slug, 'curriculum.json'))
     if not cur:
         sys.exit(f'no curriculum.json for {slug}')
     prog = load_json(L.j('courses', slug, 'state', 'progress.json'), {'videos': []})
     pstat = {v['id']: v for v in prog.get('videos', [])}
+    scores, pass_min = load_scores(slug)
     info = load_json(L.j('courses', slug, 'course.json'), {})
     # work/<code>/ in dakademia-videos carries no course name, so it only marks "in production" for an active course
     works_ok = info.get('status') == 'active'
@@ -158,6 +183,7 @@ def build_course(slug, repo, state, files, works, sheets):
             p = pstat.get(vid, {})
             if (works_ok and code in works) or p.get('status') in ('in_progress', 'waiting'):
                 e['st'] = 'prod'
+        e['sc'] = score_view(scores.get(vid))
         if v.get('type') == 'summary' and L.sheet_path(slug, vid) in sheets:
             e['sheet'] = L.sheet_url(slug, vid)
         return e
@@ -169,7 +195,16 @@ def build_course(slug, repo, state, files, works, sheets):
     t = entry({'id': tr['id'], 'title': tr['title'], 'description': tr.get('description', ''), 'type': 'trailer'})
     t['hook'] = tr.get('hookQuestion', '')
     return units, t, {'k': SHORT.get(slug, slug), 'slug': slug, 'name': info.get('name') or cur.get('course', slug),
-                      'h': HUES.get(slug, sum(map(ord, slug)) % 360)}
+                      'h': HUES.get(slug, sum(map(ord, slug)) % 360), 'pass': pass_min}
+
+
+def default_out():
+    """Where scripts that must refresh the map (rubric_score.py) leave the regenerated page."""
+    return L.j('queue', 'course-map.html')
+
+
+def marker_path():
+    return L.j('queue', 'course-map-published.json')
 
 
 def load_json_text(s):
@@ -185,14 +220,28 @@ def main():
     ap.add_argument('--videos-repo')
     ap.add_argument('--out')
     ap.add_argument('--template', default=os.path.join(HERE, '..', 'course_map', 'template.html'))
+    ap.add_argument('--check', action='store_true')
+    ap.add_argument('--mark-published', metavar='FILE')
     ap.add_argument('--json', action='store_true', help='print the status table instead of writing the page')
     a = ap.parse_args()
 
+    if a.mark_published:
+        try:
+            h = open(a.mark_published + '.hash', encoding='utf-8').read().strip()
+        except OSError:
+            sys.exit(f'no {a.mark_published}.hash: generate the page with --out first')
+        mp = marker_path()
+        os.makedirs(os.path.dirname(mp), exist_ok=True)
+        json.dump({'hash': h, 'published_utc': dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds')}, open(mp, 'w', encoding='utf-8'))
+        print(f'course map marked as published ({h[:10]})')
+        return
     courses = a.course or [s for s in ('discrete-math', 'databases') if os.path.isfile(L.j('courses', s, 'curriculum.json'))]
     path = a.videos_repo
     if not path:
-        path = tempfile.mkdtemp(prefix='dakademia-videos-')
-        sh('git', 'clone', '-q', f'https://github.com/{REPO}.git', path)
+        # a cached blobless clone (history and trees only, no mp4 downloads): the first run clones, later runs only fetch
+        path = os.path.join(tempfile.gettempdir(), 'dakademia-videos-map-cache')
+        if not os.path.isdir(os.path.join(path, '.git')):
+            sh('git', 'clone', '-q', '--filter=blob:none', '--no-checkout', f'https://github.com/{REPO}.git', path)
     repo = Repo(path)
     state = load_json_text(repo.show('publish-state.json')).get('videos', {})
     files = repo.files(*[f'{c}/' for c in courses])
@@ -214,6 +263,12 @@ def main():
     if a.json:
         return
 
+    h = hashlib.sha256(json.dumps([DATA, TRAILER, COURSES], ensure_ascii=False, sort_keys=True).encode('utf-8')).hexdigest()
+    if a.check:
+        last = (load_json(marker_path()) or {}).get('hash')
+        print('course map: current' if last == h else 'COURSE-MAP: stale (an upload, delivery or score changed since the last publish): regenerate and republish')
+        sys.exit(0 if last == h else 1)
+
     def js(o):
         return json.dumps(o, ensure_ascii=False).replace('</', '<\\/')
 
@@ -221,9 +276,11 @@ def main():
     with open(a.template, encoding='utf-8') as f:
         html = f.read()
     html = (html.replace('__DATA__', js(DATA)).replace('__TRAILER__', js(TRAILER)).replace('__COURSES__', js(COURSES)).replace('__META__', js(meta)))
-    out = a.out or os.path.join(tempfile.gettempdir(), 'course-map.html')
+    out = a.out or default_out()
     with open(out, 'w', encoding='utf-8') as f:
         f.write(html)
+    with open(out + '.hash', 'w', encoding='utf-8') as f:
+        f.write(h)
     print(out)
 
 

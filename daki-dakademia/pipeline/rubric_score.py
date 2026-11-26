@@ -10,6 +10,9 @@ usage:
   python rubric_score.py <src> [--dry]             read <src>/rubric-score.json, write <src>/rubric-report.md, decide
   python rubric_score.py <src> --file other.json   score another file
 <src> is the video's working folder (script.md, voice/script.json, ...).
+Every real (not --dry, not --file) scoring also upserts the score into courses/<slug>/state/script-scores.json, which the course map shows
+(the course and video id come from the folder path courses/<slug>/videos/.../uNN-eMM ..., or --course <slug> --id N.M); the run then prints
+a regenerated course-map page (queue/course-map.html, by course_map.py) and a COURSE-MAP line: only the Artifact publish is left (PUBLISHING-DAKI.md section 6).
 
 Score file: {"thresholds": {"ת1": {"pass": true, "evidence": "..."}, ...},
              "scores": {"1א": {"level": "full|half|zero|na", "evidence": "...", "fix": "..."}, ...}, "notes": "..."}
@@ -23,7 +26,9 @@ gets rubric-report.md, fixes, and the reviewer scores again. At most 3 returns t
 the 4th scoring the best version continues if it has no failed threshold (exit 3), else the video is blocked (exit 4).
 A failed threshold caps the reported total at 59. Exit 2 = bad input.
 Each scoring is kept in <src>/rubric-history.jsonl, with a snapshot of script.md + voice/script.json in <src>/rubric-rounds/round-N/."""
-import json, os, re, shutil, sys
+import json, os, re, shutil, subprocess, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
     sys.stdout.reconfigure(encoding='utf-8')
@@ -181,6 +186,45 @@ def report(rnd, res, verdict, text, comps, crit, thr, data):
     return '\n'.join(L) + '\n'
 
 
+def course_and_id(a, src):
+    """The course slug and video id of a scored script: --course/--id, else from the folder (.../courses/<slug>/videos/uNN .../uNN-eMM name)."""
+    course = a[a.index('--course') + 1] if '--course' in a else None
+    vid = a[a.index('--id') + 1] if '--id' in a else None
+    parts = os.path.normpath(src).split(os.sep)
+    if course is None and 'courses' in parts:
+        k = parts.index('courses')
+        course = parts[k + 1] if k + 1 < len(parts) else None
+    m = re.match(r'^u(\d+)-e(\d+)', parts[-1])
+    if vid is None and m:
+        vid = f'{int(m.group(1))}.{int(m.group(2))}'
+    return course, vid
+
+
+def record_score(a, src, data, res, comps, crit, thr):
+    """Write this score into the course's scores file (the course map reads it) and say that the map needs a republish. Never fails the scoring."""
+    try:
+        course, vid = course_and_id(a, src)
+        if not (course and vid):
+            print('rubric_score: course/id not known (run it inside courses/<slug>/videos/... or pass --course <slug> --id N.M); score NOT added to the course map')
+            return
+        import layout as L
+        import rubric_collect as rc
+        path = L.j('courses', course, 'state', 'script-scores.json')
+        e = rc.upsert(path, course, vid, data, res, comps, crit, thr)
+        print(f"score {e['total']} of {vid} saved in {path}")
+        # regenerate the course-map page right now, from the real state (the scoring script itself does it, nobody has to remember)
+        page = L.j('queue', 'course-map.html')
+        r = subprocess.run([sys.executable, os.path.join(HERE, 'course_map.py'), '--out', page],
+                           capture_output=True, text=True, encoding='utf-8', timeout=180)
+        if r.returncode:
+            print(f'COURSE-MAP: the page could not be regenerated ({r.stderr.strip()[-300:]}); run python course_map.py --out F by hand')
+        else:
+            print(f"COURSE-MAP: page regenerated at {page}. Only the Artifact publish is left (url from PUBLISHING-DAKI.md section 6, file_path={page}), "
+                  f"then python course_map.py --mark-published {page}")
+    except Exception as ex:  # the score itself is already decided; a bookkeeping problem must not change the exit code
+        print(f'rubric_score: could not save the score for the course map: {ex}')
+
+
 def main(a):
     if not a or a[0] in ('-h', '--help'):
         print(__doc__); return 0
@@ -209,6 +253,8 @@ def main(a):
                 shutil.copy2(os.path.join(src, f), os.path.join(snap, dst))
         with open(hp, 'a', encoding='utf-8') as fh:
             fh.write(json.dumps({'round': rnd, 'total': res['total'], 'raw': res['raw'], 'failed': res['failed'], 'verdict': verdict}, ensure_ascii=False) + '\n')
+        if '--file' not in a:
+            record_score(a, src, data, res, comps, crit, thr)
     return code
 
 

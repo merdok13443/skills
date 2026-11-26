@@ -59,6 +59,14 @@ li .n{display:block;color:var(--mut);font-size:13px}
 .lnk{font-size:12px;font-weight:700;text-decoration:none;color:var(--fg);border:1px solid var(--line);background:var(--card);border-radius:7px;padding:2px 9px}
 .lnk:hover{border-color:var(--c)}
 .lnk.mark{border-style:dashed;color:var(--mut);font-weight:500}
+
+.sc{margin-top:6px;font-size:12px}
+.sc summary{list-style:none;cursor:pointer;display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:7px;padding:2px 9px;font-weight:700}
+.sc summary::-webkit-details-marker{display:none}
+.sc .v{font-variant-numeric:tabular-nums;font-size:13px}
+.sc .ok{color:var(--s-up)}.sc .no{color:var(--s-rev)}.sc .cm{color:var(--mut);font-weight:500}
+.sc .box{margin-top:6px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--mut);display:grid;gap:3px;max-width:46ch}
+.sc .box span{display:flex;justify-content:space-between;gap:12px}.sc .box b{color:var(--fg);font-variant-numeric:tabular-nums}
 .empty{color:var(--mut);padding:20px 0}
 .note{color:var(--mut);font-size:13px;margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:520px){.seg{font-size:0}.strip{height:40px}.ut span{display:none}}
@@ -105,6 +113,14 @@ function pubLinks(v){
  if(v.sheet)s+=a(v.sheet,"דף סיכום","");
  return s?`<span class="links">${s}</span>`:'';
 }
+function scoreBlock(v,pass){
+ const c=v.sc;if(!c)return '';
+ const num=Number.isInteger(c.total)?c.total:c.total.toFixed(1);
+ const tag=c.lesson?(c.pass?`<span class="ok">עבר (מעל ${pass})</span>`:`<span class="no">לא עבר (מתחת ל-${pass})</span>`):`<span class="cm">להערות בלבד</span>`;
+ const rows=c.comps.map(x=>`<span>${esc(x[0])}<b>${x[1]}/${x[2]}</b></span>`).join('');
+ const extra=(c.main?`<span>הניכוי הגדול: ${esc(c.main)}</span>`:'')+c.failed.map(t=>`<span>סף שנכשל: ${esc(t)}</span>`).join('')+(c.legacy?'<span>תסריט מגרסה ישנה, מדורג מחדש לפי הרובריקה הנוכחית</span>':'');
+ return `<details class="sc"><summary>ציון תסריט <span class="v">${num}</span> ${tag}</summary><div class="box">${rows}${extra}</div></details>`;
+}
 function color(c,i,n){const l=34+(i/(Math.max(n-1,1)))*22;return `hsl(${c.h} 52% ${l}%)`}
 const built=v=>v.st==="up"||v.st==="upold"||v.st==="rev";
 function render(){
@@ -112,11 +128,12 @@ function render(){
  document.documentElement.style.setProperty("--h",c.h);
  $("#tabs").innerHTML=COURSES.map((x,i)=>`<button class="tab" role="tab" aria-selected="${i==cur}" data-i="${i}">${esc(x.name)}</button>`).join("");
  const TR=TRAILER[c.k];
- $("#trailer").innerHTML=`<div class="trailer"><span class="tag intro" style="--c:hsl(${c.h} 52% 40%)">טריילר ${esc(TR.id)}</span><span class="st ${TR.st}">${ST[TR.st]}</span> <b>${esc(TR.t)}</b><span class="n">${esc(TR.note)}</span><span class="links" style="--c:hsl(${c.h} 52% 40%)">${pubLinks(TR)}</span></div>`;
+ $("#trailer").innerHTML=`<div class="trailer"><span class="tag intro" style="--c:hsl(${c.h} 52% 40%)">טריילר ${esc(TR.id)}</span><span class="st ${TR.st}">${ST[TR.st]}</span> <b>${esc(TR.t)}</b><span class="n">${esc(TR.note)}</span>${scoreBlock(TR,c.pass)}<span class="links" style="--c:hsl(${c.h} 52% 40%)">${pubLinks(TR)}</span></div>`;
  const all=U.flatMap(u=>u.videos).concat([TR]);
  const cnt=k=>all.filter(v=>grp(v)===k).length;
+ const sl=all.filter(v=>v.sc&&v.sc.lesson),avgHtml=sl.length?`<span>ממוצע ציוני תסריט: <b>${(sl.reduce((n,v)=>n+v.sc.total,0)/sl.length).toFixed(1)}</b> (${sl.length} שיעורים, ${sl.filter(v=>v.sc.pass).length} עברו)</span>`:'';
  const total=U.reduce((n,u)=>n+u.videos.length,0),opt=U.reduce((n,u)=>n+u.videos.filter(v=>v.opt).length,0);
- $("#stats").innerHTML=`<span><b>${U.length}</b> יחידות</span><span><b>${total}</b> סרטונים (+ טריילר)</span><span><b>${opt}</b> אופציונליים</span><span><b>${cnt("up")}</b> הועלו</span><span><b>${cnt("rev")}</b> ממתינים לבדיקה</span><span><b>${cnt("prod")}</b> בהפקה</span>`;
+ $("#stats").innerHTML=`<span><b>${U.length}</b> יחידות</span><span><b>${total}</b> סרטונים (+ טריילר)</span><span><b>${opt}</b> אופציונליים</span><span><b>${cnt("up")}</b> הועלו</span><span><b>${cnt("rev")}</b> ממתינים לבדיקה</span><span><b>${cnt("prod")}</b> בהפקה</span>${avgHtml}`;
  $("#filters").innerHTML=FILTERS.map(([k,l])=>`<button class="f" data-f="${k}" aria-pressed="${filt===k}">${l}${k==="all"?"":` (${cnt(k)})`}</button>`).join("");
  $("#strip").innerHTML=U.map((u,i)=>{const b=u.videos.filter(built).length;return `<button class="seg" style="--n:${u.videos.length};--c:${color(c,i,U.length)};--p:${Math.round(100*b/u.videos.length)}%" data-u="${u.n}" title="${esc(u.name)}: נבנו ${b} מתוך ${u.videos.length}">${u.n}<i></i></button>`}).join("");
  const q=query;let html="",shown=0;
@@ -127,12 +144,12 @@ function render(){
   const b=u.videos.filter(built).length,up=u.videos.filter(v=>grp(v)==="up").length;
   const hl=s=>{if(!q)return esc(s);const k=s.indexOf(q);return k<0?esc(s):esc(s.slice(0,k))+'<span class="hl">'+esc(s.slice(k,k+q.length))+'</span>'+esc(s.slice(k+q.length))};
   html+=`<details class="u" id="u${u.n}" style="--c:${col}" ${(q||filt!=="all")?"open":""}><summary><span class="num">${u.n}</span><span class="ut"><strong>${hl(u.name)}</strong><span>${esc(u.goal)}</span></span><span class="cnt">${b}/${u.videos.length}<small>נבנו · ${up} הועלו</small></span></summary><div class="bar" style="--p:${Math.round(100*b/u.videos.length)}%"><i></i></div><ol>`+
-   vs.map(v=>`<li id="v${v.id.replace('.','-')}"><span class="id">${lab(v)}</span><span class="body"><span class="t">${hl(v.t)}</span><span class="st ${v.st}">${ST[v.st]}${v.ver&&v.st!=="plan"?` · ${v.ver}`:""}</span>${v.opt?'<span class="tag">אופציונלי</span>':''}${v.type==='intro'?'<span class="tag intro">פתיח</span>':''}${v.type==='summary'?'<span class="tag intro">סיכום יחידה</span>':''}${v.sn&&v.sn.startsWith('כבד')?'<span class="tag">כבד: לקצר או לפצל</span>':''}${v.note?`<span class="n">${hl(v.note)}</span>`:""}${links(v)}${pubLinks(v)}</span></li>`).join("")+`</ol></details>`;
+   vs.map(v=>`<li id="v${v.id.replace('.','-')}"><span class="id">${lab(v)}</span><span class="body"><span class="t">${hl(v.t)}</span><span class="st ${v.st}">${ST[v.st]}${v.ver&&v.st!=="plan"?` · ${v.ver}`:""}</span>${v.opt?'<span class="tag">אופציונלי</span>':''}${v.type==='intro'?'<span class="tag intro">פתיח</span>':''}${v.type==='summary'?'<span class="tag intro">סיכום יחידה</span>':''}${v.sn&&v.sn.startsWith('כבד')?'<span class="tag">כבד: לקצר או לפצל</span>':''}${v.note?`<span class="n">${hl(v.note)}</span>`:""}${links(v)}${scoreBlock(v,c.pass)}${pubLinks(v)}</span></li>`).join("")+`</ol></details>`;
  });
  $("#list").innerHTML=html||'<p class="empty">לא נמצא סרטון שמתאים לחיפוש או לסינון.</p>';
  const d=new Date(META.generated);
  let when=META.generated;try{when=d.toLocaleString("he-IL",{timeZone:"Asia/Jerusalem",dateStyle:"short",timeStyle:"short"})}catch(e){}
- $("#note").innerHTML=`סרטונים אופציונליים מסומנים בתג כתום, וניתן לדלג עליהם בלי לשבור תלות. מספור בצורת יחידה.סרטון, וכוכב ★ הוא סרטון הסיכום של היחידה. הקישור לבדיקה מוצמד ל-commit של הגרסה האחרונה בענף dev של מאגר הסרטונים. עודכן: ${esc(when)} (שעון ישראל).`;
+ $("#note").innerHTML=`סרטונים אופציונליים מסומנים בתג כתום, וניתן לדלג עליהם בלי לשבור תלות. מספור בצורת יחידה.סרטון, וכוכב ★ הוא סרטון הסיכום של היחידה. הקישור לבדיקה מוצמד ל-commit של הגרסה האחרונה בענף dev של מאגר הסרטונים. ציון התסריט הוא לפי הרובריקה (עובר ב-95 ומעלה ובלי סף שנכשל); לפתיח, סיכום וטריילר הציון להערות בלבד. עודכן: ${esc(when)} (שעון ישראל).`;
 }
 document.addEventListener("click",e=>{
  const g=e.target.closest("[data-go]");if(g){e.preventDefault();const d=document.getElementById("u"+g.dataset.go.split(".")[0]);if(d){d.open=true;d.scrollIntoView({behavior:"smooth",block:"start"})}return}
