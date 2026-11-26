@@ -17,6 +17,7 @@ Place and name: `../LAYOUT.md` (`courses/<slug>/videos/uNN <unit name>/uNN-eNN <
   01-content/            draft-haiku.md             stage 1: facts and draft from the sources, ending with "קטעי מקור" (quotes + [book p.N])
   02-example/            example.md                 stage 1b: the approved example + the ONE message
   03-script/             script.md, review.md       stage 2-3: script (human table), Sonnet critique + Haiku accuracy check (one pass; every round's findings)
+                         rubric-score.json, rubric-report.md, rubric-history.jsonl   stage 3: the script's rubric score (SCRIPT-RUBRIC.md), the last report, one line per scoring round
                          fable-notes.md, display.md trailer/intro videos only (Fable's notes and visual presentation)
   04-voice/              script.json                exactly what was sent to Gemini (lines, say, pause, target, model)
                          voice.wav, timing.json     the audio and word times THE BUILD USED (after inject_pauses)

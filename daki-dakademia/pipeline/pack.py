@@ -57,6 +57,8 @@ PACKS = {
         ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', "## צ'קליסט לסרטוני דקדמיה"]),
     ],
     'review': [
+        ('daki-dakademia/pipeline/prompts/script_reviewer.md', None),
+        ('daki-dakademia/SCRIPT-RUBRIC.md', None),
         ('daki-dakademia/SKILL.md', ('between', '**Content**', '**Look**')),
         ('daki-dakademia/GUIDELINES-DAKI.md', ['### דפוסי משוב של הבעלים', '### משמעת עבודה לפני מסירה', "## צ'קליסט לסרטוני דקדמיה", '## Teaching quality rules']),
     ],
