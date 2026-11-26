@@ -32,7 +32,7 @@ the scripts only replace a model reading big files or typing commands. Every scr
 2. script       Opus (high): COMPACT script (62-78 words, pace follows difficulty, one message with a pause to land, recap, loop)   script.md + voice/script.json   (prompts/scriptwriter.md)
 3. review       SONNET scores the script with `../SCRIPT-RUBRIC.md` (+ the Haiku accuracy check in the same pass); an independent reviewer with no stake in the script
                 passing: honest, evidence for every deduction, no new criteria (prompts/script_reviewer.md). Pack: python pack.py review ...
-                a. python rubric_score.py <src> --template > <src>/rubric-score.json; the reviewer fills it (10 pass/fail thresholds + 34 criteria in 8 components)
+                a. python rubric_score.py <src> --template > <src>/rubric-score.json; the reviewer fills it (9 pass/fail thresholds + 33 criteria in 8 components)
                 b. python rubric_score.py <src>: adds up, checks the file is complete, writes <src>/rubric-report.md and decides (exit code):
                    0 PASS (>= 95 and no failed threshold) -> stage 4;  1 REVISE -> rubric-report.md goes to stage 2 (Opus high, the revision paragraph of scriptwriter.md),
                    the revised script is scored AGAIN in full;  3 CAP / 4 BLOCKED after the 3rd return (the cap of 3 stays): the best version without a failed threshold continues
